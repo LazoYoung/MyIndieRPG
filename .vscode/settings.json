@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "ncurses.h": "c",
+        "curses.h": "c",
+        "ncurses_dll.h": "c",
+        "cursesw.h": "c",
+        "wchar.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
+}
