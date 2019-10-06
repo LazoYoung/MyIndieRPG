@@ -18,11 +18,12 @@
             "args": [
                 "-g",
                 "-o",
-                "/home/parkcymil/workspace/lab4/main.out",
+                "/home/lazoyoung/workspace/lab4/main.out",
                 "main.c",
                 "screen.c",
                 "title-screen.c",
-                "-lmenu",
+                "-lmenuw",
+                "-lpanelw",
                 "-lncursesw"
             ],
             "group": {

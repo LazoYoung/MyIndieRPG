@@ -9,10 +9,10 @@
         "name": "(gdb) Launch",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/home/parkcymil/workspace/lab4/main.out",
+        "program": "/home/lazoyoung/workspace/lab4/main.out",
         "args": [""],
         "stopAtEntry": true,
-        "cwd": "/home/parkcymil/workspace/lab4/",
+        "cwd": "/home/lazoyoung/workspace/lab4/",
         "environment": [],
         "externalConsole": true,
         "windows": {
@@ -34,7 +34,7 @@
         },
         "sourceFileMap": {
           "/mnt/c": "${env:systemdrive}/",
-          "/usr": "C:\\Users\\stark\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\usr\\"
+          "/usr": "C:\\Users\\ideal\\AppData\\Local\\Packages\\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\\LocalState\\rootfs\\usr"
         }
       }
     ]

@@ -5,7 +5,12 @@
         "curses.h": "c",
         "ncurses_dll.h": "c",
         "cursesw.h": "c",
-        "wchar.h": "c"
+        "wchar.h": "c",
+        "poll.h": "c",
+        "signal.h": "c",
+        "unistd.h": "c",
+        "screen.h": "c",
+        "stdarg.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
