@@ -4,8 +4,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+#include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <locale.h>
 #include <ncursesw/curses.h>
 #include "screen.h"
@@ -13,8 +13,8 @@
 short screen_mode = TITLE_SCREEN;
 short prompt_mode = PROMPT_NONE;
 int column = 130;
-int row = 50;
-static bool cont = TRUE;
+int row = 40;
+static bool cont = true;
 
 int main() {
 	// NCurses 터미널 스크린 초기화
@@ -23,7 +23,7 @@ int main() {
 	cbreak();
 	noecho();
 	curs_set(0);
-	keypad(stdscr, TRUE);
+	keypad(stdscr, true);
 	
 	// 타이틀 화면을 시작
 	togglePrompt(TITLE_PROMPT);
@@ -65,5 +65,5 @@ int main() {
 }
 
 void suspend() {
-	cont = FALSE;
+	cont = false;
 }

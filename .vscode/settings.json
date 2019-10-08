@@ -10,7 +10,10 @@
         "signal.h": "c",
         "unistd.h": "c",
         "screen.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "game.h": "c",
+        "stdbool.h": "c",
+        "cstdbool": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

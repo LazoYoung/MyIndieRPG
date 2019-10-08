@@ -1,15 +1,16 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <menu.h>
 #include <panel.h>
 #include <ncursesw/curses.h>
 #include "screen.h"
+#include "game.h"
 
 extern int column, row;
 
 extern void suspend();
 static Prompt getTitlePrompt();
 static Prompt getCharPrompt();
+static void printAttributes(PlayerAttribute);
 static void startGame();
 static void onStart(int);
 static void onQuit(int);
@@ -57,12 +58,61 @@ static void onQuit(int click) {
 }
 
 static void onKirito(int click) {
-    if (click) {
-        startGame();
-        return;
-    }
+    PlayerAttribute attr = p_attr;
+    attr.agility = 30;
+    attr.strength = 30;
+    attr.name = "Kirito";
+    assignSkill(&attr, EXP_BONUS);
+    assignSkill(&attr, MANA_RECOVERY);
 
-    mvwprintw(getPromptWindow(), 1, 3, "Hit Enter to select %s", "Kirito");
+    if (click) {
+        startGame(attr);
+    } else {
+        printAttributes(attr);        
+    }
+}
+
+static void onAsuna(int click) {
+    PlayerAttribute attr = p_attr;
+    attr.agility = 50;
+    attr.strength = 20;
+    attr.name = "Asuna";
+    assignSkill(&attr, HEALTH_RECOVERY);
+
+    if (click) {
+        startGame(attr);
+    } else {
+        printAttributes(attr);        
+    }
+}
+
+static void onKlein(int click) {
+    PlayerAttribute attr = p_attr;
+    attr.agility = 30;
+    attr.strength = 30;
+    attr.name = "Klein";
+    assignSkill(&attr, MANA_RECOVERY);
+    assignSkill(&attr, EXP_BONUS);
+
+    if (click) {
+        startGame(attr);
+    } else {
+        printAttributes(attr);        
+    }
+}
+
+static void onAgil(int click) {
+    PlayerAttribute attr = p_attr;
+    attr.agility = 20;
+    attr.strength = 50;
+    attr.name = "Agil";
+    assignSkill(&attr, DOUBLE_CLEAVE);
+
+    if (click) {
+        startGame(attr);
+    } else {
+        printAttributes(attr);
+    }
 }
 
 static void onReturn(int click) {
@@ -73,8 +123,12 @@ static void onReturn(int click) {
     togglePrompt(TITLE_PROMPT);
 }
 
-static void startGame() {
-    // TODO Implement
+static void printAttributes(PlayerAttribute attr) {
+    WINDOW *w = getPromptWindow();
+    mvwprintw(w, 1, 3, "Selected character: %s", attr.name);
+    mvwprintw(w, 2, 3, "AGILITY: %d", attr.agility);
+    mvwprintw(w, 3, 3, "STRENGTH: %d", attr.strength);
+    mvwprintw(w, 4, 3, "SKILL FLAGS: %d", attr.skills);
 }
 
 static Prompt getTitlePrompt() {
@@ -102,9 +156,9 @@ static Prompt getCharPrompt() {
 
     // 버튼 동작 함수를 NCurse로 넘겨준다.
     set_item_userptr(myItems[0], (void*) onKirito);
-    set_item_userptr(myItems[1], (void*) onKirito);
-    set_item_userptr(myItems[2], (void*) onKirito);
-    set_item_userptr(myItems[3], (void*) onKirito);
+    set_item_userptr(myItems[1], (void*) onAsuna);
+    set_item_userptr(myItems[2], (void*) onKlein);
+    set_item_userptr(myItems[3], (void*) onAgil);
     set_item_userptr(myItems[4], (void*) onReturn);
 
     Prompt p = {40, 20, column / 2 - 20, row / 2 - 10, 8, myItems};
