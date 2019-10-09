@@ -18,12 +18,12 @@ void startGame(PlayerAttribute new_attr) {
 }
 
 /* Assigns a given skill into the data */
-void assignSkill(PlayerAttribute *data, short skill_code) {
+void assignSkill(PlayerAttribute *data, char skill_code) {
     data -> skills |= (1 << skill_code);
 }
 
 /* Determines whether or not a given skill is achieved and available */
-bool isSkillAvailable(short skill_code) {
-    // TODO Implement
-    return false;
+bool isSkillAvailable(PlayerAttribute *data, char skill_code) {
+    long long filter = 1 << skill_code;
+    return (data -> skills & filter) == filter;
 }

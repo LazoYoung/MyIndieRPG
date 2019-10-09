@@ -62,8 +62,8 @@ static void onKirito(int click) {
     attr.agility = 30;
     attr.strength = 30;
     attr.name = "Kirito";
-    assignSkill(&attr, EXP_BONUS);
     assignSkill(&attr, MANA_RECOVERY);
+    assignSkill(&attr, DUAL_WIELD);
 
     if (click) {
         startGame(attr);
@@ -106,7 +106,7 @@ static void onAgil(int click) {
     attr.agility = 20;
     attr.strength = 50;
     attr.name = "Agil";
-    assignSkill(&attr, DOUBLE_CLEAVE);
+    assignSkill(&attr, AXE_BERSERK);
 
     if (click) {
         startGame(attr);
@@ -125,10 +125,17 @@ static void onReturn(int click) {
 
 static void printAttributes(PlayerAttribute attr) {
     WINDOW *w = getPromptWindow();
+    int r = 4;
     mvwprintw(w, 1, 3, "Selected character: %s", attr.name);
     mvwprintw(w, 2, 3, "AGILITY: %d", attr.agility);
     mvwprintw(w, 3, 3, "STRENGTH: %d", attr.strength);
-    mvwprintw(w, 4, 3, "SKILL FLAGS: %d", attr.skills);
+
+    if (isSkillAvailable(&attr, DUAL_WIELD)) {
+        mvwprintw(w, r++, 3, "UNIQUE SKILL: Dual Wield");
+    }
+    if (isSkillAvailable(&attr, AXE_BERSERK)) {
+        mvwprintw(w, r++, 3, "UNIQUE SKILL: Axe Berserk");
+    }
 }
 
 static Prompt getTitlePrompt() {
