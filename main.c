@@ -1,4 +1,5 @@
-#define _XOPEN_SOURCE_EXTENDED
+// Redefine the macro to use poll def. & wide characters
+#undef _GNU_SOURCE
 #define _GNU_SOURCE
 
 #include <unistd.h>
@@ -10,8 +11,6 @@
 #include <ncursesw/curses.h>
 #include "screen.h"
 
-short screen_mode = TITLE_SCREEN;
-short prompt_mode = PROMPT_NONE;
 int column = 130;
 int row = 40;
 static bool cont = true;
@@ -20,6 +19,13 @@ int main() {
 	// NCurses 터미널 스크린 초기화
 	setlocale(LC_ALL, "");
 	initscr();
+
+	if (has_colors() == FALSE) {
+		endwin();
+		printf("Your console does not support color!");
+		exit(EXIT_SUCCESS);
+	}
+
 	cbreak();
 	noecho();
 	curs_set(0);
@@ -50,9 +56,7 @@ int main() {
 			continue;
 		}
 
-		if (prompt_mode != PROMPT_NONE) {
-			refreshPrompt(action);
-		}
+		refreshScreen(action);
 
 		if (is_term_resized(row, column)) {
 			clear();

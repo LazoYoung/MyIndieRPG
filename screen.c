@@ -1,13 +1,19 @@
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
+
 #include <string.h>
 #include <ncursesw/curses.h>
-#include <menu.h>
-#include <panel.h>
+#include <ncursesw/menu.h>
+#include <ncursesw/panel.h>
 #include "screen.h"
 
+char screen_mode = TITLE_SCREEN;
+char prompt_mode = PROMPT_NONE;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static WINDOW *prompt_win[2] = { NULL }; // 0: 테두리, 1: 버튼
 
+static void refreshPrompt(int);
 
 /* 화면을 생성한다. */
 void drawScreen() {
@@ -20,6 +26,19 @@ void drawScreen() {
         case TITLE_SCREEN:
             drawTitleScreen();
             break;
+        case GAME_SCREEN:
+            drawGameScreen();
+            break;
+    }
+}
+
+/* 화면을 갱신한다. */
+void refreshScreen(int action) {
+    if (prompt_mode != PROMPT_NONE) {
+        refreshPrompt(action);
+    }
+    if (screen_mode == GAME_SCREEN) {
+        drawGameScreen();
     }
 }
 
@@ -40,8 +59,52 @@ void drawPrompt() {
     wrefresh(prompt_win[1]);
 }
 
+/* 프롬프트 화면을 끈다. */
+void deletePrompt() {
+    ITEM** items = menu_items(menu);
+    int count = item_count(menu);
+    
+    wclear(prompt_win[0]);
+    touchwin(prompt_win[0]);
+    wrefresh(prompt_win[0]);
+    wrefresh(prompt_win[1]);
+    // unpost_menu() must precede delwin() to make sure that they're unlinked
+    unpost_menu(menu);
+    free_menu(menu); 
+    delwin(prompt_win[0]);
+    delwin(prompt_win[1]);
+
+    for (int i = 0; i < count; i++) {
+        free_item(items[i]);
+    }
+
+    items = NULL;
+    menu = NULL;
+
+    togglePrompt(PROMPT_NONE);
+}
+
+/* 프롬프트 메뉴 mode를 전환한다. 매크로는 screen.h에 정의되어 있음 */
+void togglePrompt(char mode) {
+    if (menu != NULL) {
+        deletePrompt();
+    }
+
+    prompt_mode = mode;
+    drawScreen();
+}
+
+void toggleScreen(char mode) {
+    screen_mode = mode;
+    drawScreen();
+}
+
+WINDOW* getPromptWindow() {
+    return prompt_win[0];
+}
+
 /* 메뉴 입력을 받아 동작시키고, 프롬프트 화면을 갱신한다. */
-void refreshPrompt(int action) {
+static void refreshPrompt(int action) {
     if (menu == NULL || prompt_win[0] == NULL || prompt_win[1] == NULL) {
         return;
     }
@@ -75,44 +138,4 @@ void refreshPrompt(int action) {
         wrefresh(prompt_win[1]);
         refresh();
     }
-}
-
-/* 프롬프트 화면을 끈다. */
-void deletePrompt() {
-    ITEM** items = menu_items(menu);
-    int count = item_count(menu);
-    static int result = -999; // TODO debug purpose
-    
-    wclear(prompt_win[0]);
-    touchwin(prompt_win[0]);
-    wrefresh(prompt_win[0]);
-    wrefresh(prompt_win[1]);
-    // unpost_menu() must precede delwin() to make sure that they're unlinked
-    result = unpost_menu(menu);
-    result = free_menu(menu); 
-    delwin(prompt_win[0]);
-    delwin(prompt_win[1]);
-
-    for (int i = 0; i < count; i++) {
-        free_item(items[i]);
-    }
-
-    items = NULL;
-    menu = NULL;
-
-    togglePrompt(PROMPT_NONE);
-}
-
-/* 프롬프트 메뉴 mode를 전환한다. 매크로는 screen.h에 정의되어 있음 */
-void togglePrompt(short mode) {
-    if (menu != NULL) {
-        deletePrompt();
-    }
-
-    prompt_mode = mode;
-    drawScreen();
-}
-
-WINDOW* getPromptWindow() {
-    return prompt_win[0];
 }

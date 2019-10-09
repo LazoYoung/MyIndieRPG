@@ -1,3 +1,7 @@
+#undef _GNU_SOURCE
+#define _GNU_SOURCE
+
+#include <stdlib.h>
 #include <stdbool.h>
 #include "game.h"
 
@@ -8,22 +12,26 @@ PlayerAttribute p_attr = {
     .mp = 100,
     .level = 1,
     .exp = 0,
-    .skills = 0,
-    .coin = 0,
     .name = "UNDEFINED"
 };
 
-void startGame(PlayerAttribute new_attr) {
+Inventory inv = {
+    .sword = NULL,
+    .skills = 0,
+    .coin = 0
+};
+
+void startGame() {
     // TODO Implement
 }
 
-/* Assigns a given skill into the data */
-void assignSkill(PlayerAttribute *data, char skill_code) {
-    data -> skills |= (1 << skill_code);
+/* Assigns a given skill into the player's inventory */
+void assignSkill(char skill_code) {
+    inv.skills |= (1 << skill_code);
 }
 
-/* Determines whether or not a given skill is achieved and available */
-bool isSkillAvailable(PlayerAttribute *data, char skill_code) {
+/* Determines whether or not a given skill is achieved by the player */
+bool hasSkill(char skill_code) {
     long long filter = 1 << skill_code;
-    return (data -> skills & filter) == filter;
+    return (inv.skills & filter) == filter;
 }

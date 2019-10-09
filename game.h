@@ -29,13 +29,22 @@ typedef struct str_p_attr {
     unsigned short mp; // 1 ~ 100
     unsigned short level;
     unsigned long exp; // Level-up cost: 200 + (50 * level)
-    long long skills; // All the skills achieved by player
-    int coin;
     const char* name; // Character name
 } PlayerAttribute;
 
-extern PlayerAttribute p_attr;
+typedef struct sword {
 
-extern void startGame(PlayerAttribute);
-extern void assignSkill(PlayerAttribute*, char);
-extern bool isSkillAvailable(PlayerAttribute*, char skill_code);
+} Sword;
+
+typedef struct inv {
+    Sword* sword;
+    long long skills;
+    int coin;
+} Inventory;
+
+extern PlayerAttribute p_attr;
+extern Inventory inv;
+
+extern void startGame();
+extern void assignSkill(char);
+extern bool hasSkill(char);

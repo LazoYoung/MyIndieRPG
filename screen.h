@@ -1,12 +1,14 @@
-#include <menu.h>
+#define _GNU_SOURCE
+#include <ncursesw/menu.h>
 
 // 화면 모드를 정의하는 플래그
 #define TITLE_SCREEN 0
+#define GAME_SCREEN 1
 
 // 프롬프트 메뉴 모드를 정의하는 플래그
-#define PROMPT_NONE 0
-#define TITLE_PROMPT 1
-#define TITLE_CHARACTER_PROMPT 2
+#define PROMPT_NONE 10
+#define TITLE_PROMPT 11
+#define TITLE_CHARACTER_PROMPT 12
 
 typedef struct prompt_str {
     int width; // box width
@@ -17,8 +19,8 @@ typedef struct prompt_str {
     ITEM** items;
 } Prompt;
 
-extern short screen_mode;
-extern short prompt_mode;
+extern char screen_mode;
+extern char prompt_mode;
 extern int column, row;
 extern Prompt prompt;
 
@@ -26,10 +28,13 @@ extern Prompt prompt;
 extern void drawScreen();
 extern void deletePrompt();
 extern void drawPrompt();
-extern void refreshPrompt(int);
-extern void toggleScreen(short);
-extern void togglePrompt(short);
+extern void refreshScreen(int);
+extern void toggleScreen(char);
+extern void togglePrompt(char);
 extern WINDOW* getPromptWindow();
 
-// title-screen.
+// title-screen.c
 extern void drawTitleScreen();
+
+// game-screen.c
+extern void drawGameScreen();

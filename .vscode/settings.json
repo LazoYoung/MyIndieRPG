@@ -13,7 +13,10 @@
         "stdarg.h": "c",
         "game.h": "c",
         "stdbool.h": "c",
-        "cstdbool": "c"
+        "cstdbool": "c",
+        "panel.h": "c",
+        "menu.h": "c",
+        "stdlib.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
