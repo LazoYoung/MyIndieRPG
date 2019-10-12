@@ -112,8 +112,6 @@ Entity getEntity(const char* name) {
 Location getSpawnLocation(int x_pos) {
     Location loc;
     loc.pos_x = x_pos;
-    loc.vec_x = 0.0;
-    loc.vec_y = 0.0;
     
     if (tiles != NULL) {
         for (int y=0; y<level_height; y++) {
@@ -131,8 +129,7 @@ void updateEntities() {
     Entity *iter = entity;
 
     while (iter != NULL && iter->valid) {
-        // TODO Do physics
-
+        updatePhysic(iter);
         iter = iter->next;
     }
 }

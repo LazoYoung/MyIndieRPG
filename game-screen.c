@@ -40,6 +40,7 @@ void initGameScreen() {
     update_panels();
     doupdate();
     
+    generateLevel();
 }
 
 void drawGameScreen() {
@@ -88,6 +89,8 @@ void clearGameScreen() {
     delwin(w0);
     delwin(w1);
     delwin(w2);
+    
+    destructLevel();
 }
 
 static void drawTiles() {
@@ -106,6 +109,7 @@ static void drawTiles() {
     
     for (int y_ = 0; y_ < row_; y_++) {
         int y = loc.pos_y + y_ctr - y_;
+
 
         if (y < 0 || y >= level_height) {
             continue;

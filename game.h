@@ -43,6 +43,7 @@ typedef struct {
 extern PlayerAttribute p_attr;
 extern Inventory inv;
 extern bool inGame;
+extern float deltaTime; // in milliseconds
 
 extern void startGame();
 extern void assignSkill(char);

@@ -22,6 +22,7 @@
                 "main.c",
                 "game.c",
                 "level.c",
+                "physic.c",
                 "screen.c",
                 "title-screen.c",
                 "game-screen.c",

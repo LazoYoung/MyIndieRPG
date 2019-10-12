@@ -25,11 +25,11 @@ Inventory inv = {
 
 bool inGame = false;
 
+float deltaTime = 50 / 1000f;
 
 void startGame() {
     inGame = true;
 
-    generateLevel();
     spawnEntity(p_attr.name, getSpawnLocation(0));
 }
 

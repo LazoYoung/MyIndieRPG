@@ -17,7 +17,9 @@
         "panel.h": "c",
         "menu.h": "c",
         "stdlib.h": "c",
-        "level.h": "c"
+        "level.h": "c",
+        "physic.h": "c",
+        "math.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
