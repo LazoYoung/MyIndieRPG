@@ -25,7 +25,7 @@ Inventory inv = {
 
 bool inGame = false;
 
-float deltaTime = 50 / 1000f;
+float deltaTime = 50 / 1000.0;
 
 void startGame() {
     inGame = true;

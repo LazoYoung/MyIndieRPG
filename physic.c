@@ -12,19 +12,24 @@ bool overlaps(AABB a, AABB b) {
     return true;
 }
 
-void updatePhysic(Entity e) {
-    Location l = e.loc;
-    l.last_pos_x = l.pos_x;
-    l.last_pos_y = l.posy;
-    l.last_spd_x = l.spd_x;
-    l.last_spd_y = l.spd_y;
-    l.wasOnGround = l.onGround;
-    l.pos_x = l.spd_x * deltaTime;
+void updatePhysic(Entity* e) {
+    if (e == NULL || !e->valid) {
+        return;
+    }
+
+    Location* l = &e->loc;
+    AABB* hitbox = &e->hitbox;
+    l->last_pos_x = l->pos_x;
+    l->last_pos_y = l->pos_y;
+    l->last_spd_x = l->spd_x;
+    l->last_spd_y = l->spd_y;
+    l->wasOnGround = l->onGround;
+    l->pos_x = l->spd_x * deltaTime;
 
     // TODO Handle ground collisions
 
-    e.hitbox.centre_x = l.pos_x;
-    e.hitbox.centre_y = l.pos_y + e.offset_y;
+    hitbox->centre_x = l->pos_x;
+    hitbox->centre_y = l->pos_y + e->offset_y;
 
     // TODO Implement controls
 }
