@@ -1,5 +1,6 @@
-#undef _GNU_SOURCE
-#define _GNU_SOURCE
+// Redefine the macro to use poll def. & wide characters
+#undef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED 1
 
 #include <string.h>
 #include <ncursesw/curses.h>
@@ -9,6 +10,8 @@
 
 char screen_mode = TITLE_SCREEN;
 char prompt_mode = PROMPT_NONE;
+int column = 130;
+int row = 40;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static WINDOW *prompt_win[2] = { NULL }; // 0: 테두리, 1: 버튼
@@ -27,7 +30,7 @@ void drawScreen() {
             drawTitleScreen();
             break;
         case GAME_SCREEN:
-            drawGameScreen();
+            initGameScreen();
             break;
     }
 }
@@ -39,6 +42,12 @@ void refreshScreen(int action) {
     }
     if (screen_mode == GAME_SCREEN) {
         drawGameScreen();
+    }
+}
+
+void clearScreen() {
+    if (screen_mode == GAME_SCREEN) {
+        clearGameScreen();
     }
 }
 
@@ -61,6 +70,10 @@ void drawPrompt() {
 
 /* 프롬프트 화면을 끈다. */
 void deletePrompt() {
+    if (menu == NULL || prompt_mode == PROMPT_NONE) {
+        return;
+    }
+
     ITEM** items = menu_items(menu);
     int count = item_count(menu);
     
@@ -86,16 +99,15 @@ void deletePrompt() {
 
 /* 프롬프트 메뉴 mode를 전환한다. 매크로는 screen.h에 정의되어 있음 */
 void togglePrompt(char mode) {
-    if (menu != NULL) {
-        deletePrompt();
-    }
-
     prompt_mode = mode;
+    deletePrompt();
     drawScreen();
 }
 
 void toggleScreen(char mode) {
     screen_mode = mode;
+    deletePrompt();
+    clearScreen();
     drawScreen();
 }
 

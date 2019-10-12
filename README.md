@@ -1,5 +1,5 @@
-# SAO-RPG
-A Simple 2D Role Playing Game running on Linux terminal to simulate the concept of Sword Art Online.
+# Overview
+A Simple 2D Role Playing Game running on Linux terminal.
 This is a WIP project.
 
 # Compatibility

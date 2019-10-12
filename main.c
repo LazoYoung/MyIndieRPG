@@ -1,19 +1,18 @@
 // Redefine the macro to use poll def. & wide characters
-#undef _GNU_SOURCE
-#define _GNU_SOURCE
+#undef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED 1
 
-#include <unistd.h>
 #include <signal.h>
-#include <poll.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <locale.h>
 #include <ncursesw/curses.h>
 #include "screen.h"
+#include "game.h"
 
-int column = 130;
-int row = 40;
 static bool cont = true;
+
+void suspend();
 
 int main() {
 	// NCurses 터미널 스크린 초기화
@@ -25,42 +24,31 @@ int main() {
 		printf("Your console does not support color!");
 		exit(EXIT_SUCCESS);
 	}
-
+	
 	cbreak();
 	noecho();
 	curs_set(0);
+	timeout(50);
 	keypad(stdscr, true);
 	
 	// 타이틀 화면을 시작
 	togglePrompt(TITLE_PROMPT);
 	drawScreen();
+	initGameResolution();
 
-	int result;
-	struct timespec t;
-	struct pollfd fds;
-	t.tv_sec = 0;
-	t.tv_nsec = 100;
-	fds.fd = STDIN_FILENO;
-	fds.events = POLLIN | POLLRDNORM;
-
-	// 최대 100ms 동안 stdin 의 입력이 오기를 기다린다.
-	// result = -1: 오류 / 0: 정상적 입력 없음 / 1: 정상적 입력
 	while (cont) {
-		int result = ppoll(&fds, 1, &t, NULL);
-		int action = ERR;
-
-		if (result > 0) {
-			action = getch();
-		}
-		else if (result < 0) {
-			continue;
-		}
-
-		refreshScreen(action);
+		int action = getch();
 
 		if (is_term_resized(row, column)) {
-			clear();
+			clearScreen();
 			drawScreen();
+		}
+		else {
+			refreshScreen(action);
+		}
+
+		if (doTick() == false) {
+			suspend();
 		}
 	}
 	

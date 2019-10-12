@@ -16,7 +16,8 @@
         "cstdbool": "c",
         "panel.h": "c",
         "menu.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "level.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

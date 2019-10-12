@@ -1,5 +1,6 @@
-#undef _GNU_SOURCE
-#define _GNU_SOURCE
+// Redefine the macro to use poll def. & wide characters
+#undef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED 1
 
 #include <stdlib.h>
 #include <menu.h>
@@ -20,7 +21,7 @@ static void onKirito(int);
 
 void drawTitleScreen() {
     mvaddch(10, column / 2 - 10, ACS_DIAMOND);
-    printw(" Sword Art Online ");
+    printw(" My Indie RPG ");
     addch(ACS_DIAMOND);
     mvprintw(12, column / 2 - 10, "An MMO-RPG Prototype");
     mvprintw(13, column / 2 - 18, "2019136063 parkcymil@koreatech.ac.kr");

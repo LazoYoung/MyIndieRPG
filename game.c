@@ -1,9 +1,11 @@
-#undef _GNU_SOURCE
-#define _GNU_SOURCE
+// Redefine the macro to use poll def. & wide characters
+#undef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED 1
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include "game.h"
+#include "level.h"
 
 PlayerAttribute p_attr = {
     .agility = 1,
@@ -16,13 +18,19 @@ PlayerAttribute p_attr = {
 };
 
 Inventory inv = {
-    .sword = NULL,
+    .item = NULL, // TODO dynamic allocation may be required for this array
     .skills = 0,
     .coin = 0
 };
 
+bool inGame = false;
+
+
 void startGame() {
-    // TODO Implement
+    inGame = true;
+
+    generateLevel();
+    spawnEntity(p_attr.name, getSpawnLocation(0));
 }
 
 /* Assigns a given skill into the player's inventory */
@@ -34,4 +42,12 @@ void assignSkill(char skill_code) {
 bool hasSkill(char skill_code) {
     long long filter = 1 << skill_code;
     return (inv.skills & filter) == filter;
+}
+
+bool doTick() {
+    if (inGame) {
+        updateEntities();
+    }
+
+    return true;
 }

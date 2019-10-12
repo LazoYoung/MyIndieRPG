@@ -14,13 +14,14 @@
         {
             "label": "build project on WSL",
             "type": "shell",
-            "command": "g++",
+            "command": "gcc",
             "args": [
                 "-g",
                 "-o",
                 "/home/lazoyoung/workspace/lab4/main.out",
                 "main.c",
                 "game.c",
+                "level.c",
                 "screen.c",
                 "title-screen.c",
                 "game-screen.c",

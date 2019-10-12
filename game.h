@@ -1,5 +1,3 @@
-/* Skill codes are recorded in bit-manner. Cap: 64 */
-
 // Sword skill
 #define SINGLE_SHOT 0
 #define RAGE_SPIKE 1
@@ -22,29 +20,32 @@
 #define HEALTH_RECOVERY 42
 #define MANA_RECOVERY 43
 
-typedef struct str_p_attr {
-    unsigned short agility; // 1 ~ 100
-    unsigned short strength; // 1 ~ 100
-    unsigned short health; // 0 ~ 100
-    unsigned short mp; // 1 ~ 100
-    unsigned short level;
+typedef struct {
+    char agility; // 1 ~ 100
+    char strength; // 1 ~ 100
+    char health; // 0 ~ 100
+    char mp; // 1 ~ 100
+    unsigned int level;
     unsigned long exp; // Level-up cost: 200 + (50 * level)
     const char* name; // Character name
 } PlayerAttribute;
 
-typedef struct sword {
+typedef struct {
+    const char* name;
+} Item;
 
-} Sword;
-
-typedef struct inv {
-    Sword* sword;
-    long long skills;
+typedef struct {
+    Item* item;
+    long long skills; // Achieved skills are recorded as codes in bit-manner.
     int coin;
 } Inventory;
 
 extern PlayerAttribute p_attr;
 extern Inventory inv;
+extern bool inGame;
 
 extern void startGame();
 extern void assignSkill(char);
 extern bool hasSkill(char);
+extern bool doTick();
+extern int getTimeoutCount(int);
