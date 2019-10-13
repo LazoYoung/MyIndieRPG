@@ -36,9 +36,9 @@ void drawScreen() {
 }
 
 /* 화면을 갱신한다. */
-void refreshScreen(int action) {
+void refreshScreen(int key) {
     if (prompt_mode != PROMPT_NONE) {
-        refreshPrompt(action);
+        refreshPrompt(key);
     }
     if (screen_mode == GAME_SCREEN) {
         drawGameScreen();
@@ -116,7 +116,7 @@ WINDOW* getPromptWindow() {
 }
 
 /* 메뉴 입력을 받아 동작시키고, 프롬프트 화면을 갱신한다. */
-static void refreshPrompt(int action) {
+static void refreshPrompt(int key) {
     if (menu == NULL || prompt_win[0] == NULL || prompt_win[1] == NULL) {
         return;
     }
@@ -125,19 +125,19 @@ static void refreshPrompt(int action) {
     void (* buttonFunc)(int) = (void(*)(int)) item_userptr(item);
     int id = item_index(item);
 
-    if (action == KEY_DOWN && id < item_count(menu) - 1) {
+    if (key == KEY_DOWN && id < item_count(menu) - 1) {
         werase(prompt_win[0]);
         box(prompt_win[0], 0, 0);
         menu_driver(menu, REQ_DOWN_ITEM);
         refresh();
     }
-    else if (action == KEY_UP && id > 0) {
+    else if (key == KEY_UP && id > 0) {
         werase(prompt_win[0]);
         box(prompt_win[0], 0, 0);
         menu_driver(menu, REQ_UP_ITEM);
         refresh();
     }
-    else if (action == 10) {
+    else if (key == 10) {
         deletePrompt();
         buttonFunc(1);
         refresh();

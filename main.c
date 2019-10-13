@@ -9,6 +9,7 @@
 #include <ncursesw/curses.h>
 #include "screen.h"
 #include "game.h"
+#include "physic.h"
 
 static bool cont = true;
 
@@ -37,18 +38,18 @@ int main() {
 	initGameResolution();
 
 	while (cont) {
-		int action = getch();
+		int key = getch();
 
 		if (is_term_resized(row, column)) {
 			clearScreen();
 			drawScreen();
 		}
 		else {
-			refreshScreen(action);
-		}
+			refreshScreen(key);
 
-		if (doTick() == false) {
-			suspend();
+			if (doTick(key) == false) {
+				suspend();
+			}
 		}
 	}
 	

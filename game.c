@@ -2,6 +2,7 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED 1
 
+#include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "game.h"
@@ -16,16 +17,14 @@ PlayerAttribute p_attr = {
     .exp = 0,
     .name = "UNDEFINED"
 };
-
 Inventory inv = {
     .item = NULL, // TODO dynamic allocation may be required for this array
     .skills = 0,
     .coin = 0
 };
-
 bool inGame = false;
-
-float deltaTime = 50 / 1000.0;
+const float deltaTime = 50 / 1000.0;
+const int fps = 1000 / 50;
 
 void startGame() {
     inGame = true;
@@ -44,10 +43,21 @@ bool hasSkill(char skill_code) {
     return (inv.skills & filter) == filter;
 }
 
-bool doTick() {
-    if (inGame) {
-        updateEntities();
+bool doTick(int key) {
+    if (!inGame)
+        return true;
+
+    Entity player = getEntity(p_attr.name);
+    
+    if (player.valid) {
+        updateControl(key, &player.ctrl);
     }
 
+    updateEntities();
     return true;
+}
+
+/* Returns the rounded count of frames being made during the given time-frame (ms) */
+int getFramesDuringTime(int miliseconds) {
+    return round(fps * miliseconds / 1000);
 }

@@ -43,10 +43,11 @@ typedef struct {
 extern PlayerAttribute p_attr;
 extern Inventory inv;
 extern bool inGame;
-extern float deltaTime; // in milliseconds
+extern const float deltaTime; // How much time does 1 frame take in seconds
+extern const int fps; // How many frames and operations are made in 1 sec
 
 extern void startGame();
 extern void assignSkill(char);
 extern bool hasSkill(char);
 extern bool doTick();
-extern int getTimeoutCount(int);
+extern int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)
