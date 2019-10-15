@@ -19,7 +19,8 @@
         "stdlib.h": "c",
         "level.h": "c",
         "physic.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "vector.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

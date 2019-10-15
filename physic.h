@@ -1,19 +1,15 @@
+#include "vector.h"
+
 typedef struct { // Axis Aligned Bounding Box
-    float centre_x;
-    float centre_y;
-    float radius_x;
-    float radius_y;
+    Vector centre;
+    Vector radius;
 } AABB;
 
 typedef struct {
-    float last_pos_x;
-    float last_pos_y;
-    float last_spd_x;
-    float last_spd_y;
-    float pos_x;
-    float pos_y;
-    float spd_x;
-    float spd_y;
+    Vector last_pos;
+    Vector last_spd;
+    Vector pos;
+    Vector spd;
     bool onGround;
     bool wasOnGround;
 } Location;
@@ -31,7 +27,7 @@ typedef struct entity {
     Location loc;
     Control ctrl;
     AABB hitbox;
-    float offset_y;
+    Vector offset;
     struct entity* next;
 } Entity;
 

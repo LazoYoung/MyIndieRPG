@@ -108,7 +108,7 @@ static void drawTiles() {
     box(win, ACS_VLINE, ACS_HLINE);
     
     for (int y_ = 0; y_ < row_; y_++) {
-        int y = loc.pos_y + y_ctr - y_;
+        int y = loc.pos.y + y_ctr - y_;
 
 
         if (y < 0 || y >= level_height) {
@@ -116,7 +116,7 @@ static void drawTiles() {
         }
 
         for (int x_ = 0; x_ < column; x_++) {
-            int x = loc.pos_x + x_ - x_ctr;
+            int x = loc.pos.x + x_ - x_ctr;
 
             if (x < 0 || x >= level_width) {
                 continue;

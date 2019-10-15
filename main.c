@@ -28,9 +28,9 @@ int main() {
 	
 	cbreak();
 	noecho();
-	curs_set(0);
 	timeout(deltaTime * 1000);
 	keypad(stdscr, true);
+	curs_set(0);
 	
 	// 타이틀 화면을 시작
 	togglePrompt(TITLE_PROMPT);

@@ -111,12 +111,12 @@ Entity getEntity(const char* name) {
 
 Location getSpawnLocation(int x_pos) {
     Location loc;
-    loc.pos_x = x_pos;
+    loc.pos.x = x_pos;
     
     if (tiles != NULL) {
         for (int y=0; y<level_height; y++) {
             if (tiles[y][x_pos] == TILE_AIR) {
-                loc.pos_y = y + 3;
+                loc.pos.y = y + 3;
                 break;
             }
         }
