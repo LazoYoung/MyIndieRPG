@@ -9,7 +9,6 @@
 #include <ncursesw/curses.h>
 #include "screen.h"
 #include "game.h"
-#include "physic.h"
 
 static bool cont = true;
 
@@ -20,7 +19,7 @@ int main() {
 	setlocale(LC_ALL, "");
 	initscr();
 
-	if (has_colors() == FALSE) {
+	if (!has_colors()) {
 		endwin();
 		printf("Your console does not support color!");
 		exit(EXIT_SUCCESS);
@@ -29,8 +28,8 @@ int main() {
 	cbreak();
 	noecho();
 	timeout(deltaTime * 1000);
-	keypad(stdscr, true);
 	curs_set(0);
+	keypad(stdscr, true);
 	
 	// 타이틀 화면을 시작
 	togglePrompt(TITLE_PROMPT);
@@ -47,7 +46,7 @@ int main() {
 		else {
 			refreshScreen(key);
 
-			if (doTick(key) == false) {
+			if (!doTick(key)) {
 				suspend();
 			}
 		}

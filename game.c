@@ -5,10 +5,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <ncursesw/curses.h>
 #include "game.h"
 #include "level.h"
 
-PlayerAttribute p_attr = {
+PlayerProperty p_attr = {
     .agility = 1,
     .strength = 1,
     .health = 100,
@@ -22,14 +24,32 @@ Inventory inv = {
     .skills = 0,
     .coin = 0
 };
+static Entity player;
 bool inGame = false;
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
 void startGame() {
+    AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
+    Bias bias = {false, false, false, 0};
+    Location loc = getSpawnLocation(0);
+    bool map[9][9] = {false};
+    Texture skin;
+
+    map[0][4] = true;
+    skin.color = COLOR_CYAN;
+    memcpy(skin.map, map, sizeof(map));
+    player.valid = true;
+    player.name = p_attr.name;
+    player.loc = loc;
+    player.hitbox = hitbox;
+    player.offset[0] = 0.0;
+    player.offset[1] = 0.0;
+    player.skin = skin;
+    player.bias = bias;
     inGame = true;
 
-    spawnEntity(p_attr.name, getSpawnLocation(0));
+    spawnEntity(&player);
 }
 
 /* Assigns a given skill into the player's inventory */
@@ -46,11 +66,9 @@ bool hasSkill(char skill_code) {
 bool doTick(int key) {
     if (!inGame)
         return true;
-
-    Entity player = getEntity(p_attr.name);
     
     if (player.valid) {
-        updateControl(key, &player.ctrl);
+        updateControl(key, &player.bias);
     }
 
     updateEntities();

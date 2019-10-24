@@ -10,7 +10,7 @@
 
 static PANEL *panels[3];
 static int green, red, white;
-static int row_, column_, init_y, init_x;
+static int row_, column_, init_y, init_x, ctr_y, ctr_x;
 
 static void drawTiles();
 static void drawEntities();
@@ -19,6 +19,8 @@ void initGameResolution() {
     row_ = row - 10;
     column_ = column;
     init_y = init_x = 0;
+    ctr_y = row_ / 2 + init_y;
+    ctr_x = column_ / 2 + init_x;
 }
 
 void initGameScreen() {
@@ -36,6 +38,9 @@ void initGameScreen() {
     green = COLOR_PAIR(1);
     red = COLOR_PAIR(2);
     white = COLOR_PAIR(3);
+
+    timeout(deltaTime * 1000);
+	keypad(world_win, true);
 
     update_panels();
     doupdate();
@@ -97,8 +102,6 @@ static void drawTiles() {
     Entity entity = getEntity(p_attr.name);
     WINDOW *win = panel_window(panels[0]);
     Location loc;
-    int y_ctr = row_ / 2 + init_y;
-    int x_ctr = column_ / 2 + init_x;
 
     if (entity.valid) {
         loc = entity.loc;
@@ -108,15 +111,14 @@ static void drawTiles() {
     box(win, ACS_VLINE, ACS_HLINE);
     
     for (int y_ = 0; y_ < row_; y_++) {
-        int y = loc.pos.y + y_ctr - y_;
-
+        int y = loc.pos[1] + ctr_y - y_;
 
         if (y < 0 || y >= level_height) {
             continue;
         }
 
         for (int x_ = 0; x_ < column; x_++) {
-            int x = loc.pos.x + x_ - x_ctr;
+            int x = loc.pos[0] + x_ - ctr_x;
 
             if (x < 0 || x >= level_width) {
                 continue;
@@ -137,8 +139,31 @@ static void drawTiles() {
 
 static void drawEntities() {
     Entity entity = getEntity(NULL);
+    Entity* iter = &entity;
+    int cnt = 0;
     
-    while (entity.valid) {
-        // TODO Implement
+    while (iter && iter->valid) {
+        Location loc = iter->loc;
+        Texture skin = iter->skin;
+        int color = COLOR_PAIR(10);
+        WINDOW* win = panel_window(panels[0]);
+        int x, y;
+
+        init_pair(10, COLOR_WHITE, skin.color);
+        wattron(win, color);
+        for (y = 0; y < 9; y++) {
+            for (x = 0; x < 9; x++) {
+                if (skin.map[y][x]) {
+                    mvwaddch(win, ctr_y + y - 4, ctr_x + x - 4, '0');
+                }
+            }
+        }
+        wattroff(win, color);
+
+        // TODO Debug
+        mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's position: %f %f", iter->name, iter->loc.pos[0], iter->loc.pos[1]);
+        mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's speed: %f %f", iter->name, iter->loc.spd[0], iter->loc.spd[1]);
+
+        iter = entity.next;
     }
 }

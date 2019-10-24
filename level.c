@@ -11,8 +11,8 @@ int level_width = 0, level_height = 0;
 char **tiles = NULL;
 static Entity *entity = NULL;
 
-void spawnEntity(const char* name, Location loc) {
-    Entity* iter;
+void spawnEntity(Entity* e) {
+    Entity* iter = NULL;
     bool first = true;
 
     if (entity == NULL) {
@@ -30,19 +30,19 @@ void spawnEntity(const char* name, Location loc) {
         }
 
         if (iter == NULL || !iter->valid) {
-            Entity *instance = malloc(sizeof(Entity));
-            instance->valid = true;
-            instance->name = name;
-            instance->loc = loc;
-            instance->next = NULL;
+            e->next = NULL;
 
             if (first) {
-                entity = instance;
+                entity = e;
                 first = false;
             } else {
-                before->next = instance;
+                before->next = e;
             }
             break;
+        }
+        else if (first) {
+            first = false;
+            iter = iter->next;
         }
     }
 }
@@ -73,10 +73,14 @@ int despawnEntity(const char* name) {
                 first = false;
             }
             else {
-                free(before->next);
+                free(iter);
                 before->next = NULL;
             }
             return 1;
+        }
+        else if (first) {
+            first = false;
+            iter = iter->next;
         }
     }
 
@@ -91,7 +95,7 @@ Entity getEntity(const char* name) {
     Entity *iter = entity;
     Entity empty = {false};
 
-    if (!iter->valid) {
+    if (!iter || !iter->valid) {
         return empty;
     }
     else if (name == NULL) {
@@ -104,19 +108,21 @@ Entity getEntity(const char* name) {
         }
 
         iter = iter->next;
-    } while (iter != NULL && iter->valid);
+    } while (iter && iter->valid);
 
     return empty;
 }
 
 Location getSpawnLocation(int x_pos) {
     Location loc;
-    loc.pos.x = x_pos;
+    loc.pos[0] = (float) x_pos;
+    loc.spd[0] = 0.0;
+    loc.spd[1] = 0.0;
     
     if (tiles != NULL) {
         for (int y=0; y<level_height; y++) {
             if (tiles[y][x_pos] == TILE_AIR) {
-                loc.pos.y = y + 3;
+                loc.pos[1] = y + 3;
                 break;
             }
         }

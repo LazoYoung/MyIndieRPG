@@ -1,3 +1,9 @@
+#ifndef FILE_GAME_INCLUDED
+#define FILE_GAME_INCLUDED
+
+#include "physic.h"
+#include "game-struct.h"
+
 // Sword skill
 #define SINGLE_SHOT 0
 #define RAGE_SPIKE 1
@@ -20,27 +26,8 @@
 #define HEALTH_RECOVERY 42
 #define MANA_RECOVERY 43
 
-typedef struct {
-    char agility; // 1 ~ 100
-    char strength; // 1 ~ 100
-    char health; // 0 ~ 100
-    char mp; // 1 ~ 100
-    unsigned int level;
-    unsigned long exp; // Level-up cost: 200 + (50 * level)
-    const char* name; // Character name
-} PlayerAttribute;
 
-typedef struct {
-    const char* name;
-} Item;
-
-typedef struct {
-    Item* item;
-    long long skills; // Achieved skills are recorded as codes in bit-manner.
-    int coin;
-} Inventory;
-
-extern PlayerAttribute p_attr;
+extern PlayerProperty p_attr;
 extern Inventory inv;
 extern bool inGame;
 extern const float deltaTime; // How much time does 1 frame take in seconds
@@ -49,5 +36,7 @@ extern const int fps; // How many frames and operations are made in 1 sec
 extern void startGame();
 extern void assignSkill(char);
 extern bool hasSkill(char);
-extern bool doTick();
+extern bool doTick(int);
 extern int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)
+
+#endif

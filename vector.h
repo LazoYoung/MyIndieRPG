@@ -1,11 +1,9 @@
 #ifndef VECTOR2_INCLUDED
-    #define VECTOR2_INCLUDED 1
+#define VECTOR2_INCLUDED
 
-    typedef struct {
-        float x;
-        float y;
-    } Vector;
+typedef float Vector[2];
 
-    extern Vector addVector(Vector a, Vector b);
-    extern Vector subVector(Vector a, Vector b);
+extern void addVector(Vector a, Vector b, Vector* result);
+extern void subVector(Vector a, Vector b, Vector* result);
+
 #endif

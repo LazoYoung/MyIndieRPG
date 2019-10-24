@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <math.h>
 #include <stdlib.h>
 #include <ncursesw/curses.h>
@@ -7,44 +6,46 @@
 #include "vector.h"
 
 bool overlaps(AABB a, AABB b) {
-    if (abs(a.centre.x - b.centre.x) > a.radius.x + b.radius.x)
+    if (abs(a.centre[0] - b.centre[0]) > a.radius[0] + b.radius[0])
         return false;
-    if (abs(a.centre.y - b.centre.y) > a.radius.y + b.radius.y)
+    if (abs(a.centre[1] - b.centre[1]) > a.radius[1] + b.radius[1])
         return false;
     return true;
 }
 
-void updateControl(int key, Control* ctrl) {
+void updateControl(int key, Bias* bias) {
     switch (key) {
-        case KEY_RIGHT:
-            if (ctrl->left) {
-                ctrl->left = false;
-                ctrl->times = 0;
+        case KEY_RIGHT: // This is confirmed to work
+            if (bias->left) {
+                bias->left = false;
+                bias->times = 0;
             }
-            ctrl->right = true;
-            ctrl->times += getFramesDuringTime(1000);
+            bias->right = true;
+            bias->times += getFramesDuringTime(1000);
             break;
         case KEY_LEFT:
-            if (ctrl->right) {
-                ctrl->right = false;
-                ctrl->times = 0;
+            if (bias->right) {
+                bias->right = false;
+                bias->times = 0;
             }
-            ctrl->left = true;
-            ctrl->times += getFramesDuringTime(1000);
+            bias->left = true;
+            bias->times += getFramesDuringTime(1000);
             break;
         case KEY_DOWN:
-            ctrl->left = false;
-            ctrl->right = false;
-            ctrl->times = 0;
+            bias->left = false;
+            bias->right = false;
+            bias->times = 0;
             break;
         case KEY_UP:
-            ctrl->up = true;
-            ctrl->times += getFramesDuringTime(500);
+            bias->up = true;
             break;
     }
 
-    if (ctrl->times > 0) {
-        ctrl->times--;
+    if (bias->times >= 0) {
+        if (bias->times-- == 0) {
+            bias->right = false;
+            bias->left = false;
+        }
     }
 }
 
@@ -54,46 +55,50 @@ void updatePhysic(Entity* e) {
     }
 
     Location* l = &e->loc;
+    Vector* last_pos = &l->last_pos;
     AABB* hitbox = &e->hitbox;
-    Control ctrl = e->ctrl;
+    Bias* bias = &e->bias;
 
     // Update movement records
-    l->last_pos.x = l->pos.x;
-    l->last_pos.y = l->pos.y;
-    l->last_spd.x = l->spd.x;
-    l->last_spd.y = l->spd.y;
+    l->last_pos[0] = l->pos[0];
+    l->last_pos[1] = l->pos[1];
+    l->last_pos[0] = l->spd[0];
+    l->last_pos[1] = l->spd[1];
     l->wasOnGround = l->onGround;
-    l->pos.x += l->spd.x * deltaTime;
-    l->pos.y += l->spd.y * deltaTime;
+    l->pos[0] += l->spd[0] * deltaTime;
+    l->pos[1] += l->spd[1] * deltaTime;
 
-    // Update hitbox
-    hitbox->centre.x = l->pos.x + e->offset.x;
-    hitbox->centre.y = l->pos.y + e->offset.y;
+    // Update hitbox position
+    hitbox->centre[0] = l->pos[0] + e->offset[0];
+    hitbox->centre[1] = l->pos[1] + e->offset[1];
 
     // TODO Handle ground conllision
     
 
+    // TODO bias data is corrupted. always true
     // Handle controls and gravity
-    if (ctrl.left) {
-        l->spd.x = -5.0;
+    if (bias->left) {
+        l->spd[0] = -10.0;
     }
-    else if (ctrl.right) {
-        l->spd.x = 5.0;
+    else if (bias->right) {
+        l->spd[0] = 10.0;
     }
     else {
-        l->spd.x = 0.0;
+        l->spd[0] = 0.0;
     }
-    if (ctrl.up & l->onGround) {
-        l->spd.y = 5.0;
+    if (bias->up && l->onGround) {
+        bias->up = false;
+        l->spd[1] = 10.0;
     }
     if (!l->onGround) {
-        l->spd.y -= 2.0 * deltaTime;
+        l->spd[1] -= 10.0 * deltaTime;
     }
 
     // TODO Handle entity, wall collision
 }
 
 bool hasGround(Entity entity, float ground_y) {
-    Vector centre = addVector(entity.loc.pos, entity.offset);
-    Vector lBottom = subVector(centre, entity.hitbox.radius);
+    Vector centre, lBottom;
+    addVector(entity.loc.pos, entity.offset, &centre);
+    subVector(centre, entity.hitbox.radius, &lBottom);
 }

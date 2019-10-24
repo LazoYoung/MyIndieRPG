@@ -7,7 +7,7 @@
 extern char** tiles;
 extern int level_width, level_height;
 
-extern void spawnEntity(const char*, Location);
+extern void spawnEntity(Entity*);
 extern int despawnEntity(const char*);
 extern Entity getEntity(const char*);
 extern Location getSpawnLocation(int x_pos);
