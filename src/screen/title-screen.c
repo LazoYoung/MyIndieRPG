@@ -6,8 +6,8 @@
 #include <menu.h>
 #include <panel.h>
 #include <ncursesw/curses.h>
-#include "screen.h"
-#include "game.h"
+#include "header/screen.h"
+#include "header/game.h"
 
 extern int column, row;
 

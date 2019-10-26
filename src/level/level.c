@@ -4,8 +4,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "level.h"
-#include "screen.h"
+#include "header/level.h"
+#include "header/screen.h"
 
 int level_width = 0, level_height = 0;
 static char **tiles = NULL;

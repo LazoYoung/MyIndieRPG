@@ -4,9 +4,9 @@
 
 #include <ncursesw/curses.h>
 #include <ncursesw/panel.h>
-#include "screen.h"
-#include "game.h"
-#include "level.h"
+#include "header/screen.h"
+#include "header/game.h"
+#include "header/level.h"
 
 static PANEL* panels[3];
 static int green, red, white;
@@ -160,8 +160,8 @@ static void drawEntities() {
         wattroff(win, color);
 
         // TODO Debug
-        mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's position: %f %f", iter->name, iter->loc.pos[0], iter->loc.pos[1]);
-        mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's speed: %f %f", iter->name, iter->loc.spd[0], iter->loc.spd[1]);
+        mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's position: %.2f %.2f", iter->name, iter->loc.pos[0], iter->loc.pos[1]);
+        mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's speed: %.2f %.2f", iter->name, iter->loc.spd[0], iter->loc.spd[1]);
 
         iter = entity.next;
     }

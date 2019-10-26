@@ -6,7 +6,7 @@
 #include <ncursesw/curses.h>
 #include <ncursesw/menu.h>
 #include <ncursesw/panel.h>
-#include "screen.h"
+#include "header/screen.h"
 
 char screen_mode = TITLE_SCREEN;
 char prompt_mode = PROMPT_NONE;

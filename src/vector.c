@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "vector.h"
+#include "header/vector.h"
 
 /* Add two vectors: a + b */
 Vector* add(Vector a, Vector b) {

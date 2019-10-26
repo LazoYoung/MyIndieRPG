@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ncursesw/curses.h>
-#include "level.h"
-#include "game.h"
-#include "physic.h"
-#include "vector.h"
+#include "header/level.h"
+#include "header/game.h"
+#include "header/physic.h"
+#include "header/vector.h"
 
-static bool hasGround(Location loc, AABB hitbox, Vector offset, float *ground_y);
+static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y);
 
 bool overlaps(AABB a, AABB b) {
     if (abs(a.centre[0] - b.centre[0]) > a.radius[0] + b.radius[0])
@@ -19,26 +19,23 @@ bool overlaps(AABB a, AABB b) {
 
 void updateControl(int key, Bias* bias) {
     switch (key) {
-        case KEY_RIGHT: // This is confirmed to work
+        case KEY_RIGHT:
             if (bias->left) {
                 bias->left = false;
                 bias->times = 0;
+            } else {
+                bias->right = true;
+                bias->times = getFramesDuringTime(1000);
             }
-            bias->right = true;
-            bias->times += getFramesDuringTime(1000);
             break;
         case KEY_LEFT:
             if (bias->right) {
                 bias->right = false;
                 bias->times = 0;
+            } else {
+                bias->left = true;
+                bias->times = getFramesDuringTime(1000);
             }
-            bias->left = true;
-            bias->times += getFramesDuringTime(1000);
-            break;
-        case KEY_DOWN:
-            bias->left = false;
-            bias->right = false;
-            bias->times = 0;
             break;
         case KEY_UP:
             bias->up = true;
@@ -77,7 +74,8 @@ void updatePhysic(Entity* e) {
     hitbox->centre[0] = l->pos[0] + e->offset[0];
     hitbox->centre[1] = l->pos[1] + e->offset[1];
 
-    if (l->spd[1] <= 0.0 && hasGround(*l, *hitbox, e->offset, &ground_y)) {
+    // Check and perform vertical collision
+    if (l->spd[1] <= 0.0 && hasVerticalObstacle(*l, *hitbox, e->offset, &ground_y)) {
         l->pos[1] = ground_y + hitbox->radius[1] - e->offset[1];
         l->spd[1] = 0.0;
         l->onGround = true;
@@ -96,7 +94,7 @@ void updatePhysic(Entity* e) {
         l->spd[0] = 0.0;
     }
 
-    if (bias->up && l->onGround) {
+    if (bias->up) {
         bias->up = false;
         l->spd[1] = 10.0;
     }
@@ -104,15 +102,13 @@ void updatePhysic(Entity* e) {
     if (!l->onGround) {
         l->spd[1] -= 15.0 * deltaTime;
     }
-
-    // TODO Handle entity, wall collision
 }
 
 /**
- * Returns whether the entity is colliding with the ground.
- * If true, ground_y will point to the y-coordinate above ground.
+ * Returns true if entity will collide with the obstacle in vertical direction.
+ * If so, ground_y will point to y-coordinate above ground.
  **/
-static bool hasGround(Location loc, AABB hitbox, Vector offset, float *ground_y) {
+static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y) {
     Vector *centre, *lBottom, *rBottom, tile;
 
     centre = add(loc.pos, offset);
@@ -132,3 +128,10 @@ static bool hasGround(Location loc, AABB hitbox, Vector offset, float *ground_y)
     }
     return false;
 }
+
+/**
+ * TODO Planned to be implemented
+ * Returns true if entity will collide with the obstacle in horizontal direction.
+ * If so, ground_y will point to x-coordinate before the contact.
+ **/
+static bool hasHorizontalObstacle(Location loc, AABB hitbox, Vector offset) {}

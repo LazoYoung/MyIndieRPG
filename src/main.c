@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <ncursesw/curses.h>
-#include "screen.h"
-#include "game.h"
+#include "header/screen.h"
+#include "header/game.h"
 
 static bool cont = true;
 

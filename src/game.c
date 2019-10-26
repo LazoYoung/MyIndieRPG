@@ -7,8 +7,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ncursesw/curses.h>
-#include "game.h"
-#include "level.h"
+#include "header/game.h"
+#include "header/level.h"
 
 PlayerProperty p_attr = {
     .agility = 1,

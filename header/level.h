@@ -4,6 +4,10 @@
 #define TILE_AIR 0
 #define TILE_BLOCK 1
 
+#define STAGE_LOBBY 0
+#define STAGE_SHOP 1
+#define STAGE_DUNGEON_TEST 2
+
 extern int level_width, level_height;
 
 extern void spawnEntity(Entity*);
