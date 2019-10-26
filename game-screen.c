@@ -8,7 +8,7 @@
 #include "game.h"
 #include "level.h"
 
-static PANEL *panels[3];
+static PANEL* panels[3];
 static int green, red, white;
 static int row_, column_, init_y, init_x, ctr_y, ctr_x;
 
@@ -71,7 +71,7 @@ void drawGameScreen() {
     mvwaddstr(guage, 0, 13 + health, "                         ");
     wattroff(guage, red);
     
-    if (inGame && tiles != NULL) {
+    if (inGame) {
         drawTiles();
         drawEntities();
     }
@@ -113,18 +113,17 @@ static void drawTiles() {
     for (int y_ = 0; y_ < row_; y_++) {
         int y = loc.pos[1] + ctr_y - y_;
 
-        if (y < 0 || y >= level_height) {
+        if (y < 0 || y >= level_height)
             continue;
-        }
 
-        for (int x_ = 0; x_ < column; x_++) {
+        for (int x_ = 0; x_ < column_; x_++) {
             int x = loc.pos[0] + x_ - ctr_x;
 
             if (x < 0 || x >= level_width) {
                 continue;
             }
 
-            switch (tiles[y][x]) {
+            switch (getTileAt(x, y)) {
                 case TILE_AIR:
                     break;
                 case TILE_BLOCK:

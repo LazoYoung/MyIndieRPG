@@ -2,7 +2,6 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED 1
 
-#include <signal.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <locale.h>

@@ -32,11 +32,11 @@ const int fps = 1000 / 50;
 void startGame() {
     AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
     Bias bias = {false, false, false, 0};
-    Location loc = getSpawnLocation(0);
+    Location loc = getSpawnLocation(5);
     bool map[9][9] = {false};
     Texture skin;
 
-    map[0][4] = true;
+    map[4][0] = map[5][0] = true;
     skin.color = COLOR_CYAN;
     memcpy(skin.map, map, sizeof(map));
     player.valid = true;

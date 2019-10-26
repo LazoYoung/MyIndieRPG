@@ -8,7 +8,7 @@
 #include "screen.h"
 
 int level_width = 0, level_height = 0;
-char **tiles = NULL;
+static char **tiles = NULL;
 static Entity *entity = NULL;
 
 void spawnEntity(Entity* e) {
@@ -165,4 +165,12 @@ void generateLevel() {
 void destructLevel() {
     free(tiles);
     tiles = NULL;
+}
+
+char getTileAt(int x, int y) {
+    if (tiles == NULL || x > level_width || x < 0 || y > level_height || y < 0) {
+        return TILE_AIR;
+    }
+
+    return tiles[y][x];
 }
