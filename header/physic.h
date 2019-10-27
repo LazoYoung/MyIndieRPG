@@ -8,6 +8,6 @@
 
 extern bool overlaps(AABB, AABB);
 extern void updateControl(int, Bias* ctrl);
-extern void updatePhysic(Entity* entity);
+extern void updateEntities();
 
 #endif

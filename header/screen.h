@@ -1,3 +1,6 @@
+#ifndef FILE_SCREEN_INCLUDED
+#define FILE_SCREEN_INCLUDED
+
 #include <ncursesw/menu.h>
 
 // 화면 모드를 정의하는 플래그
@@ -40,3 +43,5 @@ extern void initGameScreen();
 extern void initGameResolution();
 extern void drawGameScreen();
 extern void clearGameScreen();
+
+#endif

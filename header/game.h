@@ -1,7 +1,6 @@
 #ifndef FILE_GAME_INCLUDED
 #define FILE_GAME_INCLUDED
 
-#include "physic.h"
 #include "game-struct.h"
 
 // Sword skill

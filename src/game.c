@@ -9,6 +9,7 @@
 #include <ncursesw/curses.h>
 #include "header/game.h"
 #include "header/level.h"
+#include "header/physic.h"
 
 PlayerProperty p_attr = {
     .agility = 1,
@@ -30,13 +31,13 @@ const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
 void startGame() {
-    AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
+    AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
     Bias bias = {false, false, false, 0};
-    Location loc = getSpawnLocation(5);
+    Location loc = getSpawnLocation();
     bool map[9][9] = {false};
     Texture skin;
 
-    map[4][0] = map[5][0] = true;
+    map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
     memcpy(skin.map, map, sizeof(map));
     player.valid = true;

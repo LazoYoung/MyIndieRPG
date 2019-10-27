@@ -9,7 +9,6 @@
 #include "header/level.h"
 
 static PANEL* panels[3];
-static int green, red, white;
 static int row_, column_, init_y, init_x, ctr_y, ctr_x;
 
 static void drawTiles();
@@ -17,8 +16,9 @@ static void drawEntities();
 
 void initGameResolution() {
     row_ = row - 10;
-    column_ = column;
-    init_y = init_x = 0;
+    column_ = column - 2;
+    init_y = 0;
+    init_x = 1;
     ctr_y = row_ / 2 + init_y;
     ctr_x = column_ / 2 + init_x;
 }
@@ -32,12 +32,14 @@ void initGameScreen() {
     panels[2] = new_panel(hp_win_1);
     
     start_color();
-    init_pair(1, COLOR_WHITE, COLOR_GREEN);
-    init_pair(2, COLOR_WHITE, COLOR_RED);
+    init_pair(0, COLOR_RED, COLOR_RED);
+    init_pair(1, COLOR_GREEN, COLOR_GREEN);
+    init_pair(2, COLOR_BLUE, COLOR_BLUE);
     init_pair(3, COLOR_WHITE, COLOR_WHITE);
-    green = COLOR_PAIR(1);
-    red = COLOR_PAIR(2);
-    white = COLOR_PAIR(3);
+    init_pair(4, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(6, COLOR_BLACK, COLOR_BLACK);
+    init_pair(7, COLOR_CYAN, COLOR_CYAN);
 
     timeout(deltaTime * 1000);
 	keypad(world_win, true);
@@ -45,7 +47,7 @@ void initGameScreen() {
     update_panels();
     doupdate();
     
-    generateLevel();
+    generateLevel(LOBBY);
 }
 
 void drawGameScreen() {
@@ -63,13 +65,13 @@ void drawGameScreen() {
     wattroff(guage, A_BOLD);
     waddch(guage, ' ');
 
-    wattron(guage, green);
+    wattron(guage, COLOR_PAIR(GREEN));
     mvwaddnstr(guage, 0, 13, "                         ", health);
-    wattroff(guage, green);
+    wattroff(guage, COLOR_PAIR(GREEN));
 
-    wattron(guage, red);
+    wattron(guage, COLOR_PAIR(RED));
     mvwaddstr(guage, 0, 13 + health, "                         ");
-    wattroff(guage, red);
+    wattroff(guage, COLOR_PAIR(RED));
     
     if (inGame) {
         drawTiles();
@@ -99,7 +101,7 @@ void clearGameScreen() {
 }
 
 static void drawTiles() {
-    Entity entity = getEntity(p_attr.name);
+    Entity entity = *getEntity(p_attr.name);
     WINDOW *win = panel_window(panels[0]);
     Location loc;
 
@@ -110,6 +112,7 @@ static void drawTiles() {
     werase(win);
     box(win, ACS_VLINE, ACS_HLINE);
     
+    // Convert coordinates from screen to tile
     for (int y_ = 0; y_ < row_; y_++) {
         int y = loc.pos[1] + ctr_y - y_;
 
@@ -123,22 +126,35 @@ static void drawTiles() {
                 continue;
             }
 
-            switch (getTileAt(x, y)) {
-                case TILE_AIR:
+            Tile tile = getTileAt(x, y);
+
+            switch (tile) {
+                case BLOCK:
+                    wattron(win, COLOR_PAIR(WHITE));
+                    mvwaddch(win, y_, x_, 'B');
+                    wattroff(win, COLOR_PAIR(WHITE));
                     break;
-                case TILE_BLOCK:
-                    wattron(win, white);
-                    mvwaddch(win, y_, x_, 'O');
-                    wattroff(win, white);
+                case PORTAL_1:
+                case PORTAL_2:
+                case PORTAL_3:
+                case PORTAL_4:
+                case PORTAL_5: {
+                    Portal *portal = getPortal(tile);
+
+                    if (portal != NULL) {
+                        wattron(win, COLOR_PAIR(portal->color));
+                        mvwaddch(win, y_, x_, 'P');
+                        wattroff(win, COLOR_PAIR(portal->color));
+                    }
                     break;
+                }
             }
         }
     }
 }
 
 static void drawEntities() {
-    Entity entity = getEntity(NULL);
-    Entity* iter = &entity;
+    Entity* iter = getEntity(NULL);
     int cnt = 0;
     
     while (iter && iter->valid) {
@@ -153,7 +169,7 @@ static void drawEntities() {
         for (y = 0; y < 9; y++) {
             for (x = 0; x < 9; x++) {
                 if (skin.map[y][x]) {
-                    mvwaddch(win, ctr_y + y - 4, ctr_x + x - 4, '0');
+                    mvwaddch(win, ctr_y + y - 4, ctr_x + x - 4, ' ');
                 }
             }
         }
@@ -163,6 +179,6 @@ static void drawEntities() {
         mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's position: %.2f %.2f", iter->name, iter->loc.pos[0], iter->loc.pos[1]);
         mvwprintw(panel_window(panels[0]), 3 + cnt++, 0, "%s's speed: %.2f %.2f", iter->name, iter->loc.spd[0], iter->loc.spd[1]);
 
-        iter = entity.next;
+        iter = iter->next;
     }
 }

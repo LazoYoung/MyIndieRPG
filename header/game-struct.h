@@ -1,7 +1,21 @@
 #ifndef GAME_STRUCT_INCLUDED
 #define GAME_STRUCT_INCLUDED
 
-#include "vector.h"
+#include <stdbool.h>
+
+// TODO Introduce Union as vector storage. Returning a pointer involves headache
+typedef float Vector[2];
+
+typedef enum Tile { AIR, BLOCK, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
+typedef enum Color { RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
+typedef enum Stage { LOBBY, SHOP, DUNGEON_TEST } Stage;
+
+typedef struct {
+    bool valid;
+    Tile tile;
+    Stage dest;
+    Color color;
+} Portal;
 
 typedef struct {
     bool map[9][9];
