@@ -16,6 +16,7 @@ extern void generateLevel();
 extern void destructLevel();
 extern void setStage(Stage);
 extern Stage getStage();
+extern const char* getStageName(Stage);
 extern Tile getTileAt(int, int);
 
 // lobby.c

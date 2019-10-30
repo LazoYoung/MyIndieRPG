@@ -42,7 +42,7 @@ static Prompt getCategoryPrompt() {
     items[1] = new_item("◇ Armory", "armory");
     items[2] = new_item("◇ Potion", "potion");
     items[3] = new_item("◇ Coin", "coin");
-    items[4] = new_item("× Exit", "exit");
+    items[4] = new_item("× Close Menu", "close");
     items[5] = NULL;
     item_opts_off(items[3], O_SELECTABLE);
     
@@ -111,7 +111,7 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
             category = POTION;
             setPrompt(INVENTORY_PROMPT);
         }
-        else if (strcmp(desc, "exit") == 0) {
+        else if (strcmp(desc, "close") == 0) {
             setPrompt(PROMPT_NONE);
             setScreen(GAME_SCREEN);
         }
@@ -126,6 +126,9 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
 
         if (strcmp(desc, "coin") == 0) {
             mvwprintw(win, 2, 3, "Your coin: %d", inv.coin);
+        }
+        else if (strcmp(desc, "close") == 0) {
+            mvwprintw(win, 2, 3, "Hit <ENTER> to close inventory.");
         }
         else {
             mvwprintw(win, 2, 3, "Hit <ENTER> to display your %s items.", item_description(item));

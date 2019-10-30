@@ -23,6 +23,7 @@ PlayerProperty p_attr = {
 };
 Inventory inv = {
     .items = { false }, // TODO dynamic array
+    .equipment = NULL,
     .skills = 0,
     .coin = 0
 };
@@ -78,21 +79,6 @@ bool hasSkill(char skill_code) {
     return (inv.skills & filter) == filter;
 }
 
-const char* getItemName(ItemType type) {
-    switch (type) {
-        case SMALL_SWORD:
-            return "Small Sword";
-        case BRONZE_SWORD:
-            return "Bronze Sword";
-        case STEEL_BLADE:
-            return "Steel Blade";
-        case HOOD_CAPE:
-            return "Hood Cape";
-        default:
-            return NULL;
-    }
-}
-
 void addItem(GItem item) {
     for (int i=0; i<10; i++) {
         GItem *slot = &inv.items[i];
@@ -102,6 +88,7 @@ void addItem(GItem item) {
             slot->type = item.type;
             slot->category = item.category;
             slot->equip = item.equip;
+            inv.equipment[item.category] = slot;
             break;
         }
     }
@@ -123,4 +110,19 @@ void doTick(int key) {
 /* Returns the rounded count of frames being made during the given time-frame (ms) */
 int getFramesDuringTime(int miliseconds) {
     return round(fps * miliseconds / 1000);
+}
+
+const char* getItemName(ItemType type) {
+    switch (type) {
+        case SMALL_SWORD:
+            return "Small Sword";
+        case BRONZE_SWORD:
+            return "Bronze Sword";
+        case STEEL_BLADE:
+            return "Steel Blade";
+        case HOOD_CAPE:
+            return "Hood Cape";
+        default:
+            return NULL;
+    }
 }

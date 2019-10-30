@@ -23,7 +23,7 @@ bool overlaps(AABB a, AABB b) {
 
 void updateControl(int key, Bias* bias) {
     switch (key) {
-        case KEY_RIGHT:
+        case 'd':
             if (bias->left) {
                 bias->left = false;
                 bias->times = 0;
@@ -32,7 +32,7 @@ void updateControl(int key, Bias* bias) {
                 bias->times = getFramesDuringTime(1000);
             }
             break;
-        case KEY_LEFT:
+        case 'a':
             if (bias->right) {
                 bias->right = false;
                 bias->times = 0;
@@ -41,7 +41,7 @@ void updateControl(int key, Bias* bias) {
                 bias->times = getFramesDuringTime(1000);
             }
             break;
-        case KEY_UP:
+        case 'w':
             bias->up = true;
             break;
         case 'i':

@@ -210,6 +210,21 @@ Stage getStage() {
     return stage;
 }
 
+const char* getStageName(Stage _stage) {
+    switch (_stage) {
+        case VOID:
+            return "Void";
+        case LOBBY:
+            return "Lobby";
+        case SHOP:
+            return "Shop";
+        case DUNGEON_TEST:
+            return "Dungeon Test";
+    }
+
+    return NULL;
+}
+
 Tile getTileAt(int x, int y) {
     if (tiles == NULL || x >= level_width || x < 0 || y >= level_height || y < 0) {
         return AIR;

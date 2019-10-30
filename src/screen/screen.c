@@ -11,8 +11,8 @@
 
 ScreenMode screen_mode = TITLE_SCREEN;
 PromptMode prompt_mode = PROMPT_NONE;
-int column = 130;
-int row = 40;
+int column = 230;
+int row = 70;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static WINDOW *prompt_win[2] = { NULL }; // 0: 테두리, 1: 버튼
