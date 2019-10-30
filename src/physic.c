@@ -59,11 +59,12 @@ void updateControl(int key, Bias* bias) {
 }
 
 void updateEntities() {
-    Entity* iter = getEntity(NULL);
+    int id = 0;
+    Entity* iter = getEntityByID(id++);
 
-    while (iter != NULL && iter->valid) {
+    while (iter && iter->valid) {
         updatePhysic(iter);
-        iter = iter->next;
+        iter = getEntityByID(id++);
     }
 }
 
@@ -117,8 +118,6 @@ static void updatePhysic(Entity* e) {
 
                 if (portal != NULL) {
                     setStage(portal->dest);
-                    destructLevel();
-                    generateLevel();
                 }
                 break;
             }

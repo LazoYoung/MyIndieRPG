@@ -19,7 +19,7 @@ PlayerProperty p_attr = {
     .mp = 100,
     .level = 1,
     .exp = 0,
-    .name = "UNDEFINED"
+    .name = NULL
 };
 Inventory inv = {
     .items = { false }, // TODO dynamic array
@@ -34,7 +34,6 @@ const int fps = 1000 / 50;
 
 void startGame() {
     AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
-    Bias bias = {false, false, false, 0};
     bool map[9][9] = {false};
     Texture skin;
     GItem basic_sword, basic_armor;
@@ -45,27 +44,23 @@ void startGame() {
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
     memcpy(skin.map, map, sizeof(map));
-    player.valid = true;
+
     player.name = p_attr.name;
-    player.loc = getSpawnLocation();
+    player.loc = getTopLocation(5);
     player.hitbox = hitbox;
     player.offset[0] = 0.0;
     player.offset[1] = 0.0;
     player.skin = skin;
-    player.bias = bias;
-    inGame = true;
     spawnEntity(&player);
 
-    basic_sword.valid = true;
     basic_sword.category = WEAPON;
-    basic_sword.equip = true;
     basic_sword.type = SMALL_SWORD;
-    basic_armor.valid = true;
     basic_armor.category = ARMORY;
-    basic_armor.equip = true;
     basic_armor.type = HOOD_CAPE;
     addItem(basic_sword);
     addItem(basic_armor);
+
+    inGame = true;
 }
 
 /* Assigns a given skill into the player's inventory */
@@ -88,10 +83,30 @@ void addItem(GItem item) {
             slot->type = item.type;
             slot->category = item.category;
             slot->equip = item.equip;
-            inv.equipment[item.category] = slot;
+
+            if (item.equip)
+                inv.equipment[item.category] = slot;
             break;
         }
     }
+}
+
+/**
+ * Adds experience of player.
+ * Returns true if he/she levels up.
+ **/
+bool addExp(int exp) {
+    int rem;
+
+    p_attr.exp += exp;
+    rem = p_attr.exp - getExpCap(p_attr.level);
+
+    if (rem >= 0) {
+        p_attr.level++;
+        p_attr.exp = rem;
+        return true;
+    }
+    return false;
 }
 
 void doTick(int key) {
@@ -99,8 +114,10 @@ void doTick(int key) {
         return;
     
     if (getStage() != VOID) {
-        if (player.valid) {
-            updateControl(key, &player.bias);
+        Entity *player = getEntityByID(0);
+
+        if (player && player->valid) {
+            updateControl(key, &player->bias);
         }
 
         updateEntities();
@@ -110,6 +127,10 @@ void doTick(int key) {
 /* Returns the rounded count of frames being made during the given time-frame (ms) */
 int getFramesDuringTime(int miliseconds) {
     return round(fps * miliseconds / 1000);
+}
+
+int getExpCap(int level) {
+    return sqrt(level) * 100;
 }
 
 const char* getItemName(ItemType type) {

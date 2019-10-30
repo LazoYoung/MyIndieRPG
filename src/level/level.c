@@ -8,125 +8,80 @@
 #include "header/screen.h"
 #include "header/physic.h"
 
-int level_width = 0, level_height = 0, spawn_x = 5, portal_i = -1;
+int level_width = 0, level_height = 0, portal_i = -1;
 static Stage stage = VOID;
 static Portal portal_arr[30];
 static Tile **tiles = NULL;
-static Entity *entity = NULL;
+static Entity* entity[MAX_ENTITY] = {NULL};
+
+static void generateLevel();
 
 /**
  * Spawn an entity.
  * Player must be assigned before any other entities.
  **/
 void spawnEntity(Entity* e) {
-    Entity* iter = entity;
-    Entity dummy = {false};
-    bool first = true;
+    Bias bias = {false, false, false, 0};
+    e->bias = bias;
+    e->valid = true;
 
-    if (entity == NULL) {
-        iter = entity = &dummy;
-    }
-    
-    while (1) {
-        Entity* before = iter;
+    for (int i = 0; i < MAX_ENTITY; i++) {
+        Entity *s = entity[i];
 
-        if (!first) {
-            iter = iter->next;
-        }
-
-        if (iter == NULL || !iter->valid) {
-            e->next = NULL;
-
-            if (first) {
-                entity = e;
-                first = false;
-            } else {
-                before->next = e;
-            }
-            break;
-        }
-        else if (first) {
-            first = false;
-            iter = iter->next;
-        }
+        if (s && s->valid) continue;
+        
+        entity[i] = e;
+        break;
     }
 }
 
-int despawnEntity(const char* name) {
-    Entity *iter = entity;    
-    bool first = true;
+bool despawnEntity(const char* name) {
+    for (int i=0; i<MAX_ENTITY; i++) {
+        Entity *s = entity[i];
 
-    if (entity == NULL) {
-        return 0;
-    }
-
-    while (1) {
-        Entity *before = iter;
-
-        if (!first) {
-            iter = iter->next;
-        }
-
-        if (iter == NULL || !iter->valid) {
-            break;
-        }
-
-        if (strcmp(name, iter->name) == 0) {
-            if (first) {
-                free(entity);
-                entity = NULL;
-                first = false;
-            }
-            else {
-                free(iter);
-                before->next = NULL;
-            }
-            return 1;
-        }
-        else if (first) {
-            first = false;
-            iter = iter->next;
+        if (s && !s->valid && strcmp(name, s->name) == 0) {
+            s->valid = false;
+            return true;
         }
     }
-
-    return 0;
+    return false;
 }
 
 /**
- * Returns a pointer of entity
- * If you want to retrieve the first entry, pass NULL to name.
- * The function returns NULL if failed to query
+ * Finds an entity matching the NAME
+ * Returns NULL if the function has failed to query
  **/
 Entity* getEntity(const char* name) {
-    Entity *iter = entity;
+    for (int i = 0; i < MAX_ENTITY; i++) {
+        Entity *s = entity[i];
 
-    if (!iter || !iter->valid) {
-        return NULL;
-    }
-    else if (name == NULL) {
-        return iter;
-    }
-
-    do {
-        if (strcmp(name, iter->name) == 0) {
-            return iter;
+        if (s && s->valid && strcmp(name, s->name) == 0) {
+            return s;
         }
-
-        iter = iter->next;
-    } while (iter && iter->valid);
-
+    }
     return NULL;
 }
 
-Location getSpawnLocation() {
+/**
+ * Returns the pointer of entity matching the index ID
+ * It's possible to return NULL
+ **/
+Entity* getEntityByID(int id) {
+    if (id >= 0 && id < MAX_ENTITY)
+        return entity[id];
+    return NULL;
+}
+
+/* Returns location at top of the blocks below */
+Location getTopLocation(int pos_x) {
     Location loc;
-    loc.pos[0] = (float) spawn_x;
+    loc.pos[0] = (float) pos_x;
     loc.spd[0] = 0.0;
     loc.spd[1] = 0.0;
     
     if (tiles != NULL) {
-        for (int y=0; y<level_height; y++) {
-            if (tiles[y][spawn_x] == AIR) {
+        for (int y = level_height - 1; y > 0; y--) {
+            if (tiles[y][pos_x] == BLOCK) {
                 loc.pos[1] = y + 3;
                 break;
             }
@@ -156,38 +111,13 @@ Portal *getPortal(Tile tile) {
     return NULL;
 }
 
-/**
- * Define a stage (setStage) before generating a new level.
- **/
-void generateLevel() {
-    level_width = 200;
-    level_height = 50;
-
-    tiles = calloc(level_height, sizeof(Tile *));
-
-    for (int r=0; r<level_height; r++) {
-        tiles[r] = (Tile *) calloc(level_width, sizeof(Tile));
-    }
-
-    for (int y=0; y<level_height; y++) {
-        for (int x=0; x<level_width; x++) {
-            if (y > 5) {
-                tiles[y][x] = AIR;
-            }
-            else {
-                tiles[y][x] = BLOCK;
-            }
-        }
-    }
-
+void destructLevel() {
     switch (stage) {
-        case LOBBY:
-            generateLobby(tiles);
+        case DUNGEON_TEST:
+            destructDungeon();
             break;
     }
-}
 
-void destructLevel() {
     if (tiles != NULL) {
         free(tiles);
         tiles = NULL;
@@ -202,8 +132,15 @@ void destructLevel() {
     }
 }
 
+/**
+ * Generate the level with a new stage.
+ **/
 void setStage(Stage _stage) {
+    if (stage != VOID) {
+        destructLevel();
+    }
     stage = _stage;
+    generateLevel();
 }
 
 Stage getStage() {
@@ -231,4 +168,35 @@ Tile getTileAt(int x, int y) {
     }
 
     return tiles[y][x];
+}
+
+static void generateLevel() {
+    level_width = 200;
+    level_height = 50;
+
+    tiles = calloc(level_height, sizeof(Tile *));
+
+    for (int r=0; r<level_height; r++) {
+        tiles[r] = (Tile *) calloc(level_width, sizeof(Tile));
+    }
+
+    for (int y=0; y<level_height; y++) {
+        for (int x=0; x<level_width; x++) {
+            if (y > 5) {
+                tiles[y][x] = AIR;
+            }
+            else {
+                tiles[y][x] = BLOCK;
+            }
+        }
+    }
+
+    switch (stage) {
+        case LOBBY:
+            generateLobby(tiles);
+            break;
+        case DUNGEON_TEST:
+            generateDungeon(tiles);
+            break;
+    }
 }

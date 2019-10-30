@@ -35,9 +35,11 @@ extern const int fps; // How many frames and operations are made in 1 sec
 extern void startGame();
 extern void assignSkill(char);
 extern bool hasSkill(char);
-extern const char* getItemName(ItemType);
 extern void addItem(GItem);
+extern bool addExp(int);
 extern void doTick(int);
+extern int getExpCap(int);
+extern const char* getItemName(ItemType);
 extern int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)
 
 #endif

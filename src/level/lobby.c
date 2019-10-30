@@ -8,5 +8,5 @@ void generateLobby(Tile **tiles) {
     assignPortal(dun_test);
 
     tiles[6][19] = tiles[6][20] = tiles[6][21] = PORTAL_1;
-    tiles[6][30] = PORTAL_2;
+    tiles[6][39] = tiles[6][40] = tiles[6][41] = PORTAL_2;
 }

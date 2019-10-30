@@ -60,7 +60,7 @@ typedef struct entity {
     Texture skin;
     AABB hitbox;
     Vector offset;
-    struct entity* next;
+    //struct entity* next;
 } Entity;
 
 typedef struct {
