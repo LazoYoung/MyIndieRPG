@@ -15,6 +15,7 @@ extern Portal* getPortal(Tile);
 extern void generateLevel();
 extern void destructLevel();
 extern void setStage(Stage);
+extern Stage getStage();
 extern Tile getTileAt(int, int);
 
 // lobby.c

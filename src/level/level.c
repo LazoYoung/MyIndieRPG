@@ -9,7 +9,7 @@
 #include "header/physic.h"
 
 int level_width = 0, level_height = 0, spawn_x = 5, portal_i = -1;
-Stage stage = LOBBY;
+static Stage stage = VOID;
 static Portal portal_arr[30];
 static Tile **tiles = NULL;
 static Entity *entity = NULL;
@@ -156,6 +156,9 @@ Portal *getPortal(Tile tile) {
     return NULL;
 }
 
+/**
+ * Define a stage (setStage) before generating a new level.
+ **/
 void generateLevel() {
     level_width = 200;
     level_height = 50;
@@ -201,6 +204,10 @@ void destructLevel() {
 
 void setStage(Stage _stage) {
     stage = _stage;
+}
+
+Stage getStage() {
+    return stage;
 }
 
 Tile getTileAt(int x, int y) {

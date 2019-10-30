@@ -31,23 +31,23 @@ void initGameScreen() {
     panels[1] = new_panel(hp_win_0);
     panels[2] = new_panel(hp_win_1);
     
-    start_color();
-    init_pair(0, COLOR_RED, COLOR_RED);
-    init_pair(1, COLOR_GREEN, COLOR_GREEN);
-    init_pair(2, COLOR_BLUE, COLOR_BLUE);
-    init_pair(3, COLOR_WHITE, COLOR_WHITE);
-    init_pair(4, COLOR_YELLOW, COLOR_YELLOW);
-    init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
-    init_pair(6, COLOR_BLACK, COLOR_BLACK);
-    init_pair(7, COLOR_CYAN, COLOR_CYAN);
+    // Initialize basic screen colors
+    init_pair(1, COLOR_RED, COLOR_RED);
+    init_pair(2, COLOR_GREEN, COLOR_GREEN);
+    init_pair(3, COLOR_BLUE, COLOR_BLUE);
+    init_pair(4, COLOR_WHITE, COLOR_WHITE);
+    init_pair(5, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(6, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(7, COLOR_BLACK, COLOR_BLACK);
+    init_pair(8, COLOR_CYAN, COLOR_CYAN);
 
     timeout(deltaTime * 1000);
 	keypad(world_win, true);
 
     update_panels();
     doupdate();
-    
-    generateLevel(LOBBY);
+
+    generateLevel();
 }
 
 void drawGameScreen() {

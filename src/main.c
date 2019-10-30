@@ -18,12 +18,13 @@ int main() {
 	setlocale(LC_ALL, "");
 	initscr();
 
-	if (!has_colors()) {
+	if (!(has_colors() && can_change_color())) {
 		endwin();
 		printf("Your console does not support color!");
 		exit(EXIT_SUCCESS);
 	}
 	
+    start_color();
 	cbreak();
 	noecho();
 	timeout(deltaTime * 1000);
@@ -31,7 +32,7 @@ int main() {
 	keypad(stdscr, true);
 	
 	// 타이틀 화면을 시작
-	togglePrompt(TITLE_PROMPT);
+	setPrompt(TITLE_PROMPT);
 	drawScreen();
 	initGameResolution();
 
@@ -44,10 +45,7 @@ int main() {
 		}
 		else {
 			refreshScreen(key);
-
-			if (!doTick(key)) {
-				suspend();
-			}
+			doTick(key);
 		}
 	}
 	

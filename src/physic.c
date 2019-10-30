@@ -5,6 +5,7 @@
 #include "header/game-struct.h"
 #include "header/level.h"
 #include "header/game.h"
+#include "header/screen.h"
 #include "header/physic.h"
 #include "header/vector.h"
 
@@ -42,6 +43,10 @@ void updateControl(int key, Bias* bias) {
             break;
         case KEY_UP:
             bias->up = true;
+            break;
+        case 'i':
+            setPrompt(INV_CATEGORY_PROMPT);
+            setScreen(INVENTORY_SCREEN);
             break;
     }
 

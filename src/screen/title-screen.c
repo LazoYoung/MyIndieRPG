@@ -15,15 +15,15 @@ extern void suspend();
 static Prompt getTitlePrompt();
 static Prompt getCharPrompt();
 static void printAttributes();
-static void onStart(int);
-static void onQuit(int);
-static void onKirito(int);
+static void onStart(ItemEvent, ITEM*);
+static void onQuit(ItemEvent, ITEM*);
+static void onKirito(ItemEvent, ITEM*);
 
 void drawTitleScreen() {
-    mvaddch(10, column / 2 - 10, ACS_DIAMOND);
+    mvaddch(10, column / 2 - 8, ACS_DIAMOND);
     printw(" My Indie RPG ");
     addch(ACS_DIAMOND);
-    mvprintw(12, column / 2 - 10, "An MMO-RPG Prototype");
+    mvprintw(12, column / 2 - 14, "RPG Prototype Simulating SAO");
     mvprintw(13, column / 2 - 18, "2019136063 parkcymil@koreatech.ac.kr");
 
     switch (prompt_mode) {
@@ -41,26 +41,26 @@ void drawTitleScreen() {
 }
 
 /* 시작 버튼을 누른 이벤트 */
-static void onStart(int click) {
-    if (click) {
-        togglePrompt(TITLE_CHARACTER_PROMPT);
+static void onStart(ItemEvent event, ITEM* item) {
+    if (event == CLICK) {
+        setPrompt(TITLE_CHARACTER_PROMPT);
         return;
     }
 
-    mvwprintw(getPromptWindow(), 1, 3, "Hit Enter to select your character!");
+    mvwprintw(menu_win(getPromptMenu()), 1, 3, "Hit <Enter> to select your character!");
 }
 
 /* 종료 버튼을 누른 이벤트 */
-static void onQuit(int click) {
-    if (click) {
+static void onQuit(ItemEvent event, ITEM* item) {
+    if (event == CLICK) {
         suspend();
         return;
     }
     
-    mvwprintw(getPromptWindow(), 1, 3, "Hit Enter to exit the game.");
+    mvwprintw(menu_win(getPromptMenu()), 1, 3, "Hit <Enter> to exit the game.");
 }
 
-static void onKirito(int click) {
+static void onKirito(ItemEvent event, ITEM* item) {
     p_attr.agility = 30;
     p_attr.strength = 30;
     p_attr.name = "Kirito";
@@ -68,30 +68,28 @@ static void onKirito(int click) {
     assignSkill(MANA_RECOVERY);
     assignSkill(DUAL_WIELD);
 
-    if (click) {
-        toggleScreen(GAME_SCREEN);
+    if (event == CLICK) {
         startGame();
     } else {
         printAttributes();        
     }
 }
 
-static void onAsuna(int click) {
+static void onAsuna(ItemEvent event, ITEM* item) {
     p_attr.agility = 50;
     p_attr.strength = 20;
     p_attr.name = "Asuna";
     inv.skills = 0;
     assignSkill(HEALTH_RECOVERY);
 
-    if (click) {
-        toggleScreen(GAME_SCREEN);
+    if (event == CLICK) {
         startGame();
     } else {
         printAttributes();        
     }
 }
 
-static void onKlein(int click) {
+static void onKlein(ItemEvent event, ITEM* item) {
     p_attr.agility = 30;
     p_attr.strength = 30;
     p_attr.name = "Klein";
@@ -99,39 +97,35 @@ static void onKlein(int click) {
     assignSkill(MANA_RECOVERY);
     assignSkill(EXP_BONUS);
 
-    if (click) {
-        toggleScreen(GAME_SCREEN);
+    if (event == CLICK) {
         startGame();
     } else {
         printAttributes();        
     }
 }
 
-static void onAgil(int click) {
+static void onAgil(ItemEvent event, ITEM* item) {
     p_attr.agility = 20;
     p_attr.strength = 50;
     p_attr.name = "Agil";
     inv.skills = 0;
     assignSkill(AXE_BERSERK);
 
-    if (click) {
-        toggleScreen(GAME_SCREEN);
+    if (event == CLICK) {
         startGame();
     } else {
         printAttributes();
     }
 }
 
-static void onReturn(int click) {
-    if (!click) {
-        return;
+static void onReturn(ItemEvent event, ITEM* item) {
+    if (event == CLICK) {
+        setPrompt(TITLE_PROMPT);
     }
-
-    togglePrompt(TITLE_PROMPT);
 }
 
 static void printAttributes() {
-    WINDOW *w = getPromptWindow();
+    WINDOW *w = menu_win(getPromptMenu());
     int r = 4;
     mvwprintw(w, 1, 3, "Name: %s", p_attr.name);
     mvwprintw(w, 2, 3, "AGILITY: %d", p_attr.agility);
@@ -158,9 +152,9 @@ static void printAttributes() {
 }
 
 static Prompt getTitlePrompt() {
-    ITEM **myItems = (ITEM**) calloc(3, sizeof(ITEM*));
-    myItems[0] = new_item("◎", "Start Game");
-    myItems[1] = new_item("◎", "Quit");
+    ITEM **myItems = calloc(3, sizeof(ITEM*));
+    myItems[0] = new_item("◎ Start Game", "Start Game");
+    myItems[1] = new_item("◎ Quit", "Quit");
     myItems[2] = NULL; // 말단 원소는 NULL값으로 지정해야 함
 
     // 버튼 동작 함수를 NCurse로 넘겨준다.
@@ -173,11 +167,11 @@ static Prompt getTitlePrompt() {
 
 static Prompt getCharPrompt() {
     ITEM **myItems = (ITEM**) calloc(6, sizeof(ITEM*));
-    myItems[0] = new_item("▣", "Kirito");
-    myItems[1] = new_item("▣", "Asuna");
-    myItems[2] = new_item("▣", "Klein");
-    myItems[3] = new_item("▣", "Agil");
-    myItems[4] = new_item("←", "Go back");
+    myItems[0] = new_item("▣ Kirito", "Kirito");
+    myItems[1] = new_item("▣ Asuna", "Asuna");
+    myItems[2] = new_item("▣ Klein", "Klein");
+    myItems[3] = new_item("▣ Agil", "Agil");
+    myItems[4] = new_item("← Go back", "Go back");
     myItems[5] = NULL;
 
     // 버튼 동작 함수를 NCurse로 넘겨준다.

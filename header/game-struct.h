@@ -7,8 +7,17 @@
 typedef float Vector[2];
 
 typedef enum Tile { AIR, BLOCK, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
-typedef enum Color { RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
-typedef enum Stage { LOBBY, SHOP, DUNGEON_TEST } Stage;
+typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
+typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_TEST } Stage;
+typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
+typedef enum ItemType {EMPTY, SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE} ItemType;
+typedef struct GItem {
+    bool valid;
+    ItemCategory category;
+    ItemType type;
+    bool equip;
+    char* id_str;
+} GItem;
 
 typedef struct {
     bool valid;
@@ -60,16 +69,13 @@ typedef struct {
     char health; // 0 ~ 100
     char mp; // 1 ~ 100
     unsigned int level;
-    unsigned long exp; // Level-up cost: 200 + (50 * level)
+    unsigned long long exp; // Level-up cost: 200 + (50 * level)
     const char* name; // Character name
 } PlayerProperty;
 
 typedef struct {
-    const char* name;
-} Item;
-
-typedef struct {
-    Item* item;
+    GItem items[10];
+    GItem *equipment[3]; // Indexed upon ItemCategory
     long long skills; // Achieved skills are recorded as codes in bit-manner.
     int coin;
 } Inventory;

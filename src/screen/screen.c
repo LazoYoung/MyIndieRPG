@@ -2,14 +2,15 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED 1
 
+#include <stdbool.h>
 #include <string.h>
 #include <ncursesw/curses.h>
 #include <ncursesw/menu.h>
 #include <ncursesw/panel.h>
 #include "header/screen.h"
 
-char screen_mode = TITLE_SCREEN;
-char prompt_mode = PROMPT_NONE;
+ScreenMode screen_mode = TITLE_SCREEN;
+PromptMode prompt_mode = PROMPT_NONE;
 int column = 130;
 int row = 40;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
@@ -31,6 +32,9 @@ void drawScreen() {
             break;
         case GAME_SCREEN:
             initGameScreen();
+            break;
+        case INVENTORY_SCREEN:
+            drawInventoryScreen();
             break;
     }
 }
@@ -61,6 +65,7 @@ void drawPrompt() {
     set_menu_win(menu, prompt_win[0]);
     set_menu_sub(menu, prompt_win[1]);
     set_menu_mark(menu, "*");
+    menu_opts_off(menu, O_SHOWDESC);
     box(prompt_win[0], 0, 0);
     post_menu(menu);
     refresh();
@@ -94,25 +99,25 @@ void deletePrompt() {
     items = NULL;
     menu = NULL;
 
-    togglePrompt(PROMPT_NONE);
+    setPrompt(PROMPT_NONE);
 }
 
-/* 프롬프트 메뉴 mode를 전환한다. 매크로는 screen.h에 정의되어 있음 */
-void togglePrompt(char mode) {
+/* 프롬프트 메뉴를 설정/전환한다. */
+void setPrompt(PromptMode mode) {
     prompt_mode = mode;
     deletePrompt();
     drawScreen();
 }
 
-void toggleScreen(char mode) {
+void setScreen(ScreenMode mode) {
     screen_mode = mode;
     deletePrompt();
     clearScreen();
     drawScreen();
 }
 
-WINDOW* getPromptWindow() {
-    return prompt_win[0];
+MENU* getPromptMenu() {
+    return menu;
 }
 
 /* 메뉴 입력을 받아 동작시키고, 프롬프트 화면을 갱신한다. */
@@ -122,9 +127,10 @@ static void refreshPrompt(int key) {
     }
 
     ITEM* item = current_item(menu);
-    void (* buttonFunc)(int) = (void(*)(int)) item_userptr(item);
+    void (* buttonFunc)(ItemEvent, ITEM*) = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
     int id = item_index(item);
 
+    // TODO clear the smudge text
     if (key == KEY_DOWN && id < item_count(menu) - 1) {
         werase(prompt_win[0]);
         box(prompt_win[0], 0, 0);
@@ -137,17 +143,37 @@ static void refreshPrompt(int key) {
         menu_driver(menu, REQ_UP_ITEM);
         refresh();
     }
-    else if (key == 10) {
-        deletePrompt();
-        buttonFunc(1);
-        refresh();
-        return;
+    else if (((int) item_opts(item) & O_SELECTABLE) == O_SELECTABLE) {
+        switch (key) {
+            case 10:
+                deletePrompt();
+                (* buttonFunc)(CLICK, item);
+                refresh();
+                return;
+            case ' ':
+                touchwin(prompt_win[0]);
+                (* buttonFunc)(SELECT, item);
+                wrefresh(prompt_win[0]);
+                wrefresh(prompt_win[1]);
+                refresh();
+                return;
+        }
     }
-    else {
-        touchwin(prompt_win[0]);
-        buttonFunc(0);
-        wrefresh(prompt_win[0]);
-        wrefresh(prompt_win[1]);
-        refresh();
+
+    touchwin(prompt_win[0]);
+    (* buttonFunc)(HOVER, item);
+    wrefresh(prompt_win[0]);
+    wrefresh(prompt_win[1]);
+    refresh();
+}
+
+void setMenuOptions(Menu_Options options, bool on) {
+    if (menu == NULL)
+        return;
+
+    if (on) {
+        menu_opts_on(menu, options);
+    } else {
+        menu_opts_off(menu, options);
     }
 }
