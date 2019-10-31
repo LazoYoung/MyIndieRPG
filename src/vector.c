@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include "header/vector.h"
 
 /* Add two vectors: a + b */
@@ -26,4 +27,10 @@ void sub(Vector a, Vector b, Vector *result) {
 void scale(Vector a, float scalar, Vector *result) {
     (*result)[0] = scalar * a[0];
     (*result)[1] = scalar * a[1];
+}
+
+/* Measure the distance between two location: p1 and p2*/
+float distance(Vector p1, Vector p2) {
+    double a = pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2);
+    return sqrt(a);
 }

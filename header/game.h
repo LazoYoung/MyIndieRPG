@@ -37,6 +37,7 @@ extern void assignSkill(char);
 extern bool hasSkill(char);
 extern void addItem(GItem);
 extern bool addExp(int);
+extern void attack(Entity*);
 extern void doTick(int);
 extern int getExpCap(int);
 extern const char* getItemName(ItemType);

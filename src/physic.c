@@ -21,7 +21,9 @@ bool overlaps(AABB a, AABB b) {
     return true;
 }
 
-void updateControl(int key, Bias* bias) {
+void updateControl(int key, Entity* player) {
+    Bias *bias = &player->bias;
+
     switch (key) {
         case 'd':
             if (bias->left) {
@@ -48,13 +50,19 @@ void updateControl(int key, Bias* bias) {
             setPrompt(INV_CATEGORY_PROMPT);
             setScreen(INVENTORY_SCREEN);
             break;
+        case 'k':
+            if (!bias->attack) {
+                attack(player);
+                bias->attack = true;
+            }
+            break;
     }
 
-    if (bias->times >= 0) {
-        if (bias->times-- == 0) {
-            bias->right = false;
-            bias->left = false;
-        }
+    if (bias->times-- <= 0) {
+        bias->right = false;
+        bias->left = false;
+        bias->attack = false;
+        bias->times = fps;
     }
 }
 
@@ -62,7 +70,7 @@ void updateEntities() {
     int id = 0;
     Entity* iter = getEntityByID(id++);
 
-    while (iter && iter->valid) {
+    while (iter != NULL) {
         updatePhysic(iter);
         iter = getEntityByID(id++);
     }

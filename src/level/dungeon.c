@@ -22,6 +22,8 @@ void generateDungeon(Tile** tiles) {
         monster.loc = getTopLocation(50);
         monster.hitbox = hitbox;
         monster.name = "Bullsht";
+        monster.health = 50;
+        monster.damage = 5;
         monster.offset[0] = 0.0;
         monster.offset[1] = 0.0;
         monster.skin = skin;

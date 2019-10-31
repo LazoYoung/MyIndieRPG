@@ -16,6 +16,7 @@ typedef struct GItem {
     ItemCategory category;
     ItemType type;
     bool equip;
+    int value;
     char* id_str;
 } GItem;
 
@@ -49,6 +50,7 @@ typedef struct { // Present bias of entity movement
     bool left; // Going left
     bool right; // Going right
     bool up; // Toggling jump or fly
+    bool attack; // Attacking others
     int times; // How many times does the present control carry on
 } Bias;
 
@@ -56,6 +58,8 @@ typedef struct entity {
     bool valid;
     const char* name;
     Location loc;
+    char health; // 0 ~ 100
+    char damage; // Amount of damage dealt without a weapon
     Bias bias;
     Texture skin;
     AABB hitbox;
@@ -66,7 +70,6 @@ typedef struct entity {
 typedef struct {
     char agility; // 1 ~ 100
     char strength; // 1 ~ 100
-    char health; // 0 ~ 100
     char mp; // 1 ~ 100
     unsigned int level;
     unsigned long long exp; // Level-up cost: 200 + (50 * level)

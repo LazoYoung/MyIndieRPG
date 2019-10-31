@@ -88,6 +88,7 @@ void drawGameScreen() {
     WINDOW* armory_w = getWindow(ARMORY_WIN);
     WINDOW* potion_w = getWindow(POTION_WIN);
     WINDOW* ctrl_w = getWindow(CONTROL_WIN);
+    Entity *player = getEntityByID(0);
 
     for (int i = 0; i <= WORLD_WIN; i++) {
         WINDOW *w = getWindow(i);
@@ -104,8 +105,8 @@ void drawGameScreen() {
     box(potion_w, ACS_VLINE, ACS_HLINE);
     box(ctrl_w, ACS_VLINE, ACS_HLINE);
 
-    if (inGame) {
-        drawGuage(health_w, "Health", GREEN, RED, p_attr.health);
+    if (inGame && player) {
+        drawGuage(health_w, "Health", GREEN, RED, player->health);
         drawGuage(mana_w, "Mana", CYAN, BLACK, p_attr.mp);
         drawStatus(stat_w);
         drawEquipment(weapon_w, WEAPON);
@@ -257,7 +258,7 @@ static void drawEntities() {
     int id = 0, row = 0;
     Entity* iter = getEntityByID(id);
     
-    while (iter && iter->valid) {
+    while (iter != NULL) {
         Location loc = iter->loc;
         Texture skin = iter->skin;
         WINDOW* win = getWindow(WORLD_WIN);
@@ -295,7 +296,7 @@ static void drawEntities() {
 
         // TODO Debug
         mvwprintw(win, 10 + row++, 2, "%s's position: %.2f %.2f", iter->name, loc.pos[0], loc.pos[1]);
-        mvwprintw(win, 10 + row++, 2, "%s's speed: %.2f %.2f", iter->name, loc.spd[0], loc.spd[1]);
+        mvwprintw(win, 10 + row++, 2, "%s's health: %d", iter->name, iter->health);
 
         iter = getEntityByID(++id);
     }

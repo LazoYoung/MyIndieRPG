@@ -7,7 +7,7 @@
 #include "game-struct.h"
 
 extern bool overlaps(AABB, AABB);
-extern void updateControl(int, Bias* ctrl);
+extern void updateControl(int, Entity*);
 extern void updateEntities();
 
 #endif

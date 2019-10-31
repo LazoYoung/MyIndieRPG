@@ -11,11 +11,11 @@
 #include "header/level.h"
 #include "header/physic.h"
 #include "header/screen.h"
+#include "header/vector.h"
 
 PlayerProperty p_attr = {
     .agility = 1,
     .strength = 1,
-    .health = 100,
     .mp = 100,
     .level = 1,
     .exp = 0,
@@ -48,6 +48,8 @@ void startGame() {
     player.name = p_attr.name;
     player.loc = getTopLocation(5);
     player.hitbox = hitbox;
+    player.health = 100;
+    player.damage = 1;
     player.offset[0] = 0.0;
     player.offset[1] = 0.0;
     player.skin = skin;
@@ -55,8 +57,10 @@ void startGame() {
 
     basic_sword.category = WEAPON;
     basic_sword.type = SMALL_SWORD;
+    basic_sword.value = 10;
     basic_armor.category = ARMORY;
     basic_armor.type = HOOD_CAPE;
+    basic_armor.value = 5;
     addItem(basic_sword);
     addItem(basic_armor);
 
@@ -83,6 +87,7 @@ void addItem(GItem item) {
             slot->type = item.type;
             slot->category = item.category;
             slot->equip = item.equip;
+            slot->value = item.value;
 
             if (item.equip)
                 inv.equipment[item.category] = slot;
@@ -109,6 +114,47 @@ bool addExp(int exp) {
     return false;
 }
 
+void attack(Entity* entity) {
+    int i = 0;
+    Entity *victim;
+    Vector e_loc;
+
+    e_loc[0] = entity->loc.pos[0];
+    e_loc[1] = entity->loc.pos[1];
+
+    while (i < MAX_ENTITY) {
+        victim = getEntityByID(i++);        
+
+        if (victim != NULL) {
+            if (strcmp(victim->name, entity->name) == 0)
+                continue;
+
+            float dist = distance(victim->loc.pos, e_loc);
+            GItem *item = inv.equipment[WEAPON];
+            float damage;
+            const float crit_dist = 2.0;
+            const float crit_mul = 2.0;
+            
+            if (dist > 3.0)
+                continue;
+
+            if (item == NULL) {
+                damage = entity->damage;
+            } else {
+                damage = item->value;
+            }
+
+            if (crit_dist > dist) {
+                damage *= (1 - crit_mul) / crit_dist * dist + crit_mul;
+            }
+
+            damage += damage * (p_attr.strength / 100);
+            victim->health -= floor(damage);
+            break;
+        }
+    }
+}
+
 void doTick(int key) {
     if (!inGame)
         return;
@@ -116,8 +162,8 @@ void doTick(int key) {
     if (getStage() != VOID) {
         Entity *player = getEntityByID(0);
 
-        if (player && player->valid) {
-            updateControl(key, &player->bias);
+        if (player != NULL) {
+            updateControl(key, player);
         }
 
         updateEntities();

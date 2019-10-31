@@ -21,7 +21,7 @@ static void generateLevel();
  * Player must be assigned before any other entities.
  **/
 void spawnEntity(Entity* e) {
-    Bias bias = {false, false, false, 0};
+    Bias bias = {false, false, false, false, 0};
     e->bias = bias;
     e->valid = true;
 
@@ -64,11 +64,15 @@ Entity* getEntity(const char* name) {
 
 /**
  * Returns the pointer of entity matching the index ID
- * It's possible to return NULL
+ * The pointer is NULL if the entity is invalid.
  **/
 Entity* getEntityByID(int id) {
-    if (id >= 0 && id < MAX_ENTITY)
-        return entity[id];
+    if (id >= 0 && id < MAX_ENTITY) {
+        Entity *e = entity[id];
+
+        if (e != NULL && e->valid)
+            return e;
+    }
     return NULL;
 }
 
