@@ -39,6 +39,7 @@ bool despawnEntity(const char* name) {
 
         if (s != NULL && s->valid && strcmp(name, s->name) == 0) {
             s->valid = false;
+            entity[i] = NULL;
             return true;
         }
     }

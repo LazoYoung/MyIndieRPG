@@ -17,7 +17,7 @@ static void onSelectItem(ItemEvent, ITEM*);
 static void onReturn(ItemEvent, ITEM*);
 
 void drawInventoryScreen() {
-    drawPrompt();
+    //drawPrompt();
 }
 
 Prompt getCategoryPrompt() {
@@ -60,7 +60,6 @@ Prompt getInventoryPrompt() {
             static char desc[4];
             snprintf(desc, 4, "%d", i);
 
-            gitem.id_str = desc;
             items[n] = new_item(getItemName(gitem.type), desc);
             set_item_userptr(items[n], onSelectItem);
             n++;

@@ -46,8 +46,8 @@ void updateControl(int key, Entity* player) {
             bias->up = true;
             break;
         case 'i':
-            setPromptMode(INV_CATEGORY_PROMPT);
             setScreenMode(INVENTORY_SCREEN);
+            setPromptMode(INV_CATEGORY_PROMPT);
             break;
         case 'k':
             if (!bias->attack) {

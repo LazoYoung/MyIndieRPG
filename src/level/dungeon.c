@@ -2,8 +2,14 @@
 #include <string.h>
 #include <stdbool.h>
 #include "header/level.h"
+#include "header/screen.h"
+#include "header/game.h"
+
+#define MAX_REWARD 3
 
 static Entity* monster;
+static int exp;
+static GItem* reward[MAX_REWARD] = { NULL };
 
 static void onMonsterDeath(Entity*);
 
@@ -30,6 +36,10 @@ void generateDungeon() {
         monster->skin = skin;
         monster->deathEvent = onMonsterDeath;
         spawnEntity(monster);
+
+        exp = 100;
+        reward[0] = &item_reg[BRONZE_SWORD];
+        reward[1] = &item_reg[STEEL_BLADE];
     }
 }
 
@@ -43,15 +53,49 @@ void destructDungeon() {
 
 static void onMonsterDeath(Entity* entity) {
     Portal exit;
+    WINDOW* win;
+    char name[30];
+    char rewards[100];
+    int cnt = 0;
+    
     exit.color = GREEN;
     exit.tile = PORTAL_1;
     exit.dest = LOBBY;
+    strcpy(name, entity->name);
+    memset(rewards, '\0', strlen(rewards));
+
+    for (int i = 0; i < MAX_REWARD; i++) {
+        GItem* item = reward[i];
+
+        if (item != NULL && item->valid) {
+            const char* str = getItemName(item->type);
+
+            if (str != NULL)
+                strcat(rewards, str);
+            
+            strcat(rewards, ", ");
+            addItem(*item);
+        }
+    }
+
+    if (rewards[0] != '\0') {
+        rewards[strlen(rewards) - 2] = '\0';
+    }
+
+    addExp(exp);
 
     assignPortal(exit);
     setTileAt(10, 6, PORTAL_1);
     setTileAt(11, 6, PORTAL_1);
     setTileAt(12, 6, PORTAL_1);
-    despawnEntity(entity->name);
+    despawnEntity(name);
     free(monster);
     monster = NULL;
+
+    setPromptMode(DIALOGUE_PROMPT);
+    win = menu_win(getPromptMenu());
+    mvwprintw(win, 1, 3, "Dungeon Clear! You've defeated %s.", name);
+    mvwprintw(win, 3, 3, "EXP Gained: %d", exp);
+    mvwprintw(win, 4, 3, "Reward: %s", rewards);
+    wrefresh(win);
 }

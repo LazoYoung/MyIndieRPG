@@ -10,14 +10,13 @@ typedef enum Tile { AIR, BLOCK, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5
 typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
 typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_TEST } Stage;
 typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
-typedef enum ItemType {EMPTY, SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE} ItemType;
+typedef enum ItemType {SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE, ITEMTYPE_SIZE} ItemType;
 typedef struct GItem {
     bool valid;
     ItemCategory category;
     ItemType type;
     bool equip;
     int value;
-    char* id_str;
 } GItem;
 
 typedef struct {

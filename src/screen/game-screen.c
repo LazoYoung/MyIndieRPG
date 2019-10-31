@@ -114,25 +114,8 @@ void drawGameScreen() {
     doupdate();
 }
 
-void showDialog() {
-    Prompt p;
-    p.desc_lines = 5;
-    p.items = NULL;
-    p.height = 15;
-    p.width = 100;
-    p.y = init_y + 10;
-    p.x = column_ / 2 + init_x - 50;
-
-    
-    // TODO Draw prompt
-}
-
-void hideDialog() {
-    //deletePrompt();
-}
-
-void clearGameScreen() { // TODO Clear all the windows
-    WINDOW* w;
+void clearGameScreen() {
+    WINDOW* w = NULL;
 
     for (int i=0; i<=WORLD_WIN; i++) {
         w = getGameWindow(i);

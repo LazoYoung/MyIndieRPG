@@ -28,6 +28,7 @@
 
 extern PlayerProperty p_attr;
 extern Inventory inv;
+extern GItem item_reg[ITEMTYPE_SIZE]; // Item definition registry. Index represents ItemType
 extern bool inGame;
 extern const float deltaTime; // How much time does 1 frame take in seconds
 extern const int fps; // How many frames and operations are made in 1 sec
@@ -40,6 +41,8 @@ extern bool addExp(int);
 extern void attack(Entity*);
 extern void doTick(int);
 extern int getExpCap(int);
+extern GItem getItem(ItemType);
+extern void defineItem(GItem);
 extern const char* getItemName(ItemType);
 extern int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)
 

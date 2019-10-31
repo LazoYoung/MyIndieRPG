@@ -27,8 +27,9 @@ Inventory inv = {
     .skills = 0,
     .coin = 0
 };
-static Entity player;
+GItem item_reg[ITEMTYPE_SIZE];
 bool inGame = false;
+static Entity player;
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
@@ -39,7 +40,7 @@ void startGame() {
     AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
     bool map[9][9] = {false};
     Texture skin;
-    GItem basic_sword, basic_armor;
+    GItem sword1, sword2, sword3, armor1;
 
     generateLevel(LOBBY);
     setScreenMode(GAME_SCREEN);
@@ -56,17 +57,27 @@ void startGame() {
     player.offset[0] = 0.0;
     player.offset[1] = 0.0;
     player.skin = skin;
-    player.deathEvent - onPlayerDeath;
+    player.deathEvent = onPlayerDeath;
     spawnEntity(&player);
 
-    basic_sword.category = WEAPON;
-    basic_sword.type = SMALL_SWORD;
-    basic_sword.value = 10;
-    basic_armor.category = ARMORY;
-    basic_armor.type = HOOD_CAPE;
-    basic_armor.value = 5;
-    addItem(basic_sword);
-    addItem(basic_armor);
+    sword1.category = WEAPON;
+    sword1.type = SMALL_SWORD;
+    sword1.value = 5;
+    sword2.category = WEAPON;
+    sword2.type = BRONZE_SWORD;
+    sword2.value = 10;
+    sword3.category = WEAPON;
+    sword3.type = STEEL_BLADE;
+    sword3.value = 15;
+    armor1.category = ARMORY;
+    armor1.type = HOOD_CAPE;
+    armor1.value = 5;
+    item_reg[SMALL_SWORD] = sword1;
+    item_reg[BRONZE_SWORD] = sword2;
+    item_reg[STEEL_BLADE] = sword3;
+    item_reg[HOOD_CAPE] = armor1;
+    addItem(item_reg[SMALL_SWORD]);
+    addItem(item_reg[HOOD_CAPE]);
 
     inGame = true;
 }

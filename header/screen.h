@@ -18,7 +18,7 @@ typedef enum ScreenMode {
 
 typedef enum PromptMode {
     PROMPT_NONE, TITLE_PROMPT, TITLE_CHARACTER_PROMPT,
-    INV_CATEGORY_PROMPT, INVENTORY_PROMPT
+    INV_CATEGORY_PROMPT, INVENTORY_PROMPT, DIALOGUE_PROMPT
 } PromptMode;
 
 typedef struct {
@@ -44,6 +44,7 @@ extern void refreshScreen(int key);
 extern void setScreenMode(ScreenMode mode);
 extern void setPromptMode(PromptMode mode);
 extern MENU* getPromptMenu();
+extern WINDOW* getPromptWindow(int index);
 extern void setMenuOptions(Menu_Options, bool);
 
 /* title-screen.c */
