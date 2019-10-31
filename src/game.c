@@ -32,14 +32,17 @@ bool inGame = false;
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
+extern void updatePhysic(Entity*);
+static void onPlayerDeath(Entity*);
+
 void startGame() {
     AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
     bool map[9][9] = {false};
     Texture skin;
     GItem basic_sword, basic_armor;
 
-    setStage(LOBBY);
-    setScreen(GAME_SCREEN);
+    generateLevel(LOBBY);
+    setScreenMode(GAME_SCREEN);
 
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
@@ -53,6 +56,7 @@ void startGame() {
     player.offset[0] = 0.0;
     player.offset[1] = 0.0;
     player.skin = skin;
+    player.deathEvent - onPlayerDeath;
     spawnEntity(&player);
 
     basic_sword.category = WEAPON;
@@ -160,13 +164,22 @@ void doTick(int key) {
         return;
     
     if (getStage() != VOID) {
-        Entity *player = getEntityByID(0);
+        int id = 0;
+        Entity* iter = getEntityByID(id++);
 
-        if (player != NULL) {
-            updateControl(key, player);
+        if (iter != NULL) {
+            updateControl(key, iter);
         }
 
-        updateEntities();
+        while (iter != NULL) {
+            if (iter->health <= 0) {
+                iter->deathEvent(iter);
+                break;
+            }
+
+            updatePhysic(iter);
+            iter = getEntityByID(id++);
+        }
     }
 }
 
@@ -192,4 +205,9 @@ const char* getItemName(ItemType type) {
         default:
             return NULL;
     }
+}
+
+static void onPlayerDeath(Entity* entity) {
+    entity->health = 100;
+    generateLevel(LOBBY);
 }

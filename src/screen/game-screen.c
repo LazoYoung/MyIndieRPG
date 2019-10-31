@@ -8,14 +8,7 @@
 #include "header/game.h"
 #include "header/level.h"
 
-enum WindowType {
-    HEALTH_WIN, HEALTH_G_WIN, MANA_WIN, MANA_G_WIN, STAT_WIN,
-    WEAPON_WIN, ARMORY_WIN, POTION_WIN, CONTROL_WIN, WORLD_WIN
-};
-
-enum Axis {
-    X, Y
-};
+enum Axis { X, Y };
 
 static PANEL* panels[WORLD_WIN + 1];
 static int row_, column_, init_y, init_x, ctr_y, ctr_x;
@@ -26,7 +19,6 @@ static void drawEquipment(WINDOW*, ItemCategory);
 static void drawControlAid(WINDOW*);
 static void drawTiles();
 static void drawEntities();
-static WINDOW* getWindow(enum WindowType);
 static bool getTileCoordByScreen(enum Axis, int, int*);
 static bool getScreenCoordByTile(enum Axis, int, int*);
 
@@ -79,19 +71,19 @@ void initGameScreen() {
 }
 
 void drawGameScreen() {
-    WINDOW* health_bg = getWindow(HEALTH_WIN);
-    WINDOW* health_w = getWindow(HEALTH_G_WIN);
-    WINDOW* mana_bg = getWindow(MANA_WIN);
-    WINDOW* mana_w = getWindow(MANA_G_WIN);
-    WINDOW* stat_w = getWindow(STAT_WIN);
-    WINDOW* weapon_w = getWindow(WEAPON_WIN);
-    WINDOW* armory_w = getWindow(ARMORY_WIN);
-    WINDOW* potion_w = getWindow(POTION_WIN);
-    WINDOW* ctrl_w = getWindow(CONTROL_WIN);
-    Entity *player = getEntityByID(0);
+    WINDOW* health_bg = getGameWindow(HEALTH_WIN);
+    WINDOW* health_w = getGameWindow(HEALTH_G_WIN);
+    WINDOW* mana_bg = getGameWindow(MANA_WIN);
+    WINDOW* mana_w = getGameWindow(MANA_G_WIN);
+    WINDOW* stat_w = getGameWindow(STAT_WIN);
+    WINDOW* weapon_w = getGameWindow(WEAPON_WIN);
+    WINDOW* armory_w = getGameWindow(ARMORY_WIN);
+    WINDOW* potion_w = getGameWindow(POTION_WIN);
+    WINDOW* ctrl_w = getGameWindow(CONTROL_WIN);
+    Entity* player = getEntityByID(0);
 
     for (int i = 0; i <= WORLD_WIN; i++) {
-        WINDOW *w = getWindow(i);
+        WINDOW *w = getGameWindow(i);
 
         if (w != NULL)
             werase(w);
@@ -105,7 +97,7 @@ void drawGameScreen() {
     box(potion_w, ACS_VLINE, ACS_HLINE);
     box(ctrl_w, ACS_VLINE, ACS_HLINE);
 
-    if (inGame && player) {
+    if (inGame && player != NULL) {
         drawGuage(health_w, "Health", GREEN, RED, player->health);
         drawGuage(mana_w, "Mana", CYAN, BLACK, p_attr.mp);
         drawStatus(stat_w);
@@ -122,16 +114,39 @@ void drawGameScreen() {
     doupdate();
 }
 
+void showDialog() {
+    Prompt p;
+    p.desc_lines = 5;
+    p.items = NULL;
+    p.height = 15;
+    p.width = 100;
+    p.y = init_y + 10;
+    p.x = column_ / 2 + init_x - 50;
+
+    
+    // TODO Draw prompt
+}
+
+void hideDialog() {
+    //deletePrompt();
+}
+
 void clearGameScreen() { // TODO Clear all the windows
     WINDOW* w;
 
     for (int i=0; i<=WORLD_WIN; i++) {
-        w = getWindow(i);
+        w = getGameWindow(i);
         wclear(w);
         del_panel(panels[i]);
         delwin(w);
     }
+}
 
+WINDOW* getGameWindow(WindowType type) {
+    if (panels[type] == NULL)
+        return NULL;
+
+    return panel_window(panels[type]);
 }
 
 static void drawStatus(WINDOW* win) {
@@ -195,7 +210,7 @@ static void drawControlAid(WINDOW* win) {
 
 static void drawTiles() {
     Entity *entity = getEntity(p_attr.name);
-    WINDOW *win = getWindow(WORLD_WIN);
+    WINDOW *win = getGameWindow(WORLD_WIN);
     Location loc;
 
     if (entity && entity->valid) {
@@ -261,7 +276,7 @@ static void drawEntities() {
     while (iter != NULL) {
         Location loc = iter->loc;
         Texture skin = iter->skin;
-        WINDOW* win = getWindow(WORLD_WIN);
+        WINDOW* win = getGameWindow(WORLD_WIN);
         int color = COLOR_PAIR(skin.color);
         int x, y;
 
@@ -296,17 +311,11 @@ static void drawEntities() {
 
         // TODO Debug
         mvwprintw(win, 10 + row++, 2, "%s's position: %.2f %.2f", iter->name, loc.pos[0], loc.pos[1]);
+        mvwprintw(win, 10 + row++, 2, "%s's velocity: %.2f %.2f", iter->name, loc.spd[0], loc.spd[1]);
         mvwprintw(win, 10 + row++, 2, "%s's health: %d", iter->name, iter->health);
 
         iter = getEntityByID(++id);
     }
-}
-
-static WINDOW* getWindow(enum WindowType type) {
-    if (panels[type] == NULL)
-        return NULL;
-
-    return panel_window(panels[type]);
 }
 
 /**
@@ -329,7 +338,7 @@ static bool getTileCoordByScreen(enum Axis a, int input, int *result) {
             return true;
         }
     }
-    else {
+    else { // a == Y
         y = player->loc.pos[1] + ctr_y - input;
 
         if (y < level_height && y >= 0) {

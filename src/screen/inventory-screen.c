@@ -12,28 +12,15 @@
 
 static ItemCategory category;
 
-static Prompt getCategoryPrompt();
-static Prompt getInventoryPrompt();
 static void onSelectCategory(ItemEvent, ITEM*);
 static void onSelectItem(ItemEvent, ITEM*);
 static void onReturn(ItemEvent, ITEM*);
 
 void drawInventoryScreen() {
-    switch (prompt_mode) {
-        case INV_CATEGORY_PROMPT:
-            prompt = getCategoryPrompt();
-            break;
-        case INVENTORY_PROMPT:
-            prompt = getInventoryPrompt();
-            break;
-        default:
-            return;
-    }
-
     drawPrompt();
 }
 
-static Prompt getCategoryPrompt() {
+Prompt getCategoryPrompt() {
     ITEM** items;
     Prompt prompt;
 
@@ -61,7 +48,7 @@ static Prompt getCategoryPrompt() {
     return prompt;
 }
 
-static Prompt getInventoryPrompt() {
+Prompt getInventoryPrompt() {
     ITEM** items = calloc(10, sizeof(ITEM*));
     Prompt prompt;
     int n = 0;
@@ -101,22 +88,22 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
     if (event == CLICK) {
         if (strcmp(desc, "weapon") == 0) {
             category = WEAPON;
-            setPrompt(INVENTORY_PROMPT);
+            setPromptMode(INVENTORY_PROMPT);
         }
         else if (strcmp(desc, "armory") == 0) {
             category = ARMORY;
-            setPrompt(INVENTORY_PROMPT);
+            setPromptMode(INVENTORY_PROMPT);
         }
         else if (strcmp(desc, "potion") == 0) {
             category = POTION;
-            setPrompt(INVENTORY_PROMPT);
+            setPromptMode(INVENTORY_PROMPT);
         }
         else if (strcmp(desc, "close") == 0) {
-            setPrompt(PROMPT_NONE);
-            setScreen(GAME_SCREEN);
+            setPromptMode(PROMPT_NONE);
+            setScreenMode(GAME_SCREEN);
         }
         else {
-            setPrompt(INV_CATEGORY_PROMPT);
+            setPromptMode(INV_CATEGORY_PROMPT);
         }
     }
     else if (event == HOVER) {
@@ -159,7 +146,7 @@ static void onSelectItem(ItemEvent event, ITEM* item) {
                 gitem->equip = true;
             }
 
-            setPrompt(INVENTORY_PROMPT);
+            setPromptMode(INVENTORY_PROMPT);
             break;
         }
 
@@ -175,6 +162,6 @@ static void onSelectItem(ItemEvent event, ITEM* item) {
 
 static void onReturn(ItemEvent event, ITEM* item) {
     if (event == CLICK) {
-        setPrompt(INV_CATEGORY_PROMPT);
+        setPromptMode(INV_CATEGORY_PROMPT);
     }
 }

@@ -44,6 +44,7 @@ void refreshScreen(int key) {
     if (prompt_mode != PROMPT_NONE) {
         refreshPrompt(key);
     }
+
     if (screen_mode == GAME_SCREEN) {
         drawGameScreen();
     }
@@ -75,7 +76,7 @@ void drawPrompt() {
 
 /* 프롬프트 화면을 끈다. */
 void deletePrompt() {
-    if (menu == NULL || prompt_mode == PROMPT_NONE) {
+    if (menu == NULL) {
         return;
     }
 
@@ -98,26 +99,52 @@ void deletePrompt() {
 
     items = NULL;
     menu = NULL;
+    prompt_mode = PROMPT_NONE;
+}
 
-    setPrompt(PROMPT_NONE);
+MENU* getPromptMenu() {
+    return menu;
 }
 
 /* 프롬프트 메뉴를 설정/전환한다. */
-void setPrompt(PromptMode mode) {
-    prompt_mode = mode;
+void setPromptMode(PromptMode mode) {
     deletePrompt();
-    drawScreen();
+    prompt_mode = mode;
+    
+    switch (prompt_mode) {
+        case TITLE_PROMPT:
+            prompt = getTitlePrompt();
+            break;
+        case TITLE_CHARACTER_PROMPT:
+            prompt = getCharPrompt();
+            break;
+        case INV_CATEGORY_PROMPT:
+            prompt = getCategoryPrompt();
+            break;
+        case INVENTORY_PROMPT:
+            prompt = getInventoryPrompt();
+            break;
+    }
+
+    drawPrompt();
 }
 
-void setScreen(ScreenMode mode) {
+void setScreenMode(ScreenMode mode) {
     screen_mode = mode;
     deletePrompt();
     clearScreen();
     drawScreen();
 }
 
-MENU* getPromptMenu() {
-    return menu;
+void setMenuOptions(Menu_Options options, bool on) {
+    if (menu == NULL)
+        return;
+
+    if (on) {
+        menu_opts_on(menu, options);
+    } else {
+        menu_opts_off(menu, options);
+    }
 }
 
 /* 메뉴 입력을 받아 동작시키고, 프롬프트 화면을 갱신한다. */
@@ -146,7 +173,6 @@ static void refreshPrompt(int key) {
     else if (((int) item_opts(item) & O_SELECTABLE) == O_SELECTABLE) {
         switch (key) {
             case 10:
-                deletePrompt();
                 (* buttonFunc)(CLICK, item);
                 refresh();
                 return;
@@ -165,15 +191,4 @@ static void refreshPrompt(int key) {
     wrefresh(prompt_win[0]);
     wrefresh(prompt_win[1]);
     refresh();
-}
-
-void setMenuOptions(Menu_Options options, bool on) {
-    if (menu == NULL)
-        return;
-
-    if (on) {
-        menu_opts_on(menu, options);
-    } else {
-        menu_opts_off(menu, options);
-    }
 }

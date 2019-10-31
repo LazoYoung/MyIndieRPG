@@ -9,7 +9,6 @@
 #include "header/physic.h"
 #include "header/vector.h"
 
-static void updatePhysic(Entity* e);
 static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y);
 static bool hasHorizontalObstacle(Location loc, AABB hitbox, Vector offset);
 
@@ -47,8 +46,8 @@ void updateControl(int key, Entity* player) {
             bias->up = true;
             break;
         case 'i':
-            setPrompt(INV_CATEGORY_PROMPT);
-            setScreen(INVENTORY_SCREEN);
+            setPromptMode(INV_CATEGORY_PROMPT);
+            setScreenMode(INVENTORY_SCREEN);
             break;
         case 'k':
             if (!bias->attack) {
@@ -66,17 +65,7 @@ void updateControl(int key, Entity* player) {
     }
 }
 
-void updateEntities() {
-    int id = 0;
-    Entity* iter = getEntityByID(id++);
-
-    while (iter != NULL) {
-        updatePhysic(iter);
-        iter = getEntityByID(id++);
-    }
-}
-
-static void updatePhysic(Entity* e) {
+void updatePhysic(Entity* e) {
     if (e == NULL || !e->valid) {
         return;
     }
@@ -125,7 +114,7 @@ static void updatePhysic(Entity* e) {
                 Portal *portal = getPortal(tile);
 
                 if (portal != NULL) {
-                    setStage(portal->dest);
+                    generateLevel(portal->dest);
                 }
                 break;
             }
@@ -135,10 +124,10 @@ static void updatePhysic(Entity* e) {
 
     // Handle controls and gravity
     if (bias->left) {
-        l->spd[0] = -10.0;
+        l->spd[0] = -10.0 * (1 + p_attr.agility / 100.0);
     }
     else if (bias->right) {
-        l->spd[0] = 10.0;
+        l->spd[0] = 10.0 * (1 + p_attr.agility / 100.0);
     }
     else {
         l->spd[0] = 0.0;
@@ -146,11 +135,11 @@ static void updatePhysic(Entity* e) {
 
     if (bias->up) {
         bias->up = false;
-        l->spd[1] = 10.0;
+        l->spd[1] = 10.0 * (1 + p_attr.agility / 100.0);
     }
 
     if (!l->onGround) {
-        l->spd[1] -= 15.0 * deltaTime;
+        l->spd[1] -= 20.0 * deltaTime;
     }
 }
 

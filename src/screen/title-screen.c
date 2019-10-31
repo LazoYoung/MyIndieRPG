@@ -12,12 +12,14 @@
 extern int column, row;
 
 extern void suspend();
-static Prompt getTitlePrompt();
-static Prompt getCharPrompt();
 static void printAttributes();
 static void onStart(ItemEvent, ITEM*);
 static void onQuit(ItemEvent, ITEM*);
 static void onKirito(ItemEvent, ITEM*);
+static void onAsuna(ItemEvent, ITEM*);
+static void onKlein(ItemEvent, ITEM*);
+static void onAgil(ItemEvent, ITEM*);
+static void onReturn(ItemEvent, ITEM*);
 
 void drawTitleScreen() {
     mvaddch(10, column / 2 - 8, ACS_DIAMOND);
@@ -25,25 +27,46 @@ void drawTitleScreen() {
     addch(ACS_DIAMOND);
     mvprintw(12, column / 2 - 14, "RPG Prototype Simulating SAO");
     mvprintw(13, column / 2 - 18, "2019136063 parkcymil@koreatech.ac.kr");
+}
 
-    switch (prompt_mode) {
-        case TITLE_PROMPT:
-            prompt = getTitlePrompt();
-            break;
-        case TITLE_CHARACTER_PROMPT:
-            prompt = getCharPrompt();
-            break;
-        default:
-            return;
-    }
-    
-    drawPrompt();
+Prompt getTitlePrompt() {
+    ITEM **myItems = calloc(3, sizeof(ITEM*));
+    myItems[0] = new_item("◎ Start Game", "Start Game");
+    myItems[1] = new_item("◎ Quit", "Quit");
+    myItems[2] = NULL; // 말단 원소는 NULL값으로 지정해야 함
+
+    // 버튼 동작 함수를 NCurse로 넘겨준다.
+    set_item_userptr(myItems[0], (void*) onStart);
+    set_item_userptr(myItems[1], (void*) onQuit);
+
+    Prompt p = {40, 15, column / 2 - 20, row / 2 - 5, 1, myItems};
+    return p;
+}
+
+Prompt getCharPrompt() {
+    ITEM **myItems = (ITEM**) calloc(6, sizeof(ITEM*));
+    myItems[0] = new_item("▣ Kirito", "Kirito");
+    myItems[1] = new_item("▣ Asuna", "Asuna");
+    myItems[2] = new_item("▣ Klein", "Klein");
+    myItems[3] = new_item("▣ Agil", "Agil");
+    myItems[4] = new_item("← Go back", "Go back");
+    myItems[5] = NULL;
+
+    // 버튼 동작 함수를 NCurse로 넘겨준다.
+    set_item_userptr(myItems[0], (void*) onKirito);
+    set_item_userptr(myItems[1], (void*) onAsuna);
+    set_item_userptr(myItems[2], (void*) onKlein);
+    set_item_userptr(myItems[3], (void*) onAgil);
+    set_item_userptr(myItems[4], (void*) onReturn);
+
+    Prompt p = {40, 20, column / 2 - 20, row / 2 - 10, 8, myItems};
+    return p;
 }
 
 /* 시작 버튼을 누른 이벤트 */
 static void onStart(ItemEvent event, ITEM* item) {
     if (event == CLICK) {
-        setPrompt(TITLE_CHARACTER_PROMPT);
+        setPromptMode(TITLE_CHARACTER_PROMPT);
         return;
     }
 
@@ -120,7 +143,7 @@ static void onAgil(ItemEvent event, ITEM* item) {
 
 static void onReturn(ItemEvent event, ITEM* item) {
     if (event == CLICK) {
-        setPrompt(TITLE_PROMPT);
+        setPromptMode(TITLE_PROMPT);
     }
 }
 
@@ -149,38 +172,4 @@ static void printAttributes() {
     if (hasSkill(MANA_RECOVERY)) {
         mvwprintw(w, r++, 3, "MISC SKILL: MP Recovery");
     }
-}
-
-static Prompt getTitlePrompt() {
-    ITEM **myItems = calloc(3, sizeof(ITEM*));
-    myItems[0] = new_item("◎ Start Game", "Start Game");
-    myItems[1] = new_item("◎ Quit", "Quit");
-    myItems[2] = NULL; // 말단 원소는 NULL값으로 지정해야 함
-
-    // 버튼 동작 함수를 NCurse로 넘겨준다.
-    set_item_userptr(myItems[0], (void*) onStart);
-    set_item_userptr(myItems[1], (void*) onQuit);
-
-    Prompt p = {40, 15, column / 2 - 20, row / 2 - 5, 1, myItems};
-    return p;
-}
-
-static Prompt getCharPrompt() {
-    ITEM **myItems = (ITEM**) calloc(6, sizeof(ITEM*));
-    myItems[0] = new_item("▣ Kirito", "Kirito");
-    myItems[1] = new_item("▣ Asuna", "Asuna");
-    myItems[2] = new_item("▣ Klein", "Klein");
-    myItems[3] = new_item("▣ Agil", "Agil");
-    myItems[4] = new_item("← Go back", "Go back");
-    myItems[5] = NULL;
-
-    // 버튼 동작 함수를 NCurse로 넘겨준다.
-    set_item_userptr(myItems[0], (void*) onKirito);
-    set_item_userptr(myItems[1], (void*) onAsuna);
-    set_item_userptr(myItems[2], (void*) onKlein);
-    set_item_userptr(myItems[3], (void*) onAgil);
-    set_item_userptr(myItems[4], (void*) onReturn);
-
-    Prompt p = {40, 20, column / 2 - 20, row / 2 - 10, 8, myItems};
-    return p;
 }

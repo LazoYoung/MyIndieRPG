@@ -32,7 +32,7 @@ int main() {
 	keypad(stdscr, true);
 	
 	// 타이틀 화면을 시작
-	setPrompt(TITLE_PROMPT);
+	setPromptMode(TITLE_PROMPT);
 	drawScreen();
 	initGameResolution();
 

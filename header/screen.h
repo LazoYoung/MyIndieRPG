@@ -3,6 +3,11 @@
 
 #include <ncursesw/menu.h>
 
+typedef enum WindowType { // WORLD_WIN is the last element
+    HEALTH_WIN, HEALTH_G_WIN, MANA_WIN, MANA_G_WIN, STAT_WIN,
+    WEAPON_WIN, ARMORY_WIN, POTION_WIN, CONTROL_WIN, WORLD_WIN
+} WindowType;
+
 typedef enum ItemEvent {
     HOVER, SELECT, CLICK
 } ItemEvent;
@@ -24,6 +29,7 @@ typedef struct {
     int desc_lines; // Number of rows reserved in description window
     ITEM** items;
 } Prompt;
+
 extern ScreenMode screen_mode;
 extern PromptMode prompt_mode;
 extern int column, row;
@@ -34,22 +40,27 @@ extern void drawScreen();
 extern void clearScreen();
 extern void deletePrompt();
 extern void drawPrompt();
-extern void refreshScreen(int);
-extern void setScreen(ScreenMode);
-extern void setPrompt(PromptMode);
+extern void refreshScreen(int key);
+extern void setScreenMode(ScreenMode mode);
+extern void setPromptMode(PromptMode mode);
 extern MENU* getPromptMenu();
 extern void setMenuOptions(Menu_Options, bool);
 
 /* title-screen.c */
 extern void drawTitleScreen();
+extern Prompt getTitlePrompt();
+extern Prompt getCharPrompt();
 
 /* game-screen.c */
 extern void initGameScreen();
 extern void initGameResolution();
 extern void drawGameScreen();
 extern void clearGameScreen();
+extern WINDOW* getGameWindow(enum WindowType type);
 
 /* inventory-screen.c */
 extern void drawInventoryScreen();
+extern Prompt getCategoryPrompt();
+extern Prompt getInventoryPrompt();
 
 #endif

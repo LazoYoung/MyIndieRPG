@@ -14,17 +14,18 @@ extern Entity* getEntityByID(int);
 extern Location getTopLocation(int);
 extern void assignPortal(Portal);
 extern Portal* getPortal(Tile);
-extern void setStage(Stage);
+extern void generateLevel(Stage);
 extern void destructLevel();
 extern Stage getStage();
 extern const char* getStageName(Stage);
 extern Tile getTileAt(int, int);
+extern void setTileAt(int x, int y, Tile tile);
 
 // lobby.c
-extern void generateLobby(Tile**);
+extern void generateLobby();
 
 // dungeon.c
-extern void generateDungeon(Tile**);
+extern void generateDungeon();
 extern void destructDungeon();
 
 #endif

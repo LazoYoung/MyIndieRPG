@@ -14,8 +14,6 @@ static Portal portal_arr[30];
 static Tile **tiles = NULL;
 static Entity* entity[MAX_ENTITY] = {NULL};
 
-static void generateLevel();
-
 /**
  * Spawn an entity.
  * Player must be assigned before any other entities.
@@ -39,7 +37,7 @@ bool despawnEntity(const char* name) {
     for (int i=0; i<MAX_ENTITY; i++) {
         Entity *s = entity[i];
 
-        if (s && !s->valid && strcmp(name, s->name) == 0) {
+        if (s != NULL && s->valid && strcmp(name, s->name) == 0) {
             s->valid = false;
             return true;
         }
@@ -96,6 +94,7 @@ Location getTopLocation(int pos_x) {
 }
 
 void assignPortal(Portal instance) {
+    instance.valid = true;
     portal_arr[++portal_i] = instance;
 }
 
@@ -107,7 +106,7 @@ Portal *getPortal(Tile tile) {
     for (int i=0; i<=portal_i; i++) {
         Portal iter = portal_arr[i];
 
-        if (tile == iter.tile) {
+        if (iter.valid && tile == iter.tile) {
             return &portal_arr[i];
         }
     }
@@ -139,42 +138,11 @@ void destructLevel() {
 /**
  * Generate the level with a new stage.
  **/
-void setStage(Stage _stage) {
+void generateLevel(Stage _stage) {
     if (stage != VOID) {
         destructLevel();
     }
     stage = _stage;
-    generateLevel();
-}
-
-Stage getStage() {
-    return stage;
-}
-
-const char* getStageName(Stage _stage) {
-    switch (_stage) {
-        case VOID:
-            return "Void";
-        case LOBBY:
-            return "Lobby";
-        case SHOP:
-            return "Shop";
-        case DUNGEON_TEST:
-            return "Dungeon Test";
-    }
-
-    return NULL;
-}
-
-Tile getTileAt(int x, int y) {
-    if (tiles == NULL || x >= level_width || x < 0 || y >= level_height || y < 0) {
-        return AIR;
-    }
-
-    return tiles[y][x];
-}
-
-static void generateLevel() {
     level_width = 200;
     level_height = 50;
 
@@ -203,4 +171,37 @@ static void generateLevel() {
             generateDungeon(tiles);
             break;
     }
+}
+
+Stage getStage() {
+    return stage;
+}
+
+const char* getStageName(Stage _stage) {
+    switch (_stage) {
+        case VOID:
+            return "Void";
+        case LOBBY:
+            return "Lobby";
+        case SHOP:
+            return "Shop";
+        case DUNGEON_TEST:
+            return "Dungeon Test";
+    }
+
+    return NULL;
+}
+
+Tile getTileAt(int x, int y) {
+    if (tiles == NULL || x >= level_width || x < 0 || y >= level_height || y < 0)
+        return AIR;
+
+    return tiles[y][x];
+}
+
+void setTileAt(int x, int y, Tile tile) {
+    if (tiles == NULL || x >= level_width || x < 0 || y >= level_height || y < 0)
+        return;
+    
+    tiles[y][x] = tile;
 }
