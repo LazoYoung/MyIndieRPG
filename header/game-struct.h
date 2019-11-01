@@ -59,6 +59,7 @@ typedef struct entity {
     struct entity* target; // Monster's target
     char agility; // Extra speed ratio (%)
     char strength; // Extra damage ratio (%)
+    char absorb; // Damage absorbtion
     char health;
     char damage; // Amount of damage dealt without a weapon
     Texture skin;
@@ -69,6 +70,7 @@ typedef struct entity {
 } Entity;
 
 typedef struct {
+    char health;
     char mp; // Mana point
     char agility; // Extra speed ratio (%)
     char strength; // Extra damage ratio (%)

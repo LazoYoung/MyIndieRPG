@@ -182,7 +182,8 @@ static void initPlayer() {
     player.loc = getTopLocation(5);
     player.target = NULL;
     player.hitbox = hitbox;
-    player.health = 100;
+    player.health = p_attr.health;
+    player.absorb = 0;
     player.damage = 1;
     player.agility = p_attr.agility;
     player.strength = p_attr.strength;
@@ -198,6 +199,6 @@ static void onPlayerDeath(Entity* entity) {
     setPromptMode(DIALOGUE_PROMPT);
     mvwprintw(getPromptWindow(0), 3, 3, "You died! Respawning back to lobby...");
 
-    entity->health = 100;
+    entity->health = p_attr.health;
     entity->loc = getTopLocation(5);
 }

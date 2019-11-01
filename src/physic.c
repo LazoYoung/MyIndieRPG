@@ -154,6 +154,7 @@ void updatePhysic(Entity* e) {
                     Portal *portal = getPortal(tile);
 
                     if (portal != NULL) {
+                        e->health = p_attr.health;
                         generateLevel(portal->dest);
                     }
                     break;
@@ -162,13 +163,46 @@ void updatePhysic(Entity* e) {
         }
     }
     else if (e->type == MONSTER) {
-        if (bias->attackCooldown == 0) {
-            float dist = distance(e->loc.pos, e->target->loc.pos);
+        Vector e_pos, t_pos;
+        float dist;
 
+        e_pos[0] = e->loc.pos[0];
+        e_pos[1] = e->loc.pos[1];
+        t_pos[0] = e->target->loc.pos[0];
+        t_pos[1] = e->target->loc.pos[1];
+        dist = distance(e_pos, t_pos);
+
+        if (bias->attackCooldown == 0) {
             if (dist < 2.0) {
                 attack(e, e->target, dist);
                 bias->attackCooldown = getFramesDuringTime(1000);
             }
+        }
+
+        float xDelta = e_pos[0] - t_pos[0];
+        float yDelta = e_pos[1] - t_pos[1];
+
+        if (e_pos[0] < 2) {
+            bias->leftSpan = 0;
+        }
+        else if (e_pos[0] > level_width - 2) {
+            bias->rightSpan = 0;
+        }
+        
+        if (xDelta > 1.0) {
+            if (bias->rightSpan == 0 && bias->leftSpan == 0) {
+                bias->leftSpan = getFramesDuringTime(300);
+                bias->rightSpan = 0;
+            }
+        }
+        else if (xDelta < -1.0) {
+            if (bias->leftSpan == 0 && bias->rightSpan == 0) {
+                bias->leftSpan = 0;
+                bias->rightSpan = getFramesDuringTime(300);
+            }
+        }
+        else if (yDelta < -1.0) {
+            bias->up = true;
         }
     }
 }
@@ -220,5 +254,7 @@ static void attack(Entity* entity, Entity* victim, float distance) {
     }
 
     damage += damage * (entity->strength / 100);
-    victim->health -= floor(damage);
+    damage -= victim->absorb;
+
+    victim->health -= floorf(damage);
 }

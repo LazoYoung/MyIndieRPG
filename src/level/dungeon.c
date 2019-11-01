@@ -33,7 +33,8 @@ void generateDungeon() {
         monster->name = "Magika";
         monster->health = 50;
         monster->damage = 5;
-        monster->agility = 0;
+        monster->absorb = 0;
+        monster->agility = -50;
         monster->strength = 0;
         monster->offset[0] = 0.0;
         monster->offset[1] = 0.0;

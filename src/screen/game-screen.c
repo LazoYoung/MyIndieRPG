@@ -187,7 +187,7 @@ static void drawControlAid(WINDOW* win) {
     mvwprintw(win, 1, 9, "Control Keys");
     mvwprintw(win, 2, 2, "Move: WASD");
     mvwprintw(win, 2, 15, "Attack: K");
-    mvwprintw(win, 3, 2, "Use Item: H");
+    mvwprintw(win, 3, 2, "Potion: H / M");
     mvwprintw(win, 3, 15, "Inventory: I");
 }
 
