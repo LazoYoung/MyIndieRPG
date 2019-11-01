@@ -155,6 +155,10 @@ void doTick(int key) {
         }
 
         while (iter != NULL) {
+            if (iter->loc.pos[1] < 0) {
+                iter->health--;
+            }
+
             if (iter->health <= 0) {
                 iter->deathEvent(iter);
                 break;
@@ -227,6 +231,10 @@ static void initPlayer() {
 }
 
 static void onPlayerDeath(Entity* entity) {
-    entity->health = 100;
     generateLevel(LOBBY);
+    setPromptMode(DIALOGUE_PROMPT);
+    mvwprintw(getPromptWindow(0), 3, 3, "You died! Respawning back to lobby...");
+
+    entity->health = 100;
+    entity->loc = getTopLocation(5);
 }
