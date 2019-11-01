@@ -11,6 +11,7 @@
 #include "header/game.h"
 
 static ItemCategory category;
+static char desc[INVENTORY_CAP][4];
 
 static void onSelectCategory(ItemEvent, ITEM*);
 static void onSelectItem(ItemEvent, ITEM*);
@@ -47,24 +48,22 @@ Prompt getCategoryPrompt() {
 }
 
 Prompt getInventoryPrompt() {
-    ITEM** items = calloc(10, sizeof(ITEM*));
+    ITEM** items = calloc(INVENTORY_CAP, sizeof(ITEM*));
     Prompt prompt;
     int n = 0;
 
-    for (int i=0; i<10; i++) {
+    for (int i = 0; i < INVENTORY_CAP; i++) {
         GItem *gitem = inv.items[i];
 
         if (gitem != NULL && gitem->category == category) {
-            static char desc[4];
-            snprintf(desc, 4, "%d", i);
-
-            items[n] = new_item(getItemName(gitem->type), desc);
+            sprintf(desc[n], "%d", i);
+            items[n] = new_item(getItemName(gitem->type), desc[n]);
             set_item_userptr(items[n], onSelectItem);
             n++;
         }
     }
 
-    items = realloc(items, n + 1);
+    items = realloc(items, (n + 1) * sizeof(ITEM*));
     items[n] = new_item("← Go back", "back");
     items[n + 1] = NULL;
     set_item_userptr(items[n], onReturn);
@@ -79,7 +78,6 @@ Prompt getInventoryPrompt() {
 }
 
 static void onSelectCategory(ItemEvent event, ITEM* item) {
-    WINDOW *win = menu_win(getPromptMenu());
     const char* desc = item_description(item);
 
     if (event == CLICK) {
@@ -103,6 +101,7 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
         }
     }
     else if (event == HOVER) {
+        WINDOW *win = menu_win(getPromptMenu());
         wattron(win, A_BOLD);
         mvwprintw(win, 1, 16, "Inventory");
         wattroff(win, A_BOLD);
@@ -147,10 +146,8 @@ static void onSelectItem(ItemEvent event, ITEM* item) {
         }
 
         case HOVER: {
-            if (gitem->valid) {
-                mvwprintw(win, 2, 3, "Name: %s", name);
-                mvwprintw(win, 3, 3, "Equipped: %s", gitem->equip ? "YES" : "NO");
-            }
+            mvwprintw(win, 2, 3, "Name: %s", name);
+            mvwprintw(win, 3, 3, "Equipped: %s", gitem->equip ? "YES" : "NO");
             break;
         }
     }

@@ -1,5 +1,6 @@
 #ifndef GAME_STRUCT_INCLUDED
 #define GAME_STRUCT_INCLUDED
+#define INVENTORY_CAP 10
 
 #include <stdbool.h>
 
@@ -12,7 +13,6 @@ typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_TEST } Stage;
 typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
 typedef enum ItemType {SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE, ITEMTYPE_SIZE} ItemType;
 typedef struct GItem {
-    bool valid;
     ItemCategory category;
     ItemType type;
     bool equip;
@@ -46,11 +46,10 @@ typedef struct {
 } Location;
 
 typedef struct { // Present bias of entity movement
-    bool left; // Going left
-    bool right; // Going right
-    bool up; // Toggling jump or fly
-    bool attack; // Attacking others
-    int times; // How many times does the present control carry on
+    bool up; // Jump trigger
+    int leftSpan;
+    int rightSpan;
+    int attackCooldown;
 } Bias;
 
 typedef struct entity {
@@ -76,7 +75,7 @@ typedef struct {
 } PlayerProperty;
 
 typedef struct {
-    GItem *items[10];
+    GItem *items[INVENTORY_CAP];
     GItem *equipment[3]; // Indexed upon ItemCategory
     long long skills; // Achieved skills are recorded as codes in bit-manner.
     int coin;

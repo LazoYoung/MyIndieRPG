@@ -24,45 +24,45 @@ void updateControl(int key, Entity* player) {
     Bias *bias = &player->bias;
 
     switch (key) {
-        case 'd':
-            if (bias->left) {
-                bias->left = false;
-                bias->times = 0;
+        case 'd': // Right
+            if (bias->leftSpan > 0) {
+                bias->leftSpan = 0;
             } else {
-                bias->right = true;
-                bias->times = getFramesDuringTime(1000);
+                bias->rightSpan = getFramesDuringTime(500);
             }
             break;
-        case 'a':
-            if (bias->right) {
-                bias->right = false;
-                bias->times = 0;
+        case 'a': // Left
+            if (bias->rightSpan > 0) {
+                bias->rightSpan = 0;
             } else {
-                bias->left = true;
-                bias->times = getFramesDuringTime(1000);
+                bias->leftSpan = getFramesDuringTime(500);
             }
             break;
-        case 'w':
+        case 'w': // Jump
             bias->up = true;
             break;
-        case 'i':
+        case 'i': // Inventory
             setScreenMode(INVENTORY_SCREEN);
             setPromptMode(INV_CATEGORY_PROMPT);
             break;
-        case 'k':
-            if (!bias->attack) {
+        case 'k': // Attack
+            if (bias->attackCooldown == 0) {
                 attack(player);
-                bias->attack = true;
+                bias->attackCooldown = getFramesDuringTime(700);
             }
             break;
     }
 
-    if (bias->times-- <= 0) {
-        bias->right = false;
-        bias->left = false;
-        bias->attack = false;
-        bias->times = fps;
+    if (player->loc.onGround) {
+        if (bias->leftSpan > 0)
+            bias->leftSpan--;
+
+        if (bias->rightSpan > 0)
+            bias->rightSpan--;
     }
+
+    if(bias->attackCooldown > 0)
+        bias->attackCooldown--;
 }
 
 void updatePhysic(Entity* e) {
@@ -123,10 +123,10 @@ void updatePhysic(Entity* e) {
     
 
     // Handle controls and gravity
-    if (bias->left) {
+    if (bias->leftSpan > 0) {
         l->spd[0] = -10.0 * (1 + p_attr.agility / 100.0);
     }
-    else if (bias->right) {
+    else if (bias->rightSpan > 0) {
         l->spd[0] = 10.0 * (1 + p_attr.agility / 100.0);
     }
     else {

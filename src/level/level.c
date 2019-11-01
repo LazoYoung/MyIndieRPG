@@ -19,7 +19,7 @@ static Entity* entity[MAX_ENTITY] = {NULL};
  * Player must be assigned before any other entities.
  **/
 void spawnEntity(Entity* e) {
-    Bias bias = {false, false, false, false, 0};
+    Bias bias = {false, 0, 0, 0};
     e->bias = bias;
     e->valid = true;
 

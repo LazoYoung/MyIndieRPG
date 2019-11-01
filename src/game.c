@@ -13,20 +13,8 @@
 #include "header/screen.h"
 #include "header/vector.h"
 
-PlayerProperty p_attr = {
-    .agility = 1,
-    .strength = 1,
-    .mp = 100,
-    .level = 1,
-    .exp = 0,
-    .name = NULL
-};
-Inventory inv = {
-    .items = { NULL },
-    .equipment = NULL,
-    .skills = 0,
-    .coin = 0
-};
+PlayerProperty p_attr;
+Inventory inv;
 GItem item_reg[ITEMTYPE_SIZE];
 bool inGame = false;
 static Entity player;
@@ -34,31 +22,15 @@ const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
 extern void updatePhysic(Entity*);
+static void initPlayer();
 static void onPlayerDeath(Entity*);
 
 void startGame() {
-    AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
-    bool map[9][9] = {false};
-    Texture skin;
     GItem sword1, sword2, sword3, armor1;
 
     setScreenMode(GAME_SCREEN);
     generateLevel(LOBBY);
-
-    map[3][4] = map[4][4] = true;
-    skin.color = COLOR_CYAN;
-    memcpy(skin.map, map, sizeof(map));
-
-    player.name = p_attr.name;
-    player.loc = getTopLocation(5);
-    player.hitbox = hitbox;
-    player.health = 100;
-    player.damage = 1;
-    player.offset[0] = 0.0;
-    player.offset[1] = 0.0;
-    player.skin = skin;
-    player.deathEvent = onPlayerDeath;
-    spawnEntity(&player);
+    initPlayer();
 
     sword1.category = WEAPON;
     sword1.type = SMALL_SWORD;
@@ -80,8 +52,8 @@ void startGame() {
     item_reg[BRONZE_SWORD] = sword2;
     item_reg[STEEL_BLADE] = sword3;
     item_reg[HOOD_CAPE] = armor1;
-    addItem(&item_reg[SMALL_SWORD]);
-    addItem(&item_reg[HOOD_CAPE]);
+    addItem(SMALL_SWORD);
+    addItem(HOOD_CAPE);
 
     inGame = true;
 }
@@ -97,16 +69,15 @@ bool hasSkill(char skill_code) {
     return (inv.skills & filter) == filter;
 }
 
-void addItem(GItem* item) {
-    for (int i=0; i<10; i++) {
-        GItem *slot = inv.items[i];
-        
-        if (slot == NULL) {
-            item->valid = true;
+void addItem(ItemType type) {
+    for (int i = 0; i < INVENTORY_CAP; i++) {        
+        if (inv.items[i] == NULL) {
+            GItem *item = &item_reg[type];
             inv.items[i] = item;
 
             if (item->equip)
-                inv.equipment[item->category] = slot;
+                inv.equipment[item->category] = item;
+                
             break;
         }
     }
@@ -217,6 +188,42 @@ const char* getItemName(ItemType type) {
         default:
             return NULL;
     }
+}
+
+static void initPlayer() {
+    AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
+    bool map[9][9] = {false};
+    Texture skin;
+
+    for (int i = 0; i < INVENTORY_CAP; i++) {
+        inv.items[i] = NULL;
+    }
+    inv.skills = 0;
+    inv.coin = 0;
+    inv.equipment[0] = NULL;
+    inv.equipment[1] = NULL;
+    inv.equipment[2] = NULL;
+    
+    p_attr.agility = 1;
+    p_attr.strength = 1;
+    p_attr.mp = 100;
+    p_attr.level = 1;
+    p_attr.exp = 0;
+
+    map[3][4] = map[4][4] = true;
+    skin.color = COLOR_CYAN;
+    memcpy(skin.map, map, sizeof(map));
+
+    player.name = p_attr.name;
+    player.loc = getTopLocation(5);
+    player.hitbox = hitbox;
+    player.health = 100;
+    player.damage = 1;
+    player.offset[0] = 0.0;
+    player.offset[1] = 0.0;
+    player.skin = skin;
+    player.deathEvent = onPlayerDeath;
+    spawnEntity(&player);
 }
 
 static void onPlayerDeath(Entity* entity) {

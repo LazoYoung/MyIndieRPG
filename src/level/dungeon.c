@@ -9,7 +9,7 @@
 
 static Entity* monster;
 static int exp;
-static GItem* reward[MAX_REWARD] = { NULL };
+static int reward[MAX_REWARD];
 
 static void onMonsterDeath(Entity*);
 
@@ -38,8 +38,9 @@ void generateDungeon() {
         spawnEntity(monster);
 
         exp = 100;
-        reward[0] = &item_reg[BRONZE_SWORD];
-        reward[1] = &item_reg[STEEL_BLADE];
+        reward[0] = BRONZE_SWORD;
+        reward[1] = STEEL_BLADE;
+        reward[2] = -1;
     }
 }
 
@@ -65,16 +66,16 @@ static void onMonsterDeath(Entity* entity) {
     memset(rewards, '\0', strlen(rewards));
 
     for (int i = 0; i < MAX_REWARD; i++) {
-        GItem* item = reward[i];
+        int type = reward[i];
 
-        if (item != NULL && item->valid) {
-            const char* str = getItemName(item->type);
+        if (type > -1) {
+            const char* str = getItemName(type);
 
             if (str != NULL)
                 strcat(rewards, str);
             
             strcat(rewards, ", ");
-            addItem(item);
+            addItem(type);
         }
     }
 
