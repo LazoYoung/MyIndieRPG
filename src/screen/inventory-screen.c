@@ -16,9 +16,7 @@ static void onSelectCategory(ItemEvent, ITEM*);
 static void onSelectItem(ItemEvent, ITEM*);
 static void onReturn(ItemEvent, ITEM*);
 
-void drawInventoryScreen() {
-    //drawPrompt();
-}
+void drawInventoryScreen() {}
 
 Prompt getCategoryPrompt() {
     ITEM** items;
@@ -54,13 +52,13 @@ Prompt getInventoryPrompt() {
     int n = 0;
 
     for (int i=0; i<10; i++) {
-        GItem gitem = inv.items[i];
+        GItem *gitem = inv.items[i];
 
-        if (gitem.valid && gitem.category == category) {
+        if (gitem != NULL && gitem->category == category) {
             static char desc[4];
             snprintf(desc, 4, "%d", i);
 
-            items[n] = new_item(getItemName(gitem.type), desc);
+            items[n] = new_item(getItemName(gitem->type), desc);
             set_item_userptr(items[n], onSelectItem);
             n++;
         }
@@ -124,7 +122,7 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
 static void onSelectItem(ItemEvent event, ITEM* item) {
     WINDOW *win = menu_win(getPromptMenu());
     int id = atoi(item_description(item));    
-    GItem *gitem = &inv.items[id];
+    GItem *gitem = inv.items[id];
     const char *name = getItemName(gitem->type);
     
     switch (event) {

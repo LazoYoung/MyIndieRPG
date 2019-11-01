@@ -76,7 +76,7 @@ typedef struct {
 } PlayerProperty;
 
 typedef struct {
-    GItem items[10];
+    GItem *items[10];
     GItem *equipment[3]; // Indexed upon ItemCategory
     long long skills; // Achieved skills are recorded as codes in bit-manner.
     int coin;

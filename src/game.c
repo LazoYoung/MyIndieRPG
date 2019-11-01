@@ -22,7 +22,7 @@ PlayerProperty p_attr = {
     .name = NULL
 };
 Inventory inv = {
-    .items = { false },
+    .items = { NULL },
     .equipment = NULL,
     .skills = 0,
     .coin = 0
@@ -80,8 +80,8 @@ void startGame() {
     item_reg[BRONZE_SWORD] = sword2;
     item_reg[STEEL_BLADE] = sword3;
     item_reg[HOOD_CAPE] = armor1;
-    addItem(item_reg[SMALL_SWORD]);
-    addItem(item_reg[HOOD_CAPE]);
+    addItem(&item_reg[SMALL_SWORD]);
+    addItem(&item_reg[HOOD_CAPE]);
 
     inGame = true;
 }
@@ -97,19 +97,16 @@ bool hasSkill(char skill_code) {
     return (inv.skills & filter) == filter;
 }
 
-void addItem(GItem item) {
+void addItem(GItem* item) {
     for (int i=0; i<10; i++) {
-        GItem *slot = &inv.items[i];
+        GItem *slot = inv.items[i];
         
-        if (!slot->valid) {
-            slot->valid = true;
-            slot->type = item.type;
-            slot->category = item.category;
-            slot->equip = item.equip;
-            slot->value = item.value;
+        if (slot == NULL) {
+            item->valid = true;
+            inv.items[i] = item;
 
-            if (item.equip)
-                inv.equipment[item.category] = slot;
+            if (item->equip)
+                inv.equipment[item->category] = slot;
             break;
         }
     }

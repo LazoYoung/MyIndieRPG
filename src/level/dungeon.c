@@ -74,7 +74,7 @@ static void onMonsterDeath(Entity* entity) {
                 strcat(rewards, str);
             
             strcat(rewards, ", ");
-            addItem(*item);
+            addItem(item);
         }
     }
 

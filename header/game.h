@@ -36,7 +36,7 @@ extern const int fps; // How many frames and operations are made in 1 sec
 extern void startGame();
 extern void assignSkill(char);
 extern bool hasSkill(char);
-extern void addItem(GItem);
+extern void addItem(GItem*);
 extern bool addExp(int);
 extern void attack(Entity*);
 extern void doTick(int);
