@@ -10,7 +10,17 @@
 #include "header/physic.h"
 #include "header/vector.h"
 
+struct {
+    bool active;
+    int length;
+    int span;
+    int dtg;
+    Vector pos;
+    Vector norm;
+} trail;
+
 static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y);
+static bool spawnSwordTrail(Vector pos, Vector norm);
 static void attack(Entity* entity, Entity* victim, float distance);
 
 bool overlaps(AABB a, AABB b) {
@@ -31,6 +41,7 @@ void updateControl(int key, Entity* player) {
             } else {
                 bias->rightSpan = getFramesDuringTime(500);
             }
+            bias->facing = true;
             break;
         case 'a': // Left
             if (bias->rightSpan > 0) {
@@ -38,6 +49,7 @@ void updateControl(int key, Entity* player) {
             } else {
                 bias->leftSpan = getFramesDuringTime(500);
             }
+            bias->facing = false;
             break;
         case 's': // Stop
             bias->leftSpan = 0;
@@ -50,6 +62,22 @@ void updateControl(int key, Entity* player) {
             setScreenMode(INVENTORY_SCREEN);
             setPromptMode(INV_CATEGORY_PROMPT);
             break;
+        case ' ': { // Skill (costs MP)
+            Vector norm = {1.0, 0.0};
+            Vector src;
+
+            if (!bias->facing) {
+                norm[0] = -1.0;
+            }
+
+            src[0] = player->loc.pos[0] + norm[0] * 3;
+            src[1] = player->loc.pos[1];
+            
+            if (player->mp >= 40 && spawnSwordTrail(src, norm)) {
+                player->mp -= 40;
+            }
+            break;
+        }
         case 'k': // Attack
             if (bias->attackCooldown == 0) {
                 int i = 0;
@@ -135,11 +163,15 @@ void updatePhysic(Entity* e) {
             bias->rightSpan--;
     }
 
+    // Combat functions
     if(bias->attackCooldown > 0)
         bias->attackCooldown--;
     
+    if (getTileAt(l->pos[0], l->pos[1]) == TRAIL) {
+        e->health -= 100 * 1 / getFramesDuringTime(1000);
+    }
+
     if (e->type == PLAYER) {
-        // Perform horizontal interaction
         if (--sleep == 0) {
             Tile tile = getTileAt((int) l->pos[0], (int) l->pos[1]);
             sleep = 30;
@@ -154,7 +186,8 @@ void updatePhysic(Entity* e) {
                     Portal *portal = getPortal(tile);
 
                     if (portal != NULL) {
-                        e->health = p_attr.health;
+                        e->health = p_attr.max_health;
+                        e->mp = p_attr.max_mp;
                         generateLevel(portal->dest);
                     }
                     break;
@@ -184,27 +217,82 @@ void updatePhysic(Entity* e) {
 
         if (e_pos[0] < 2) {
             bias->leftSpan = 0;
+            bias->facing = true;
         }
         else if (e_pos[0] > level_width - 2) {
             bias->rightSpan = 0;
+            bias->facing = false;
         }
         
         if (xDelta > 1.0) {
             if (bias->rightSpan == 0 && bias->leftSpan == 0) {
                 bias->leftSpan = getFramesDuringTime(300);
                 bias->rightSpan = 0;
+                bias->facing = false;
             }
         }
         else if (xDelta < -1.0) {
             if (bias->leftSpan == 0 && bias->rightSpan == 0) {
                 bias->leftSpan = 0;
                 bias->rightSpan = getFramesDuringTime(300);
+                bias->facing = true;
             }
         }
         else if (yDelta < -1.0) {
             bias->up = true;
         }
     }
+}
+
+void updateSwordTrail() {
+    if (!trail.active)
+        return;
+
+    trail.pos[0] += trail.norm[0];
+    trail.pos[1] += trail.norm[1];
+    trail.dtg--;
+
+    if ((trail.span - trail.dtg) > trail.length) {
+        Vector del;
+
+        if (trail.dtg < -trail.length) {
+            trail.active = false;
+            return;
+        }
+
+        del[0] = trail.pos[0] - trail.norm[0] * trail.length;
+        del[1] = trail.pos[1] - trail.norm[1] * trail.length;
+
+        if (getTileAt(del[0], del[1]) == TRAIL) {
+            setTileAt(del[0], del[1], AIR);
+        }
+
+        if (getTileAt(del[0], del[1] + 1) == TRAIL) {
+            setTileAt(del[0], del[1] + 1, AIR);
+        }
+    }
+
+    if (trail.dtg > 0) {
+        if (getTileAt(trail.pos[0], trail.pos[1]) == AIR)
+            setTileAt(trail.pos[0], trail.pos[1], TRAIL);
+
+        if (getTileAt(trail.pos[0], trail.pos[1] + 1) == AIR)
+            setTileAt(trail.pos[0], trail.pos[1] + 1, TRAIL);
+    }
+}
+
+static bool spawnSwordTrail(Vector pos, Vector norm) {
+    if (trail.active)
+        return false;
+
+    trail.active = true;
+    trail.pos[0] = pos[0];
+    trail.pos[1] = pos[1];
+    trail.norm[0] = norm[0];
+    trail.norm[1] = norm[1];
+    trail.dtg = trail.span = 30;
+    trail.length = 5 + rand() % 5;
+    return true;
 }
 
 /**
@@ -239,22 +327,26 @@ static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float 
 static void attack(Entity* entity, Entity* victim, float distance) {
     const float crit_dist = 2.0;
     const float crit_mul = 2.0;
-    GItem *item = inv.equipment[WEAPON];
-    bool player = entity->type == PLAYER;
+    GItem *weapon = inv.equipment[WEAPON];
+    GItem *armory = inv.equipment[ARMORY];
     float damage;
 
-    if (player && item) {
-        damage = item->value;
+    if (entity->type == PLAYER && weapon) {
+        damage = weapon->value;
     } else {
         damage = entity->damage;        
     }
 
-    if (player && crit_dist > distance) {
+    if (entity->type == PLAYER && crit_dist > distance) {
         damage *= (1 - crit_mul) / crit_dist * distance + crit_mul;
+    }
+
+    if (victim->type == PLAYER && armory) {
+        damage -= armory->value;
     }
 
     damage += damage * (entity->strength / 100);
     damage -= victim->absorb;
 
-    victim->health -= floorf(damage);
+    victim->health -= (damage > 0 ? floorf(damage) : 0);
 }

@@ -9,5 +9,6 @@
 extern bool overlaps(AABB, AABB);
 extern void updateControl(int, Entity*);
 extern void updateEntities();
+extern void updateSwordTrail();
 
 #endif

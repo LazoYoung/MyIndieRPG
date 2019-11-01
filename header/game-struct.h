@@ -6,7 +6,7 @@
 
 typedef float Vector[2];
 
-typedef enum Tile { AIR, BLOCK, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
+typedef enum Tile { AIR, BLOCK, TRAIL, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
 typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
 typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_TEST } Stage;
 typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
@@ -47,6 +47,7 @@ typedef struct {
 
 typedef struct { // Present bias of entity movement
     bool up; // Jump trigger
+    bool facing; // Facing right == true
     int leftSpan;
     int rightSpan;
     int attackCooldown;
@@ -60,7 +61,8 @@ typedef struct entity {
     char agility; // Extra speed ratio (%)
     char strength; // Extra damage ratio (%)
     char absorb; // Damage absorbtion
-    char health;
+    float health;
+    char mp; // Mana point
     char damage; // Amount of damage dealt without a weapon
     Texture skin;
     AABB hitbox;
@@ -70,8 +72,8 @@ typedef struct entity {
 } Entity;
 
 typedef struct {
-    char health;
-    char mp; // Mana point
+    char max_health;
+    char max_mp;
     char agility; // Extra speed ratio (%)
     char strength; // Extra damage ratio (%)
     unsigned int level;

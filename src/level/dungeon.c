@@ -31,7 +31,7 @@ void generateDungeon() {
         monster->target = getEntityByID(0);
         monster->hitbox = hitbox;
         monster->name = "Magika";
-        monster->health = 50;
+        monster->health = 50.0;
         monster->damage = 5;
         monster->absorb = 0;
         monster->agility = -50;

@@ -46,7 +46,7 @@ void startGame() {
     sword3.equip = false;
     armor1.category = ARMORY;
     armor1.type = HOOD_CAPE;
-    armor1.value = 5;
+    armor1.value = 2;
     armor1.equip = false;
     item_reg[SMALL_SWORD] = sword1;
     item_reg[BRONZE_SWORD] = sword2;
@@ -107,9 +107,9 @@ void doTick(int key) {
     
     if (getStage() != VOID) {
         int id = 0;
-        Entity* iter = getEntityByID(id++);
+        Entity* iter;
 
-        while (iter) {
+        while (iter = getEntityByID(id++)) {
             if (iter->loc.pos[1] < 0) {
                 iter->health--;
             }
@@ -120,13 +120,23 @@ void doTick(int key) {
             }
 
             if (iter->type == PLAYER) {
+                static int regen = 40;
+
+                if (regen-- == 0) {
+                    if (iter->mp < p_attr.max_mp)
+                        iter->mp++;
+
+                    if (iter->health < p_attr.max_health)
+                        iter->health++;
+
+                    regen = 40;
+                }
+
                 updateControl(key, iter);
             }
 
             updatePhysic(iter);
-
-
-            iter = getEntityByID(id++);
+            updateSwordTrail();
         }
     }
 }
@@ -169,7 +179,7 @@ static void initPlayer() {
     inv.equipment[1] = NULL;
     inv.equipment[2] = NULL;
     
-    p_attr.mp = 100;
+    p_attr.max_mp = 100;
     p_attr.level = 1;
     p_attr.exp = 0;
 
@@ -182,7 +192,8 @@ static void initPlayer() {
     player.loc = getTopLocation(5);
     player.target = NULL;
     player.hitbox = hitbox;
-    player.health = p_attr.health;
+    player.health = p_attr.max_health;
+    player.mp = p_attr.max_mp;
     player.absorb = 0;
     player.damage = 1;
     player.agility = p_attr.agility;
@@ -199,6 +210,6 @@ static void onPlayerDeath(Entity* entity) {
     setPromptMode(DIALOGUE_PROMPT);
     mvwprintw(getPromptWindow(0), 3, 3, "You died! Respawning back to lobby...");
 
-    entity->health = p_attr.health;
+    entity->health = p_attr.max_health;
     entity->loc = getTopLocation(5);
 }

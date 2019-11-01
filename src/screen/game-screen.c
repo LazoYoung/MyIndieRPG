@@ -99,7 +99,7 @@ void drawGameScreen() {
 
     if (inGame && player != NULL) {
         drawGuage(health_w, "Health", GREEN, RED, player->health);
-        drawGuage(mana_w, "Mana", CYAN, BLACK, p_attr.mp);
+        drawGuage(mana_w, "Mana", CYAN, BLACK, player->mp);
         drawStatus(stat_w);
         drawEquipment(weapon_w, WEAPON);
         drawEquipment(armory_w, ARMORY);
@@ -187,7 +187,7 @@ static void drawControlAid(WINDOW* win) {
     mvwprintw(win, 1, 9, "Control Keys");
     mvwprintw(win, 2, 2, "Move: WASD");
     mvwprintw(win, 2, 15, "Attack: K");
-    mvwprintw(win, 3, 2, "Potion: H / M");
+    mvwprintw(win, 3, 2, "Potion: H/M");
     mvwprintw(win, 3, 15, "Inventory: I");
 }
 
@@ -223,6 +223,11 @@ static void drawTiles() {
                     wattron(win, COLOR_PAIR(WHITE));
                     mvwaddch(win, y_, x_, 'B');
                     wattroff(win, COLOR_PAIR(WHITE));
+                    break;
+                case TRAIL:
+                    wattron(win, COLOR_PAIR(CYAN));
+                    mvwaddch(win, y_, x_, 'T');
+                    wattroff(win, COLOR_PAIR(CYAN));
                     break;
                 case PORTAL_1:
                 case PORTAL_2:
@@ -295,7 +300,7 @@ static void drawEntities() {
         // TODO Debug
         mvwprintw(win, 10 + row++, 2, "%s's position: %.2f %.2f", iter->name, loc.pos[0], loc.pos[1]);
         mvwprintw(win, 10 + row++, 2, "%s's velocity: %.2f %.2f", iter->name, loc.spd[0], loc.spd[1]);
-        mvwprintw(win, 10 + row++, 2, "%s's health: %d", iter->name, iter->health);
+        mvwprintw(win, 10 + row++, 2, "%s's health: %.1f", iter->name, iter->health);
 
         iter = getEntityByID(++id);
     }

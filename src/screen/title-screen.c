@@ -84,7 +84,8 @@ static void onQuit(ItemEvent event, ITEM* item) {
 }
 
 static void onKirito(ItemEvent event, ITEM* item) {
-    p_attr.health = 100;
+    p_attr.max_health = 100;
+    p_attr.max_mp = 100;
     p_attr.agility = 30;
     p_attr.strength = 30;
     p_attr.name = "Kirito";
@@ -100,7 +101,8 @@ static void onKirito(ItemEvent event, ITEM* item) {
 }
 
 static void onAsuna(ItemEvent event, ITEM* item) {
-    p_attr.health = 100;
+    p_attr.max_health = 100;
+    p_attr.max_mp = 100;
     p_attr.agility = 50;
     p_attr.strength = 20;
     p_attr.name = "Asuna";
@@ -115,7 +117,8 @@ static void onAsuna(ItemEvent event, ITEM* item) {
 }
 
 static void onKlein(ItemEvent event, ITEM* item) {
-    p_attr.health = 100;
+    p_attr.max_health = 100;
+    p_attr.max_mp = 100;
     p_attr.agility = 30;
     p_attr.strength = 30;
     p_attr.name = "Klein";
@@ -131,7 +134,8 @@ static void onKlein(ItemEvent event, ITEM* item) {
 }
 
 static void onAgil(ItemEvent event, ITEM* item) {
-    p_attr.health = 100;
+    p_attr.max_health = 100;
+    p_attr.max_mp = 100;
     p_attr.agility = 20;
     p_attr.strength = 50;
     p_attr.name = "Agil";
