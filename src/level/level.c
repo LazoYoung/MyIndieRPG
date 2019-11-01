@@ -12,7 +12,7 @@ int level_width = 0, level_height = 0, portal_i = -1;
 static Stage stage = VOID;
 static Portal portal_arr[30];
 static Tile **tiles = NULL;
-static Entity* entity[MAX_ENTITY] = {NULL};
+static Entity *entity[MAX_ENTITY] = {NULL};
 
 /**
  * Spawn an entity.
@@ -20,14 +20,13 @@ static Entity* entity[MAX_ENTITY] = {NULL};
  **/
 void spawnEntity(Entity* e) {
     Bias bias = {false, 0, 0, 0};
-    e->bias = bias;
-    e->valid = true;
 
     for (int i = 0; i < MAX_ENTITY; i++) {
         Entity *s = entity[i];
 
-        if (s && s->valid) continue;
+        if (s) continue;
         
+        e->bias = bias;
         entity[i] = e;
         break;
     }
@@ -37,8 +36,7 @@ bool despawnEntity(const char* name) {
     for (int i=0; i<MAX_ENTITY; i++) {
         Entity *s = entity[i];
 
-        if (s != NULL && s->valid && strcmp(name, s->name) == 0) {
-            s->valid = false;
+        if (s && strcmp(name, s->name) == 0) {
             entity[i] = NULL;
             return true;
         }
@@ -54,7 +52,7 @@ Entity* getEntity(const char* name) {
     for (int i = 0; i < MAX_ENTITY; i++) {
         Entity *s = entity[i];
 
-        if (s && s->valid && strcmp(name, s->name) == 0) {
+        if (s && strcmp(name, s->name) == 0) {
             return s;
         }
     }
@@ -69,8 +67,7 @@ Entity* getEntityByID(int id) {
     if (id >= 0 && id < MAX_ENTITY) {
         Entity *e = entity[id];
 
-        if (e != NULL && e->valid)
-            return e;
+        if (e) return e;
     }
     return NULL;
 }

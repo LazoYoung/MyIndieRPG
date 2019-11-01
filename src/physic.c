@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <ncursesw/curses.h>
 #include "header/game-struct.h"
 #include "header/level.h"
@@ -10,7 +11,7 @@
 #include "header/vector.h"
 
 static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y);
-static bool hasHorizontalObstacle(Location loc, AABB hitbox, Vector offset);
+static void attack(Entity* entity, Entity* victim, float distance);
 
 bool overlaps(AABB a, AABB b) {
     if (abs(a.centre[0] - b.centre[0]) > a.radius[0] + b.radius[0])
@@ -38,6 +39,10 @@ void updateControl(int key, Entity* player) {
                 bias->leftSpan = getFramesDuringTime(500);
             }
             break;
+        case 's': // Stop
+            bias->leftSpan = 0;
+            bias->rightSpan = 0;
+            break;
         case 'w': // Jump
             bias->up = true;
             break;
@@ -47,28 +52,31 @@ void updateControl(int key, Entity* player) {
             break;
         case 'k': // Attack
             if (bias->attackCooldown == 0) {
-                attack(player);
-                bias->attackCooldown = getFramesDuringTime(700);
+                int i = 0;
+                Entity *victim;
+                float dist;
+
+                while (i < MAX_ENTITY) {
+                    victim = getEntityByID(i++);        
+
+                    if (!victim || strcmp(victim->name, player->name) == 0)
+                        continue;
+
+                    dist = distance(victim->loc.pos, player->loc.pos);
+
+                    if (dist < 3.0) {
+                        attack(player, victim, dist);
+                        bias->attackCooldown = getFramesDuringTime(700);
+                    }
+                    break;
+                }
             }
             break;
     }
-
-    if (player->loc.onGround) {
-        if (bias->leftSpan > 0)
-            bias->leftSpan--;
-
-        if (bias->rightSpan > 0)
-            bias->rightSpan--;
-    }
-
-    if(bias->attackCooldown > 0)
-        bias->attackCooldown--;
 }
 
 void updatePhysic(Entity* e) {
-    if (e == NULL || !e->valid) {
-        return;
-    }
+    if (!e) return;
 
     static int sleep = 30;
     float ground_y = 0.0;
@@ -98,36 +106,13 @@ void updatePhysic(Entity* e) {
     } else {
         l->onGround = false;
     }
-    
-    // Perform horizontal interaction
-    if (--sleep == 0) {
-        Tile tile = getTileAt((int) l->pos[0], (int) l->pos[1]);
-        sleep = 30;
-
-        switch (tile) {
-            case PORTAL_1:
-            case PORTAL_2:
-            case PORTAL_3:
-            case PORTAL_4:
-            case PORTAL_5:
-            {
-                Portal *portal = getPortal(tile);
-
-                if (portal != NULL) {
-                    generateLevel(portal->dest);
-                }
-                break;
-            }
-        }
-    }
-    
 
     // Handle controls and gravity
     if (bias->leftSpan > 0) {
-        l->spd[0] = -10.0 * (1 + p_attr.agility / 100.0);
+        l->spd[0] = -10.0 * (1 + e->agility / 100.0);
     }
     else if (bias->rightSpan > 0) {
-        l->spd[0] = 10.0 * (1 + p_attr.agility / 100.0);
+        l->spd[0] = 10.0 * (1 + e->agility / 100.0);
     }
     else {
         l->spd[0] = 0.0;
@@ -135,11 +120,56 @@ void updatePhysic(Entity* e) {
 
     if (bias->up) {
         bias->up = false;
-        l->spd[1] = 10.0 * (1 + p_attr.agility / 100.0);
+        l->spd[1] = 10.0 * (1 + e->agility / 100.0);
     }
 
     if (!l->onGround) {
         l->spd[1] -= 20.0 * deltaTime;
+    }
+
+    if (e->loc.onGround) {
+        if (bias->leftSpan > 0)
+            bias->leftSpan--;
+
+        if (bias->rightSpan > 0)
+            bias->rightSpan--;
+    }
+
+    if(bias->attackCooldown > 0)
+        bias->attackCooldown--;
+    
+    if (e->type == PLAYER) {
+        // Perform horizontal interaction
+        if (--sleep == 0) {
+            Tile tile = getTileAt((int) l->pos[0], (int) l->pos[1]);
+            sleep = 30;
+
+            switch (tile) {
+                case PORTAL_1:
+                case PORTAL_2:
+                case PORTAL_3:
+                case PORTAL_4:
+                case PORTAL_5:
+                {
+                    Portal *portal = getPortal(tile);
+
+                    if (portal != NULL) {
+                        generateLevel(portal->dest);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    else if (e->type == MONSTER) {
+        if (bias->attackCooldown == 0) {
+            float dist = distance(e->loc.pos, e->target->loc.pos);
+
+            if (dist < 2.0) {
+                attack(e, e->target, dist);
+                bias->attackCooldown = getFramesDuringTime(1000);
+            }
+        }
     }
 }
 
@@ -172,9 +202,23 @@ static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float 
     return false;
 }
 
-/**
- * TODO Planned to be implemented
- * Returns true if entity will collide with the obstacle in horizontal direction.
- * If so, ground_y will point to x-coordinate before the contact.
- **/
-static bool hasHorizontalObstacle(Location loc, AABB hitbox, Vector offset) {}
+static void attack(Entity* entity, Entity* victim, float distance) {
+    const float crit_dist = 2.0;
+    const float crit_mul = 2.0;
+    GItem *item = inv.equipment[WEAPON];
+    bool player = entity->type == PLAYER;
+    float damage;
+
+    if (player && item) {
+        damage = item->value;
+    } else {
+        damage = entity->damage;        
+    }
+
+    if (player && crit_dist > distance) {
+        damage *= (1 - crit_mul) / crit_dist * distance + crit_mul;
+    }
+
+    damage += damage * (entity->strength / 100);
+    victim->health -= floor(damage);
+}

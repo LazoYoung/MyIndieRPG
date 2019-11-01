@@ -196,7 +196,7 @@ static void drawTiles() {
     WINDOW *win = getGameWindow(WORLD_WIN);
     Location loc;
 
-    if (entity && entity->valid) {
+    if (entity) {
         loc = entity->loc;
     }
 

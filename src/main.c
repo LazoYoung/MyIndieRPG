@@ -11,6 +11,7 @@
 
 static bool cont = true;
 
+extern void doTick(int);
 void suspend();
 
 int main() {

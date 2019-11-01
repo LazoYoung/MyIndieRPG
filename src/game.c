@@ -101,47 +101,6 @@ bool addExp(int exp) {
     return false;
 }
 
-void attack(Entity* entity) {
-    int i = 0;
-    Entity *victim;
-    Vector e_loc;
-
-    e_loc[0] = entity->loc.pos[0];
-    e_loc[1] = entity->loc.pos[1];
-
-    while (i < MAX_ENTITY) {
-        victim = getEntityByID(i++);        
-
-        if (victim != NULL) {
-            if (strcmp(victim->name, entity->name) == 0)
-                continue;
-
-            float dist = distance(victim->loc.pos, e_loc);
-            GItem *item = inv.equipment[WEAPON];
-            float damage;
-            const float crit_dist = 2.0;
-            const float crit_mul = 2.0;
-            
-            if (dist > 3.0)
-                continue;
-
-            if (item == NULL) {
-                damage = entity->damage;
-            } else {
-                damage = item->value;
-            }
-
-            if (crit_dist > dist) {
-                damage *= (1 - crit_mul) / crit_dist * dist + crit_mul;
-            }
-
-            damage += damage * (p_attr.strength / 100);
-            victim->health -= floor(damage);
-            break;
-        }
-    }
-}
-
 void doTick(int key) {
     if (!inGame)
         return;
@@ -150,11 +109,7 @@ void doTick(int key) {
         int id = 0;
         Entity* iter = getEntityByID(id++);
 
-        if (iter != NULL) {
-            updateControl(key, iter);
-        }
-
-        while (iter != NULL) {
+        while (iter) {
             if (iter->loc.pos[1] < 0) {
                 iter->health--;
             }
@@ -164,7 +119,13 @@ void doTick(int key) {
                 break;
             }
 
+            if (iter->type == PLAYER) {
+                updateControl(key, iter);
+            }
+
             updatePhysic(iter);
+
+
             iter = getEntityByID(id++);
         }
     }
@@ -208,8 +169,6 @@ static void initPlayer() {
     inv.equipment[1] = NULL;
     inv.equipment[2] = NULL;
     
-    p_attr.agility = 1;
-    p_attr.strength = 1;
     p_attr.mp = 100;
     p_attr.level = 1;
     p_attr.exp = 0;
@@ -219,10 +178,14 @@ static void initPlayer() {
     memcpy(skin.map, map, sizeof(map));
 
     player.name = p_attr.name;
+    player.type = PLAYER;
     player.loc = getTopLocation(5);
+    player.target = NULL;
     player.hitbox = hitbox;
     player.health = 100;
     player.damage = 1;
+    player.agility = p_attr.agility;
+    player.strength = p_attr.strength;
     player.offset[0] = 0.0;
     player.offset[1] = 0.0;
     player.skin = skin;

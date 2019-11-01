@@ -4,14 +4,14 @@
 
 #include <stdbool.h>
 
-// TODO Introduce Union as vector storage. Returning a pointer involves headache
 typedef float Vector[2];
 
 typedef enum Tile { AIR, BLOCK, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
 typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
 typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_TEST } Stage;
 typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
-typedef enum ItemType {SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE, ITEMTYPE_SIZE} ItemType;
+typedef enum ItemType { SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE, ITEMTYPE_SIZE } ItemType;
+typedef enum EntityType { PLAYER, MONSTER } EntityType;
 typedef struct GItem {
     ItemCategory category;
     ItemType type;
@@ -53,22 +53,25 @@ typedef struct { // Present bias of entity movement
 } Bias;
 
 typedef struct entity {
-    bool valid;
     const char* name;
+    EntityType type;
     Location loc;
-    char health; // 0 ~ 100
+    struct entity* target; // Monster's target
+    char agility; // Extra speed ratio (%)
+    char strength; // Extra damage ratio (%)
+    char health;
     char damage; // Amount of damage dealt without a weapon
-    Bias bias;
     Texture skin;
     AABB hitbox;
     Vector offset;
+    Bias bias; // Movement bias
     void (* deathEvent)(struct entity*);
 } Entity;
 
 typedef struct {
-    char agility; // Extra speed ratio: 1 ~ 100
-    char strength; // Extra damage ratio: 1 ~ 100
-    char mp; // Mana point: 1 ~ 100
+    char mp; // Mana point
+    char agility; // Extra speed ratio (%)
+    char strength; // Extra damage ratio (%)
     unsigned int level;
     unsigned long long exp; // Level-up cost: sqrt(level) * 100
     const char* name; // Character name

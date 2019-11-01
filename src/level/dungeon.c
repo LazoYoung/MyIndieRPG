@@ -26,11 +26,15 @@ void generateDungeon() {
         map[5][3] = map[5][4] = map[5][5] = true;
         memcpy(skin.map, map, sizeof(map));
 
+        monster->type = MONSTER;
         monster->loc = getTopLocation(50);
+        monster->target = getEntityByID(0);
         monster->hitbox = hitbox;
         monster->name = "Magika";
         monster->health = 50;
         monster->damage = 5;
+        monster->agility = 0;
+        monster->strength = 0;
         monster->offset[0] = 0.0;
         monster->offset[1] = 0.0;
         monster->skin = skin;
