@@ -22,7 +22,7 @@ PlayerProperty p_attr = {
     .name = NULL
 };
 Inventory inv = {
-    .items = { false }, // TODO dynamic array
+    .items = { false },
     .equipment = NULL,
     .skills = 0,
     .coin = 0
@@ -42,8 +42,8 @@ void startGame() {
     Texture skin;
     GItem sword1, sword2, sword3, armor1;
 
-    generateLevel(LOBBY);
     setScreenMode(GAME_SCREEN);
+    generateLevel(LOBBY);
 
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
@@ -63,15 +63,19 @@ void startGame() {
     sword1.category = WEAPON;
     sword1.type = SMALL_SWORD;
     sword1.value = 5;
+    sword1.equip = false;
     sword2.category = WEAPON;
     sword2.type = BRONZE_SWORD;
     sword2.value = 10;
+    sword2.equip = false;
     sword3.category = WEAPON;
     sword3.type = STEEL_BLADE;
     sword3.value = 15;
+    sword3.equip = false;
     armor1.category = ARMORY;
     armor1.type = HOOD_CAPE;
     armor1.value = 5;
+    armor1.equip = false;
     item_reg[SMALL_SWORD] = sword1;
     item_reg[BRONZE_SWORD] = sword2;
     item_reg[STEEL_BLADE] = sword3;

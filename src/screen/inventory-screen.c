@@ -98,7 +98,6 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
             setPromptMode(INVENTORY_PROMPT);
         }
         else if (strcmp(desc, "close") == 0) {
-            setPromptMode(PROMPT_NONE);
             setScreenMode(GAME_SCREEN);
         }
         else {

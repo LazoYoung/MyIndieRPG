@@ -150,6 +150,8 @@ void setPromptMode(PromptMode mode) {
         case DIALOGUE_PROMPT:
             prompt = getDialoguePrompt();
             break;
+        default:
+            return;
     }
 
     drawPrompt();
