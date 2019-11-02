@@ -8,7 +8,7 @@ typedef float Vector[2];
 
 typedef enum Tile { AIR, BLOCK, TRAIL, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
 typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
-typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_TEST } Stage;
+typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_1, DUNGEON_2, DUNGEON_3 } Stage;
 typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
 typedef enum ItemType { SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE, ITEMTYPE_SIZE } ItemType;
 typedef enum EntityType { PLAYER, MONSTER } EntityType;
@@ -62,6 +62,7 @@ typedef struct entity {
     char strength; // Extra damage ratio (%)
     char absorb; // Damage absorbtion
     float health;
+    float max_health;
     char mp; // Mana point
     char damage; // Amount of damage dealt without a weapon
     Texture skin;

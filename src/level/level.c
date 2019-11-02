@@ -114,7 +114,9 @@ Portal *getPortal(Tile tile) {
 
 void destructLevel() {
     switch (stage) {
-        case DUNGEON_TEST:
+        case DUNGEON_1:
+        case DUNGEON_2:
+        case DUNGEON_3:
             destructDungeon();
             break;
     }
@@ -165,7 +167,9 @@ void generateLevel(Stage _stage) {
         case LOBBY:
             generateLobby(tiles);
             break;
-        case DUNGEON_TEST:
+        case DUNGEON_1:
+        case DUNGEON_2:
+        case DUNGEON_3:
             generateDungeon(tiles);
             break;
     }
@@ -183,8 +187,12 @@ const char* getStageName(Stage _stage) {
             return "Lobby";
         case SHOP:
             return "Shop";
-        case DUNGEON_TEST:
-            return "Dungeon Test";
+        case DUNGEON_1:
+            return "Dungeon 1";
+        case DUNGEON_2:
+            return "Dungeon 2";
+        case DUNGEON_3:
+            return "Dungeon 3";
     }
 
     return NULL;

@@ -186,7 +186,7 @@ void updatePhysic(Entity* e) {
                     Portal *portal = getPortal(tile);
 
                     if (portal != NULL) {
-                        e->health = p_attr.max_health;
+                        e->health = e->max_health;
                         e->mp = p_attr.max_mp;
                         generateLevel(portal->dest);
                     }

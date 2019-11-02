@@ -14,7 +14,7 @@ static int reward[MAX_REWARD];
 static void onMonsterDeath(Entity*);
 
 void generateDungeon() {
-    if (getStage() == DUNGEON_TEST) {
+    if (getStage() == DUNGEON_1) {
         monster = malloc(sizeof(Entity));
         AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
         Texture skin;
@@ -31,7 +31,7 @@ void generateDungeon() {
         monster->target = getEntityByID(0);
         monster->hitbox = hitbox;
         monster->name = "Magika";
-        monster->health = 50.0;
+        monster->health = monster->max_health = 50.0;
         monster->damage = 5;
         monster->absorb = 0;
         monster->agility = -50;

@@ -2,6 +2,8 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED 1
 
+#include <math.h>
+#include <string.h>
 #include <ncursesw/curses.h>
 #include <ncursesw/panel.h>
 #include "header/screen.h"
@@ -14,7 +16,7 @@ static PANEL* panels[WORLD_WIN + 1];
 static int row_, column_, init_y, init_x, ctr_y, ctr_x;
 
 static void drawStatus(WINDOW*);
-static void drawGuage(WINDOW*, const char*, Color, Color, char);
+static void drawGuage(WINDOW* win, Color color_fg, Color color_bg, int length, float ratio);
 static void drawEquipment(WINDOW*, ItemCategory);
 static void drawControlAid(WINDOW*);
 static void drawTiles();
@@ -98,8 +100,20 @@ void drawGameScreen() {
     box(ctrl_w, ACS_VLINE, ACS_HLINE);
 
     if (inGame && player != NULL) {
-        drawGuage(health_w, "Health", GREEN, RED, player->health);
-        drawGuage(mana_w, "Mana", CYAN, BLACK, player->mp);
+        waddch(health_w, ' ');
+        wattron(health_w, A_BOLD);
+        waddstr(health_w, "Health");
+        wattroff(health_w, A_BOLD);
+        waddch(health_w, ' ');
+        wmove(health_w, 0, 13);
+        drawGuage(health_w, GREEN, RED, 25, (float) player->health / player->max_health);
+        waddch(mana_w, ' ');
+        wattron(mana_w, A_BOLD);
+        waddstr(mana_w, "Mana");
+        wattroff(mana_w, A_BOLD);
+        waddch(mana_w, ' ');
+        wmove(mana_w, 0, 13);
+        drawGuage(mana_w, CYAN, BLACK, 25, (float) player->mp / p_attr.max_mp);
         drawStatus(stat_w);
         drawEquipment(weapon_w, WEAPON);
         drawEquipment(armory_w, ARMORY);
@@ -140,22 +154,23 @@ static void drawStatus(WINDOW* win) {
     mvwprintw(win, 3, 2, "Coin: %d", inv.coin);
 }
 
-static void drawGuage(WINDOW* win, const char* alias, Color color_fg, Color color_bg, char value) {
-    char value_ = value / 4;
+static void drawGuage(WINDOW* win, Color color_fg, Color color_bg, int length, float ratio) {
+    int value = floorf(ratio * length);
+    char str[length + 1];
+    int cur_x, cur_y;
 
-    waddch(win, ' ');
-    wattron(win, A_BOLD);
-    waddstr(win, alias);
-    wattroff(win, A_BOLD);
-    waddch(win, ' ');
+    getyx(win, cur_y, cur_x);
+    memset(str, ' ', sizeof(char) * (length + 1));
+    str[length] = '\0';
 
     wattron(win, COLOR_PAIR(color_fg));
-    mvwaddnstr(win, 0, 13, "                         ", value_);
+    waddnstr(win, str, value);
     wattroff(win, COLOR_PAIR(color_fg));
 
     wattron(win, COLOR_PAIR(color_bg));
-    mvwaddstr(win, 0, 13 + value_, "                         ");
+    mvwaddnstr(win, cur_y, cur_x + value, str, length - value);
     wattroff(win, COLOR_PAIR(color_bg));
+    wmove(win, cur_y, cur_x - value);
 }
 
 static void drawEquipment(WINDOW* win, ItemCategory category) {
@@ -266,31 +281,46 @@ static void drawEntities() {
         Texture skin = iter->skin;
         WINDOW* win = getGameWindow(WORLD_WIN);
         int color = COLOR_PAIR(skin.color);
-        int x, y;
+        int map_x, map_y, scr_x, scr_y;
+        bool label = false;
 
         wattron(win, color);
 
-        for (y = 0; y < 9; y++) {
-            for (x = 0; x < 9; x++) {
-                if (!skin.map[y][x])
+        for (map_y = 0; map_y < 9; map_y++) {
+            if (iter->type != PLAYER) {
+                if (!getScreenCoordByTile(Y, loc.pos[1], &scr_y))
+                    continue;
+            
+                scr_y += map_y - 4;
+            }
+
+            for (map_x = 0; map_x < 9; map_x++) {
+                if (!skin.map[map_y][map_x])
                     continue;
 
-                if (id == 0) { // is Player
-                    mvwaddch(win, ctr_y + y - 4, ctr_x + x - 4, ' ');
+                if (iter->type == PLAYER) {
+                    mvwaddch(win, ctr_y + map_y - 4, ctr_x + map_x - 4, ' ');
                 }
-                else { // is Mob
-                    int scr_x, scr_y;
-                    int y_, x_;
+                else if (getScreenCoordByTile(X, loc.pos[0], &scr_x)){
+                    scr_x += map_x - 4;
 
-                    if (!getScreenCoordByTile(X, loc.pos[0], &scr_x)
-                        || !getScreenCoordByTile(Y, loc.pos[1], &scr_y))
-                            continue;
+                    if (scr_x < column_ && scr_y < row_)
+                        mvwaddch(win, scr_y, scr_x, ' ');
 
-                    y_ = scr_y + y - 4;
-                    x_ = scr_x + x - 4;
+                    if (!label) {
+                        label = true;
+                        wmove(win, scr_y - 3, scr_x);
 
-                    if (x_ < column_ && y_ < row_)
-                        mvwaddch(win, y_, x_, ' ');
+                        if (scr_y - 3 > init_y) {
+                            if (skin.color == RED)
+                                wattroff(win, color);
+
+                            drawGuage(win, GREEN, RED, 10, (float) iter->health / iter->max_health);
+                            
+                            if (skin.color == RED)
+                                wattron(win, color);
+                        }
+                    }
                 }
             }
         }
@@ -338,7 +368,7 @@ static bool getTileCoordByScreen(enum Axis a, int input, int *result) {
     return false;
 }
 
-/**x = tile_x + ctr_x - p_x; y = ctr_y - tile_y + p_y;
+/**
  * Converts a Tile coordinate into Screen coordinate.
  * Pass the coordinate (in either X or Y depending on Axis A) into INPUT.
  * Then, RESULT will point to the computed screen coordinate.

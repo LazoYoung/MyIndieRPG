@@ -126,9 +126,6 @@ void doTick(int key) {
                     if (iter->mp < p_attr.max_mp)
                         iter->mp++;
 
-                    if (iter->health < p_attr.max_health)
-                        iter->health++;
-
                     regen = 40;
                 }
 
@@ -192,7 +189,7 @@ static void initPlayer() {
     player.loc = getTopLocation(5);
     player.target = NULL;
     player.hitbox = hitbox;
-    player.health = p_attr.max_health;
+    player.health = player.max_health = p_attr.max_health;
     player.mp = p_attr.max_mp;
     player.absorb = 0;
     player.damage = 1;
@@ -210,6 +207,6 @@ static void onPlayerDeath(Entity* entity) {
     setPromptMode(DIALOGUE_PROMPT);
     mvwprintw(getPromptWindow(0), 3, 3, "You died! Respawning back to lobby...");
 
-    entity->health = p_attr.max_health;
+    entity->health = entity->max_health;
     entity->loc = getTopLocation(5);
 }
