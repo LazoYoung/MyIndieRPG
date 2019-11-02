@@ -13,13 +13,13 @@ extern int column, row;
 
 extern void suspend();
 static void printAttributes();
-static void onStart(ItemEvent, ITEM*);
-static void onQuit(ItemEvent, ITEM*);
-static void onKirito(ItemEvent, ITEM*);
-static void onAsuna(ItemEvent, ITEM*);
-static void onKlein(ItemEvent, ITEM*);
-static void onAgil(ItemEvent, ITEM*);
-static void onReturn(ItemEvent, ITEM*);
+static void onStart(ItemEventBus);
+static void onQuit(ItemEventBus);
+static void onKirito(ItemEventBus);
+static void onAsuna(ItemEventBus);
+static void onKlein(ItemEventBus);
+static void onAgil(ItemEventBus);
+static void onReturn(ItemEventBus);
 
 void drawTitleScreen() {
     mvaddch(10, column / 2 - 8, ACS_DIAMOND);
@@ -36,15 +36,25 @@ Prompt getTitlePrompt() {
     myItems[2] = NULL; // 말단 원소는 NULL값으로 지정해야 함
 
     // 버튼 동작 함수를 NCurse로 넘겨준다.
-    set_item_userptr(myItems[0], (void*) onStart);
-    set_item_userptr(myItems[1], (void*) onQuit);
+    set_item_userptr(myItems[0], onStart);
+    set_item_userptr(myItems[1], onQuit);
 
-    Prompt p = {40, 15, column / 2 - 20, row / 2 - 5, 1, myItems};
+    Prompt p;
+    p.width = 40;
+    p.height = 15;
+    p.x = column / 2 - 20;
+    p.y = row / 2 - 5;
+    p.desc_lines = 1;
+    p.items = myItems;
+    p.gitems = NULL;
+    p.gitem_count = 0;
     return p;
 }
 
 Prompt getCharPrompt() {
+    Prompt p;
     ITEM **myItems = (ITEM**) calloc(6, sizeof(ITEM*));
+
     myItems[0] = new_item("▣ Kirito", "Kirito");
     myItems[1] = new_item("▣ Asuna", "Asuna");
     myItems[2] = new_item("▣ Klein", "Klein");
@@ -52,20 +62,26 @@ Prompt getCharPrompt() {
     myItems[4] = new_item("← Go back", "Go back");
     myItems[5] = NULL;
 
-    // 버튼 동작 함수를 NCurse로 넘겨준다.
-    set_item_userptr(myItems[0], (void*) onKirito);
-    set_item_userptr(myItems[1], (void*) onAsuna);
-    set_item_userptr(myItems[2], (void*) onKlein);
-    set_item_userptr(myItems[3], (void*) onAgil);
-    set_item_userptr(myItems[4], (void*) onReturn);
+    set_item_userptr(myItems[0], onKirito);
+    set_item_userptr(myItems[1], onAsuna);
+    set_item_userptr(myItems[2], onKlein);
+    set_item_userptr(myItems[3], onAgil);
+    set_item_userptr(myItems[4], onReturn);
 
-    Prompt p = {40, 20, column / 2 - 20, row / 2 - 10, 8, myItems};
+    p.width = 40;
+    p.height = 20;
+    p.x = column / 2 - 20;
+    p.y = row / 2 - 10;
+    p.desc_lines = 8;
+    p.items = myItems;
+    p.gitems = NULL;
+    p.gitem_count = 0;
     return p;
 }
 
 /* 시작 버튼을 누른 이벤트 */
-static void onStart(ItemEvent event, ITEM* item) {
-    if (event == CLICK) {
+static void onStart(ItemEventBus bus) {
+    if (bus.event == CLICK) {
         setPromptMode(TITLE_CHARACTER_PROMPT);
         return;
     }
@@ -74,8 +90,8 @@ static void onStart(ItemEvent event, ITEM* item) {
 }
 
 /* 종료 버튼을 누른 이벤트 */
-static void onQuit(ItemEvent event, ITEM* item) {
-    if (event == CLICK) {
+static void onQuit(ItemEventBus bus) {
+    if (bus.event == CLICK) {
         suspend();
         return;
     }
@@ -83,7 +99,7 @@ static void onQuit(ItemEvent event, ITEM* item) {
     mvwprintw(menu_win(getPromptMenu()), 1, 3, "Hit <Enter> to exit the game.");
 }
 
-static void onKirito(ItemEvent event, ITEM* item) {
+static void onKirito(ItemEventBus bus) {
     p_attr.max_health = 100;
     p_attr.max_mp = 100;
     p_attr.agility = 30;
@@ -93,14 +109,14 @@ static void onKirito(ItemEvent event, ITEM* item) {
     assignSkill(MANA_RECOVERY);
     assignSkill(DUAL_WIELD);
 
-    if (event == CLICK) {
+    if (bus.event == CLICK) {
         startGame();
     } else {
         printAttributes();        
     }
 }
 
-static void onAsuna(ItemEvent event, ITEM* item) {
+static void onAsuna(ItemEventBus bus) {
     p_attr.max_health = 100;
     p_attr.max_mp = 100;
     p_attr.agility = 50;
@@ -109,14 +125,14 @@ static void onAsuna(ItemEvent event, ITEM* item) {
     inv.skills = 0;
     assignSkill(HEALTH_RECOVERY);
 
-    if (event == CLICK) {
+    if (bus.event == CLICK) {
         startGame();
     } else {
         printAttributes();        
     }
 }
 
-static void onKlein(ItemEvent event, ITEM* item) {
+static void onKlein(ItemEventBus bus) {
     p_attr.max_health = 100;
     p_attr.max_mp = 100;
     p_attr.agility = 30;
@@ -126,14 +142,14 @@ static void onKlein(ItemEvent event, ITEM* item) {
     assignSkill(MANA_RECOVERY);
     assignSkill(EXP_BONUS);
 
-    if (event == CLICK) {
+    if (bus.event == CLICK) {
         startGame();
     } else {
         printAttributes();        
     }
 }
 
-static void onAgil(ItemEvent event, ITEM* item) {
+static void onAgil(ItemEventBus bus) {
     p_attr.max_health = 100;
     p_attr.max_mp = 100;
     p_attr.agility = 20;
@@ -142,15 +158,15 @@ static void onAgil(ItemEvent event, ITEM* item) {
     inv.skills = 0;
     assignSkill(AXE_BERSERK);
 
-    if (event == CLICK) {
+    if (bus.event == CLICK) {
         startGame();
     } else {
         printAttributes();
     }
 }
 
-static void onReturn(ItemEvent event, ITEM* item) {
-    if (event == CLICK) {
+static void onReturn(ItemEventBus bus) {
+    if (bus.event == CLICK) {
         setPromptMode(TITLE_PROMPT);
     }
 }

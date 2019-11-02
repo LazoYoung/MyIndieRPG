@@ -1,6 +1,7 @@
 #ifndef FILE_SCREEN_INCLUDED
 #define FILE_SCREEN_INCLUDED
 
+#include "game-struct.h"
 #include <ncursesw/menu.h>
 
 typedef enum WindowType { // WORLD_WIN is the last element
@@ -13,7 +14,7 @@ typedef enum ItemEvent {
 } ItemEvent;
 
 typedef enum ScreenMode {
-    TITLE_SCREEN, GAME_SCREEN, INVENTORY_SCREEN
+    TITLE_SCREEN, GAME_SCREEN
 } ScreenMode; 
 
 typedef enum PromptMode {
@@ -28,7 +29,15 @@ typedef struct {
     int y; // box coord-y
     int desc_lines; // Number of rows reserved in description window
     ITEM** items;
+    GItem** gitems;
+    int gitem_count;
 } Prompt;
+
+typedef struct {
+    ITEM* item;
+    ItemEvent event;
+    GItem* gitem;
+} ItemEventBus;
 
 extern ScreenMode screen_mode;
 extern PromptMode prompt_mode, hid_prompt_mode;
@@ -61,7 +70,6 @@ extern void clearGameScreen();
 extern WINDOW* getGameWindow(enum WindowType type);
 
 /* inventory-screen.c */
-extern void drawInventoryScreen();
 extern Prompt getCategoryPrompt();
 extern Prompt getInventoryPrompt();
 

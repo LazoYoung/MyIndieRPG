@@ -13,15 +13,14 @@
 static ItemCategory category;
 static char desc[INVENTORY_CAP][4];
 
-static void onSelectCategory(ItemEvent, ITEM*);
-static void onSelectItem(ItemEvent, ITEM*);
-static void onReturn(ItemEvent, ITEM*);
-
-void drawInventoryScreen() {}
+static void onSelectCategory(ItemEventBus);
+static void onSelectItem(ItemEventBus);
+static void onReturn(ItemEventBus);
 
 Prompt getCategoryPrompt() {
     ITEM** items;
     Prompt prompt;
+    ItemEventBus bus;
 
     items = calloc(6, sizeof(ITEM*));
     items[0] = new_item("◇ Weapon", "weapon");
@@ -44,26 +43,30 @@ Prompt getCategoryPrompt() {
     prompt.y = row / 2 - 10;
     prompt.desc_lines = 1;
     prompt.items = items;
+    prompt.gitems = NULL;
+    prompt.gitem_count = 0;
     return prompt;
 }
 
 Prompt getInventoryPrompt() {
     ITEM** items = calloc(INVENTORY_CAP, sizeof(ITEM*));
+    GItem** gitems = calloc(INVENTORY_CAP, sizeof(GItem*));
     Prompt prompt;
     int n = 0;
 
     for (int i = 0; i < INVENTORY_CAP; i++) {
         GItem *gitem = inv.items[i];
 
-        if (gitem != NULL && gitem->category == category) {
-            sprintf(desc[n], "%d", i);
-            items[n] = new_item(getItemName(gitem->type), desc[n]);
+        if (gitem && gitem->category == category) {
+            items[n] = new_item(getItemName(gitem->type), NULL);
+            gitems[n] = gitem;
             set_item_userptr(items[n], onSelectItem);
             n++;
         }
     }
 
-    items = realloc(items, (n + 1) * sizeof(ITEM*));
+    items = realloc(items, (n + 2) * sizeof(ITEM*));
+    gitems = realloc(gitems, n * sizeof(GItem*));
     items[n] = new_item("← Go back", "back");
     items[n + 1] = NULL;
     set_item_userptr(items[n], onReturn);
@@ -74,13 +77,15 @@ Prompt getInventoryPrompt() {
     prompt.y = row / 2 - 10;
     prompt.desc_lines = 8;
     prompt.items = items;
+    prompt.gitems = gitems;
+    prompt.gitem_count = n;
     return prompt;
 }
 
-static void onSelectCategory(ItemEvent event, ITEM* item) {
-    const char* desc = item_description(item);
+static void onSelectCategory(ItemEventBus bus) {
+    const char* desc = item_description(bus.item);
 
-    if (event == CLICK) {
+    if (bus.event == CLICK) {
         if (strcmp(desc, "weapon") == 0) {
             category = WEAPON;
             setPromptMode(INVENTORY_PROMPT);
@@ -100,7 +105,7 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
             setPromptMode(INV_CATEGORY_PROMPT);
         }
     }
-    else if (event == HOVER) {
+    else if (bus.event == HOVER) {
         WINDOW *win = menu_win(getPromptMenu());
         wattron(win, A_BOLD);
         mvwprintw(win, 1, 16, "Inventory");
@@ -113,18 +118,17 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
             mvwprintw(win, 2, 3, "Hit <ENTER> to close inventory.");
         }
         else {
-            mvwprintw(win, 2, 3, "Hit <ENTER> to display your %s items.", item_description(item));
+            mvwprintw(win, 2, 3, "Hit <ENTER> to display your %s items.", item_description(bus.item));
         }
     }
 }
 
-static void onSelectItem(ItemEvent event, ITEM* item) {
+static void onSelectItem(ItemEventBus bus) {
     WINDOW *win = getPromptWindow(0);
-    int id = atoi(item_description(item));    
-    GItem *gitem = inv.items[id];
+    GItem *gitem = bus.gitem;
     const char *name = getItemName(gitem->type);
     
-    switch (event) {
+    switch (bus.event) {
         case CLICK: {
             if (gitem->equip) {
                 gitem->equip = false;
@@ -134,7 +138,6 @@ static void onSelectItem(ItemEvent event, ITEM* item) {
                 if (inv.equipment[category] != NULL) {
                     WINDOW *win1;
 
-                    hid_prompt_mode = prompt_mode;
                     setPromptMode(DIALOGUE_PROMPT);
                     win1 = getPromptWindow(0);
 
@@ -152,15 +155,30 @@ static void onSelectItem(ItemEvent event, ITEM* item) {
         }
 
         case HOVER: {
+            char desc[20];
+
+            switch (gitem->category) {
+                case WEAPON:
+                    sprintf(desc, "Attack power: %d", gitem->value);
+                    break;
+                case ARMORY:
+                    sprintf(desc, "Defense level: %d", gitem->value);
+                    break;
+                case POTION: // TODO Potion item value determines whether HP or MP.
+                    sprintf(desc, "%s recovery", gitem->value == 0 ? "HP" : "MP");
+                    break;
+            }
+
             mvwprintw(win, 2, 3, "Name: %s", name);
-            mvwprintw(win, 3, 3, "Equipped: %s", gitem->equip ? "YES" : "NO");
+            mvwprintw(win, 3, 3, desc);
+            mvwprintw(win, 4, 3, "Equipped: %s", gitem->equip ? "YES" : "NO");
             break;
         }
     }
 }
 
-static void onReturn(ItemEvent event, ITEM* item) {
-    if (event == CLICK) {
+static void onReturn(ItemEventBus bus) {
+    if (bus.event == CLICK) {
         setPromptMode(INV_CATEGORY_PROMPT);
     }
 }

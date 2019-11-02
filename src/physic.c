@@ -59,7 +59,6 @@ void updateControl(int key, Entity* player) {
             bias->up = true;
             break;
         case 'i': // Inventory
-            setScreenMode(INVENTORY_SCREEN);
             setPromptMode(INV_CATEGORY_PROMPT);
             break;
         case ' ': { // Skill (costs MP)

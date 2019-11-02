@@ -21,7 +21,7 @@ static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
 
 static void updatePrompt(int);
 static Prompt getPrompt(PromptMode);
-static void onDialogueConfirm(ItemEvent, ITEM*);
+static void onDialogueConfirm(ItemEventBus);
 
 void drawScreen() {
 	resizeterm(row, column);
@@ -35,9 +35,6 @@ void drawScreen() {
             break;
         case GAME_SCREEN:
             initGameScreen();
-            break;
-        case INVENTORY_SCREEN:
-            drawInventoryScreen();
             break;
     }
 }
@@ -141,6 +138,8 @@ static Prompt getPrompt(PromptMode mode) {
             p.width = 80;
             p.y = 10;
             p.x = column / 2 - 40;
+            p.gitems = NULL;
+            p.gitem_count = 0;
             return p;
         }
     }
@@ -160,6 +159,10 @@ WINDOW* getPromptWindow(int index) {
 }
 
 void setPromptMode(PromptMode mode) {
+    if (mode == DIALOGUE_PROMPT) {
+        hid_prompt_mode = prompt_mode;
+    }
+
     deletePrompt();
 
     if (mode != PROMPT_NONE) {
@@ -197,58 +200,58 @@ void refreshPrompt(int cursor) {
 }
 
 static void updatePrompt(int key) {
-    WINDOW *w0, *w1;
     ITEM* item;
-    void (* buttonFunc)(ItemEvent, ITEM*);
+    ItemEventBus bus;
+    void (* buttonFunc)(ItemEventBus);
     int id;
 
-    w0 = getPromptWindow(0);
-    w1 = getPromptWindow(1);
-
-    if (menu == NULL || w0 == NULL || w1 == NULL) {
+    if (menu == NULL)
         return;
-    }
 
     item = current_item(menu);
-    buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
     id = item_index(item);
+    buttonFunc = (void (*)(ItemEventBus)) item_userptr(item);
+    bus.event = HOVER;
 
     if (key == KEY_DOWN && id < item_count(menu) - 1) {
         refreshPrompt(id + 1);
         item = current_item(menu);
-        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
+        id = item_index(item);
+        buttonFunc = (void (*)(ItemEventBus)) item_userptr(item);
     }
     else if (key == KEY_UP && id > 0) {
         refreshPrompt(id - 1);
         item = current_item(menu);
-        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
+        id = item_index(item);
+        buttonFunc = (void (*)(ItemEventBus)) item_userptr(item);
     }
     else if (((int) item_opts(item) & O_SELECTABLE) == O_SELECTABLE) {
         switch (key) {
             case 10:
-                (* buttonFunc)(CLICK, item);
-                refresh();
-                return;
+                bus.event = CLICK;
+                break;
             case ' ':
-                touchwin(w0);
-                (* buttonFunc)(SELECT, item);
-                wrefresh(w0);
-                wrefresh(w1);
-                return;
+                bus.event = SELECT;
+                break;
         }
     }
+    
+    if (prompt.gitems && prompt.gitem_count > id) {
+        bus.gitem = prompt.gitems[id];
+    }
+    else {
+        bus.gitem = NULL;
+    }
 
-    w0 = getPromptWindow(0);
-    w1 = getPromptWindow(1);
-
-    touchwin(w0);
-    (* buttonFunc)(HOVER, item);
-    wrefresh(w0);
-    wrefresh(w1);
+    bus.item = item;
+    touchwin(getPromptWindow(0));
+    (* buttonFunc)(bus);
+    wrefresh(getPromptWindow(0));
+    wrefresh(getPromptWindow(1));
 }
 
-static void onDialogueConfirm(ItemEvent event, ITEM* item) {
-    if (event == CLICK) {
+static void onDialogueConfirm(ItemEventBus bus) {
+    if (bus.event == CLICK) {
         setPromptMode(hid_prompt_mode);
         hid_prompt_mode = PROMPT_NONE;
     }
