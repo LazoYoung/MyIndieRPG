@@ -12,13 +12,14 @@
 
 ScreenMode screen_mode = TITLE_SCREEN;
 PromptMode prompt_mode = PROMPT_NONE;
+PromptMode hid_prompt_mode = PROMPT_NONE;
 int column = 230;
 int row = 70;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
 
-static void refreshPrompt(int);
+static void updatePrompt(int);
 static Prompt getPrompt(PromptMode);
 static void onDialogueConfirm(ItemEvent, ITEM*);
 
@@ -41,9 +42,9 @@ void drawScreen() {
     }
 }
 
-void refreshScreen(int key) {
+void updateScreen(int key) {
     if (prompt_mode != PROMPT_NONE) {
-        refreshPrompt(key);
+        updatePrompt(key);
     }
 
     if (screen_mode == GAME_SCREEN) {
@@ -70,7 +71,6 @@ void drawPrompt(int cursor) {
     prompt_pan[1] = new_panel(win1);
 
     keypad(win0, TRUE);
-    curs_set(0);
     set_menu_win(menu, win0);
     set_menu_sub(menu, win1);
     set_menu_mark(menu, "*");
@@ -84,7 +84,6 @@ void drawPrompt(int cursor) {
     update_panels();
 }
 
-/* 프롬프트 화면을 끈다. */
 void deletePrompt() {
     if (menu == NULL) {
         return;
@@ -117,107 +116,6 @@ void deletePrompt() {
     prompt_mode = PROMPT_NONE;
 }
 
-MENU* getPromptMenu() {
-    return menu;
-}
-
-/* 0: Background, 1: Button box */
-WINDOW* getPromptWindow(int index) {
-    PANEL* pan = prompt_pan[index];
-
-    if (pan == NULL) return NULL;
-    
-    return panel_window(pan);
-}
-
-/* 프롬프트 메뉴를 설정/전환한다. */
-void setPromptMode(PromptMode mode) {
-    deletePrompt();
-    prompt_mode = mode;
-    prompt = getPrompt(mode);
-    drawPrompt(0);
-}
-
-void setScreenMode(ScreenMode mode) {
-    deletePrompt();
-    clearScreen();
-    screen_mode = mode;
-    drawScreen();
-}
-
-void setMenuOptions(Menu_Options options, bool on) {
-    if (menu == NULL)
-        return;
-
-    if (on) {
-        menu_opts_on(menu, options);
-    } else {
-        menu_opts_off(menu, options);
-    }
-}
-
-/* 메뉴 입력을 받아 동작시키고, 프롬프트 화면을 갱신한다. */
-static void refreshPrompt(int key) {
-    WINDOW *w0, *w1;
-    ITEM* item;
-    void (* buttonFunc)(ItemEvent, ITEM*);
-    int id;
-
-    w0 = getPromptWindow(0);
-    w1 = getPromptWindow(1);
-
-    if (menu == NULL || w0 == NULL || w1 == NULL) {
-        return;
-    }
-
-    item = current_item(menu);
-    buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
-    id = item_index(item);
-
-    if (key == KEY_DOWN && id < item_count(menu) - 1) {
-        PromptMode mode = prompt_mode;
-
-        setScreenMode(screen_mode);  
-        prompt_mode = mode;
-        prompt = getPrompt(mode);
-        drawPrompt(id + 1);
-        item = current_item(menu);
-        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
-    }
-    else if (key == KEY_UP && id > 0) {
-        PromptMode mode = prompt_mode;
-
-        setScreenMode(screen_mode);  
-        prompt_mode = mode;
-        prompt = getPrompt(mode);
-        drawPrompt(id - 1);
-        item = current_item(menu);
-        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
-    }
-    else if (((int) item_opts(item) & O_SELECTABLE) == O_SELECTABLE) {
-        switch (key) {
-            case 10:
-                (* buttonFunc)(CLICK, item);
-                refresh();
-                return;
-            case ' ':
-                touchwin(w0);
-                (* buttonFunc)(SELECT, item);
-                wrefresh(w0);
-                wrefresh(w1);
-                return;
-        }
-    }
-
-    w0 = getPromptWindow(0);
-    w1 = getPromptWindow(1);
-
-    touchwin(w0);
-    (* buttonFunc)(HOVER, item);
-    wrefresh(w0);
-    wrefresh(w1);
-}
-
 static Prompt getPrompt(PromptMode mode) {
     switch (mode) {
         case TITLE_PROMPT:
@@ -248,7 +146,110 @@ static Prompt getPrompt(PromptMode mode) {
     }
 }
 
+MENU* getPromptMenu() {
+    return menu;
+}
+
+/* 0: Background, 1: Button box */
+WINDOW* getPromptWindow(int index) {
+    PANEL* pan = prompt_pan[index];
+
+    if (pan == NULL) return NULL;
+    
+    return panel_window(pan);
+}
+
+void setPromptMode(PromptMode mode) {
+    deletePrompt();
+
+    if (mode != PROMPT_NONE) {
+        prompt_mode = mode;
+        prompt = getPrompt(mode);
+        drawPrompt(0);
+    }
+}
+
+void setScreenMode(ScreenMode mode) {
+    deletePrompt();
+    clearScreen();
+    screen_mode = mode;
+    drawScreen();
+}
+
+void setMenuOptions(Menu_Options options, bool on) {
+    if (menu == NULL)
+        return;
+
+    if (on) {
+        menu_opts_on(menu, options);
+    } else {
+        menu_opts_off(menu, options);
+    }
+}
+
+void refreshPrompt(int cursor) {
+    PromptMode mode = prompt_mode;
+
+    setScreenMode(screen_mode);  
+    prompt_mode = mode;
+    prompt = getPrompt(mode);
+    drawPrompt(cursor);
+}
+
+static void updatePrompt(int key) {
+    WINDOW *w0, *w1;
+    ITEM* item;
+    void (* buttonFunc)(ItemEvent, ITEM*);
+    int id;
+
+    w0 = getPromptWindow(0);
+    w1 = getPromptWindow(1);
+
+    if (menu == NULL || w0 == NULL || w1 == NULL) {
+        return;
+    }
+
+    item = current_item(menu);
+    buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
+    id = item_index(item);
+
+    if (key == KEY_DOWN && id < item_count(menu) - 1) {
+        refreshPrompt(id + 1);
+        item = current_item(menu);
+        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
+    }
+    else if (key == KEY_UP && id > 0) {
+        refreshPrompt(id - 1);
+        item = current_item(menu);
+        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
+    }
+    else if (((int) item_opts(item) & O_SELECTABLE) == O_SELECTABLE) {
+        switch (key) {
+            case 10:
+                (* buttonFunc)(CLICK, item);
+                refresh();
+                return;
+            case ' ':
+                touchwin(w0);
+                (* buttonFunc)(SELECT, item);
+                wrefresh(w0);
+                wrefresh(w1);
+                return;
+        }
+    }
+
+    w0 = getPromptWindow(0);
+    w1 = getPromptWindow(1);
+
+    touchwin(w0);
+    (* buttonFunc)(HOVER, item);
+    wrefresh(w0);
+    wrefresh(w1);
+}
+
 static void onDialogueConfirm(ItemEvent event, ITEM* item) {
-    if (event == CLICK)
-        deletePrompt();
+    if (event == CLICK) {
+        setPromptMode(hid_prompt_mode);
+        hid_prompt_mode = PROMPT_NONE;
+    }
 }

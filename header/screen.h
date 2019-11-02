@@ -31,7 +31,7 @@ typedef struct {
 } Prompt;
 
 extern ScreenMode screen_mode;
-extern PromptMode prompt_mode;
+extern PromptMode prompt_mode, hid_prompt_mode;
 extern int column, row;
 extern Prompt prompt;
 
@@ -40,7 +40,8 @@ extern void drawScreen();
 extern void clearScreen();
 extern void deletePrompt();
 extern void drawPrompt(int cursor);
-extern void refreshScreen(int key);
+extern void refreshPrompt(int cursor);
+extern void updateScreen(int key);
 extern void setScreenMode(ScreenMode mode);
 extern void setPromptMode(PromptMode mode);
 extern MENU* getPromptMenu();

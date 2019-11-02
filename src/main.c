@@ -45,7 +45,8 @@ int main() {
 			drawScreen();
 		}
 		else {
-			refreshScreen(key);
+			updateScreen(key);
+    		curs_set(0);
 			doTick(key);
 		}
 	}

@@ -119,7 +119,7 @@ static void onSelectCategory(ItemEvent event, ITEM* item) {
 }
 
 static void onSelectItem(ItemEvent event, ITEM* item) {
-    WINDOW *win = menu_win(getPromptMenu());
+    WINDOW *win = getPromptWindow(0);
     int id = atoi(item_description(item));    
     GItem *gitem = inv.items[id];
     const char *name = getItemName(gitem->type);
@@ -132,8 +132,14 @@ static void onSelectItem(ItemEvent event, ITEM* item) {
             }
             else {
                 if (inv.equipment[category] != NULL) {
-                    mvwprintw(win, 2, 3, "You can't have multiple items");
-                    mvwprintw(win, 3, 3, "equipped in the same category!");
+                    WINDOW *win1;
+
+                    hid_prompt_mode = prompt_mode;
+                    setPromptMode(DIALOGUE_PROMPT);
+                    win1 = getPromptWindow(0);
+
+                    mvwprintw(win1, 5, 3, "You can't have multiple items");
+                    mvwprintw(win1, 6, 3, "equipped in the same category!");
                     break;
                 }
 
