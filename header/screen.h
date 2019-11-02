@@ -39,7 +39,7 @@ extern Prompt prompt;
 extern void drawScreen();
 extern void clearScreen();
 extern void deletePrompt();
-extern void drawPrompt();
+extern void drawPrompt(int cursor);
 extern void refreshScreen(int key);
 extern void setScreenMode(ScreenMode mode);
 extern void setPromptMode(PromptMode mode);

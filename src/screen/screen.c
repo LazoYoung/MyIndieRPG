@@ -16,13 +16,12 @@ int column = 230;
 int row = 70;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
-static PANEL *prompt_pan[2] = { NULL }; // 0: 테두리, 1: 버튼
+static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
 
 static void refreshPrompt(int);
-static Prompt getDialoguePrompt();
+static Prompt getPrompt(PromptMode);
 static void onDialogueConfirm(ItemEvent, ITEM*);
 
-/* 화면을 생성한다. */
 void drawScreen() {
 	resizeterm(row, column);
     clear();
@@ -42,7 +41,6 @@ void drawScreen() {
     }
 }
 
-/* 화면을 갱신한다. */
 void refreshScreen(int key) {
     if (prompt_mode != PROMPT_NONE) {
         refreshPrompt(key);
@@ -59,10 +57,12 @@ void clearScreen() {
     }
 }
 
-/* 프롬프트 화면을 그린다. */
-void drawPrompt() {
+/* Draws prompt. CURSOR indicates the index of current item. */
+void drawPrompt(int cursor) {
     WINDOW *win0, *win1;
+    ITEM* item;
 
+    item = prompt.items[cursor];
     menu = new_menu(prompt.items);
     win0 = newwin(prompt.height, prompt.width, prompt.y, prompt.x);
     win1 = derwin(win0, item_count(menu), 20, prompt.desc_lines + 3, 3);
@@ -74,6 +74,7 @@ void drawPrompt() {
     set_menu_win(menu, win0);
     set_menu_sub(menu, win1);
     set_menu_mark(menu, "*");
+    set_current_item(menu, item);
     menu_opts_off(menu, O_SHOWDESC);
     box(win0, 0, 0);
     post_menu(menu);
@@ -93,8 +94,8 @@ void deletePrompt() {
     WINDOW* win[2] = {getPromptWindow(0), getPromptWindow(1)};
     int count = item_count(menu);
     
-    wclear(win[0]);
     touchwin(win[0]);
+    wclear(win[0]);
     wrefresh(win[0]);
     wrefresh(win[1]);
     // unpost_menu() must precede delwin() to make sure that they're unlinked
@@ -133,28 +134,8 @@ WINDOW* getPromptWindow(int index) {
 void setPromptMode(PromptMode mode) {
     deletePrompt();
     prompt_mode = mode;
-    
-    switch (prompt_mode) {
-        case TITLE_PROMPT:
-            prompt = getTitlePrompt();
-            break;
-        case TITLE_CHARACTER_PROMPT:
-            prompt = getCharPrompt();
-            break;
-        case INV_CATEGORY_PROMPT:
-            prompt = getCategoryPrompt();
-            break;
-        case INVENTORY_PROMPT:
-            prompt = getInventoryPrompt();
-            break;
-        case DIALOGUE_PROMPT:
-            prompt = getDialoguePrompt();
-            break;
-        default:
-            return;
-    }
-
-    drawPrompt();
+    prompt = getPrompt(mode);
+    drawPrompt(0);
 }
 
 void setScreenMode(ScreenMode mode) {
@@ -177,26 +158,41 @@ void setMenuOptions(Menu_Options options, bool on) {
 
 /* 메뉴 입력을 받아 동작시키고, 프롬프트 화면을 갱신한다. */
 static void refreshPrompt(int key) {
-    if (menu == NULL || getPromptWindow(0) == NULL || getPromptWindow(1) == NULL) {
+    WINDOW *w0, *w1;
+    ITEM* item;
+    void (* buttonFunc)(ItemEvent, ITEM*);
+    int id;
+
+    w0 = getPromptWindow(0);
+    w1 = getPromptWindow(1);
+
+    if (menu == NULL || w0 == NULL || w1 == NULL) {
         return;
     }
 
-    ITEM* item = current_item(menu);
-    void (* buttonFunc)(ItemEvent, ITEM*) = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
-    int id = item_index(item);
+    item = current_item(menu);
+    buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
+    id = item_index(item);
 
-    // TODO clear the smudge text
     if (key == KEY_DOWN && id < item_count(menu) - 1) {
-        werase(getPromptWindow(0));
-        box(getPromptWindow(0), 0, 0);
-        menu_driver(menu, REQ_DOWN_ITEM);
-        refresh();
+        PromptMode mode = prompt_mode;
+
+        setScreenMode(screen_mode);  
+        prompt_mode = mode;
+        prompt = getPrompt(mode);
+        drawPrompt(id + 1);
+        item = current_item(menu);
+        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
     }
     else if (key == KEY_UP && id > 0) {
-        werase(getPromptWindow(0));
-        box(getPromptWindow(0), 0, 0);
-        menu_driver(menu, REQ_UP_ITEM);
-        refresh();
+        PromptMode mode = prompt_mode;
+
+        setScreenMode(screen_mode);  
+        prompt_mode = mode;
+        prompt = getPrompt(mode);
+        drawPrompt(id - 1);
+        item = current_item(menu);
+        buttonFunc = (void(*)(ItemEvent, ITEM*)) item_userptr(item);
     }
     else if (((int) item_opts(item) & O_SELECTABLE) == O_SELECTABLE) {
         switch (key) {
@@ -205,38 +201,51 @@ static void refreshPrompt(int key) {
                 refresh();
                 return;
             case ' ':
-                touchwin(getPromptWindow(0));
+                touchwin(w0);
                 (* buttonFunc)(SELECT, item);
-                wrefresh(getPromptWindow(0));
-                wrefresh(getPromptWindow(1));
-                refresh();
+                wrefresh(w0);
+                wrefresh(w1);
                 return;
         }
     }
 
-    touchwin(getPromptWindow(0));
+    w0 = getPromptWindow(0);
+    w1 = getPromptWindow(1);
+
+    touchwin(w0);
     (* buttonFunc)(HOVER, item);
-    wrefresh(getPromptWindow(0));
-    wrefresh(getPromptWindow(1));
-    refresh();
+    wrefresh(w0);
+    wrefresh(w1);
 }
 
-static Prompt getDialoguePrompt() {
-    Prompt p;
-    ITEM** items;
+static Prompt getPrompt(PromptMode mode) {
+    switch (mode) {
+        case TITLE_PROMPT:
+            return getTitlePrompt();
+        case TITLE_CHARACTER_PROMPT:
+            return getCharPrompt();
+        case INV_CATEGORY_PROMPT:
+            return getCategoryPrompt();
+        case INVENTORY_PROMPT:
+            return getInventoryPrompt();
+        case DIALOGUE_PROMPT: {
+            ITEM** items;
+            Prompt p;
     
-    items = calloc(2, sizeof(ITEM*));
-    items[0] = new_item("Confirm", "confirm");
-    items[1] = NULL;
-    set_item_userptr(items[0], onDialogueConfirm);
+            items = calloc(2, sizeof(ITEM*));
+            items[0] = new_item("Confirm", "confirm");
+            items[1] = NULL;
+            set_item_userptr(items[0], onDialogueConfirm);
 
-    p.desc_lines = 5;
-    p.items = items;
-    p.height = 15;
-    p.width = 80;
-    p.y = 10;
-    p.x = column / 2 - 40;
-    return p;
+            p.desc_lines = 5;
+            p.items = items;
+            p.height = 15;
+            p.width = 80;
+            p.y = 10;
+            p.x = column / 2 - 40;
+            return p;
+        }
+    }
 }
 
 static void onDialogueConfirm(ItemEvent event, ITEM* item) {
