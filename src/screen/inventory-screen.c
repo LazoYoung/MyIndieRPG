@@ -9,9 +9,9 @@
 #include <ncursesw/panel.h>
 #include "header/screen.h"
 #include "header/game.h"
+#include "header/data.h"
 
 static ItemCategory category;
-static char desc[INVENTORY_CAP][4];
 
 static void onSelectCategory(ItemEventBus);
 static void onSelectItem(ItemEventBus);
@@ -43,30 +43,27 @@ Prompt getCategoryPrompt() {
     prompt.y = row / 2 - 10;
     prompt.desc_lines = 1;
     prompt.items = items;
-    prompt.gitems = NULL;
-    prompt.gitem_count = 0;
     return prompt;
 }
 
 Prompt getInventoryPrompt() {
-    ITEM** items = calloc(INVENTORY_CAP, sizeof(ITEM*));
-    GItem** gitems = calloc(INVENTORY_CAP, sizeof(GItem*));
+    ITEM** items = calloc(SLOT_CAP, sizeof(ITEM*));
     Prompt prompt;
     int n = 0;
 
-    for (int i = 0; i < INVENTORY_CAP; i++) {
-        GItem *gitem = inv.items[i];
+    for (int c = 0; c < IC_SIZE; c++) {
+        for (int i = 0; i < SLOT_CAP; i++) {
+            int itemType = inv.items[c][i];
 
-        if (gitem && gitem->category == category) {
-            items[n] = new_item(getItemName(gitem->type), NULL);
-            gitems[n] = gitem;
+            if (itemType < 0) continue;
+
+            items[n] = new_item(getItemName(itemType), intToString(itemType));
             set_item_userptr(items[n], onSelectItem);
             n++;
         }
     }
 
     items = realloc(items, (n + 2) * sizeof(ITEM*));
-    gitems = realloc(gitems, n * sizeof(GItem*));
     items[n] = new_item("← Go back", "back");
     items[n + 1] = NULL;
     set_item_userptr(items[n], onReturn);
@@ -77,8 +74,6 @@ Prompt getInventoryPrompt() {
     prompt.y = row / 2 - 10;
     prompt.desc_lines = 8;
     prompt.items = items;
-    prompt.gitems = gitems;
-    prompt.gitem_count = n;
     return prompt;
 }
 
@@ -125,53 +120,41 @@ static void onSelectCategory(ItemEventBus bus) {
 
 static void onSelectItem(ItemEventBus bus) {
     WINDOW *win = getPromptWindow(0);
-    GItem *gitem = bus.gitem;
-    const char *name = getItemName(gitem->type);
+    ItemType gItem = atoi(item_description(bus.item));
+    const char *name = getItemName(gItem);
+    int *equip = &inv.equipment[category];
     
     switch (bus.event) {
         case CLICK: {
-            if (gitem->equip) {
-                gitem->equip = false;
-                inv.equipment[category] = NULL;
-            }
-            else {
-                if (inv.equipment[category] != NULL) {
-                    WINDOW *win1;
 
-                    setPromptMode(DIALOGUE_PROMPT);
-                    win1 = getPromptWindow(0);
-
-                    mvwprintw(win1, 5, 3, "You can't have multiple items");
-                    mvwprintw(win1, 6, 3, "equipped in the same category!");
-                    break;
-                }
-
-                inv.equipment[category] = gitem;
-                gitem->equip = true;
+            if (*equip > -1 && *equip == gItem) {
+                *equip = -1;
             }
 
+            *equip = gItem;
             setPromptMode(INVENTORY_PROMPT);
             break;
         }
 
         case HOVER: {
-            char desc[20];
+            char desc[30];
+            int value = itemAttr[gItem][I_VALUE];
 
-            switch (gitem->category) {
+            switch (itemAttr[gItem][I_CATEGORY]) {
                 case WEAPON:
-                    sprintf(desc, "Attack power: %d", gitem->value);
+                    sprintf(desc, "Attack power: %d", value);
                     break;
                 case ARMORY:
-                    sprintf(desc, "Defense level: %d", gitem->value);
+                    sprintf(desc, "Damage absorbtion: %d", value);
                     break;
                 case POTION: // TODO Potion item value determines whether HP or MP.
-                    sprintf(desc, "%s recovery", gitem->value == 0 ? "HP" : "MP");
+                    sprintf(desc, "%s recovery", value ? "HP" : "MP");
                     break;
             }
 
             mvwprintw(win, 2, 3, "Name: %s", name);
             mvwprintw(win, 3, 3, desc);
-            mvwprintw(win, 4, 3, "Equipped: %s", gitem->equip ? "YES" : "NO");
+            mvwprintw(win, 4, 3, "Equipped: %s", *equip == gItem ? "YES" : "NO");
             break;
         }
     }

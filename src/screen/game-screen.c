@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ncursesw/curses.h>
 #include <ncursesw/panel.h>
+#include "header/data.h"
 #include "header/screen.h"
 #include "header/game.h"
 #include "header/level.h"
@@ -106,14 +107,14 @@ void drawGameScreen() {
         wattroff(health_w, A_BOLD);
         waddch(health_w, ' ');
         wmove(health_w, 0, 13);
-        drawGuage(health_w, GREEN, RED, 25, (float) player->health / player->max_health);
+        drawGuage(health_w, GREEN, RED, 25, (float) player->health / playerAttr[playerType][P_MAX_HEALTH]);
         waddch(mana_w, ' ');
         wattron(mana_w, A_BOLD);
         waddstr(mana_w, "Mana");
         wattroff(mana_w, A_BOLD);
         waddch(mana_w, ' ');
         wmove(mana_w, 0, 13);
-        drawGuage(mana_w, CYAN, BLACK, 25, (float) player->mp / p_attr.max_mp);
+        drawGuage(mana_w, CYAN, BLACK, 25, (float) player->mp / playerAttr[playerType][P_MAX_MP]);
         drawStatus(stat_w);
         drawEquipment(weapon_w, WEAPON);
         drawEquipment(armory_w, ARMORY);
@@ -147,10 +148,10 @@ WINDOW* getGameWindow(WindowType type) {
 }
 
 static void drawStatus(WINDOW* win) {
-    int lvl = p_attr.level;
+    int lvl = playerAttr[playerType][P_LEVEL];
 
-    mvwprintw(win, 1, 2, "Character: %s", p_attr.name);
-    mvwprintw(win, 2, 2, "Level: %d (Exp. %d/%d)", lvl, p_attr.exp, getExpCap(lvl));
+    mvwprintw(win, 1, 2, "Character: %s", getPlayerName(playerType));
+    mvwprintw(win, 2, 2, "Level: %d (Exp. %d/%d)", lvl, playerAttr[playerType][P_EXP], getExpCap(lvl));
     mvwprintw(win, 3, 2, "Coin: %d", inv.coin);
 }
 
@@ -174,12 +175,12 @@ static void drawGuage(WINDOW* win, Color color_fg, Color color_bg, int length, f
 }
 
 static void drawEquipment(WINDOW* win, ItemCategory category) {
-    GItem *item = inv.equipment[category];
     const char *name = NULL;
     const char *title = NULL;
+    ItemType gItem = inv.equipment[category];
 
-    if (item != NULL) {
-        name = getItemName(item->type);
+    if (gItem > -1) {
+        name = getItemName(gItem);
     }
 
     switch (category) {
@@ -207,7 +208,7 @@ static void drawControlAid(WINDOW* win) {
 }
 
 static void drawTiles() {
-    Entity *entity = getEntity(p_attr.name);
+    Entity *entity = getEntity(getPlayerName(playerType));
     WINDOW *win = getGameWindow(WORLD_WIN);
     Location loc;
 
@@ -258,7 +259,14 @@ static void drawTiles() {
 
                         if (prev_t != tile) {
                             char label[20];
-                            const char* name = getStageName(portal->dest);
+                            const char* name;
+                            
+                            if (portal->alias != NULL) {
+                                name = portal->alias;
+                            }
+                            else {
+                                name = getStageName(portal->dest);
+                            }
 
                             snprintf(label, 20, "-> %s", name);
                             prev_t = tile;
@@ -287,7 +295,7 @@ static void drawEntities() {
         wattron(win, color);
 
         for (map_y = 0; map_y < 9; map_y++) {
-            if (iter->type != PLAYER) {
+            if (iter->type[0] != PLAYER) {
                 if (!getScreenCoordByTile(Y, loc.pos[1], &scr_y))
                     continue;
             
@@ -298,28 +306,31 @@ static void drawEntities() {
                 if (!skin.map[map_y][map_x])
                     continue;
 
-                if (iter->type == PLAYER) {
+                if (iter->type[0] == PLAYER) {
                     mvwaddch(win, ctr_y + map_y - 4, ctr_x + map_x - 4, ' ');
+                    return;
                 }
-                else if (getScreenCoordByTile(X, loc.pos[0], &scr_x)){
-                    scr_x += map_x - 4;
 
-                    if (scr_x < column_ && scr_y < row_)
-                        mvwaddch(win, scr_y, scr_x, ' ');
+                if ( !(iter->type[0] == MONSTER && getScreenCoordByTile(X, loc.pos[0], &scr_x)))
+                    return;
 
-                    if (!label) {
-                        label = true;
-                        wmove(win, scr_y - 3, scr_x);
+                scr_x += map_x - 4;
 
-                        if (scr_y - 3 > init_y) {
-                            if (skin.color == RED)
-                                wattroff(win, color);
+                if (scr_x < column_ && scr_y < row_)
+                    mvwaddch(win, scr_y, scr_x, ' ');
 
-                            drawGuage(win, GREEN, RED, 10, (float) iter->health / iter->max_health);
-                            
-                            if (skin.color == RED)
-                                wattron(win, color);
-                        }
+                if (!label) {
+                    label = true;
+                    wmove(win, scr_y - 3, scr_x);
+
+                    if (scr_y - 3 > init_y) {
+                        if (skin.color == RED)
+                            wattroff(win, color);
+
+                        drawGuage(win, GREEN, RED, 10, (float) iter->health / monsterAttr[iter->type[1]][M_MAX_HEALTH]);
+                        
+                        if (skin.color == RED)
+                            wattron(win, color);
                     }
                 }
             }

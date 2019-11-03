@@ -8,50 +8,28 @@
 #include <string.h>
 #include <ncursesw/curses.h>
 #include "header/game.h"
+#include "header/data.h"
 #include "header/level.h"
 #include "header/physic.h"
 #include "header/screen.h"
 #include "header/vector.h"
 
-PlayerProperty p_attr;
 Inventory inv;
-GItem item_reg[ITEMTYPE_SIZE];
 bool inGame = false;
-static Entity player;
+static Entity playerEntity;
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
 extern void updatePhysic(Entity*);
-static void initPlayer();
+static void initInventory();
+static void initGameCache();
 static void onPlayerDeath(Entity*);
 
 void startGame() {
-    GItem sword1, sword2, sword3, armor1;
-
     setScreenMode(GAME_SCREEN);
     generateLevel(LOBBY);
-    initPlayer();
-
-    sword1.category = WEAPON;
-    sword1.type = SMALL_SWORD;
-    sword1.value = 5;
-    sword1.equip = false;
-    sword2.category = WEAPON;
-    sword2.type = BRONZE_SWORD;
-    sword2.value = 10;
-    sword2.equip = false;
-    sword3.category = WEAPON;
-    sword3.type = STEEL_BLADE;
-    sword3.value = 15;
-    sword3.equip = false;
-    armor1.category = ARMORY;
-    armor1.type = HOOD_CAPE;
-    armor1.value = 2;
-    armor1.equip = false;
-    item_reg[SMALL_SWORD] = sword1;
-    item_reg[BRONZE_SWORD] = sword2;
-    item_reg[STEEL_BLADE] = sword3;
-    item_reg[HOOD_CAPE] = armor1;
+    initGameCache();
+    spawnEntity(&playerEntity);
     addItem(SMALL_SWORD);
     addItem(HOOD_CAPE);
 
@@ -69,18 +47,17 @@ bool hasSkill(char skill_code) {
     return (inv.skills & filter) == filter;
 }
 
-void addItem(ItemType type) {
-    for (int i = 0; i < INVENTORY_CAP; i++) {        
-        if (inv.items[i] == NULL) {
-            GItem *item = &item_reg[type];
-            inv.items[i] = item;
+bool addItem(ItemType type) {
+    ItemCategory category = itemAttr[type][I_CATEGORY];
 
-            if (item->equip)
-                inv.equipment[item->category] = item;
-                
-            break;
+    for (int i = 0; i < SLOT_CAP; i++) {
+        if (inv.items[category][i] > -1) {
+            inv.items[category][i] = type;
+            return true;
         }
     }
+
+    return false;
 }
 
 /**
@@ -88,14 +65,16 @@ void addItem(ItemType type) {
  * Returns true if he/she levels up.
  **/
 bool addExp(int exp) {
-    int rem;
+    int rem, *playerExp, *playerLevel;
 
-    p_attr.exp += exp;
-    rem = p_attr.exp - getExpCap(p_attr.level);
+    playerExp = &playerAttr[playerType][P_EXP];
+    playerLevel = &playerAttr[playerType][P_LEVEL];
+    *playerExp += exp;
+    rem = *playerExp - getExpCap(*playerLevel);
 
     if (rem >= 0) {
-        p_attr.level++;
-        p_attr.exp = rem;
+        *playerLevel++;
+        *playerExp = rem;
         return true;
     }
     return false;
@@ -119,11 +98,11 @@ void doTick(int key) {
                 break;
             }
 
-            if (iter->type == PLAYER) {
+            if (iter->type[0] == PLAYER) {
                 static int regen = 40;
 
                 if (regen-- == 0) {
-                    if (iter->mp < p_attr.max_mp)
+                    if (iter->mp < playerAttr[playerType][P_MAX_MP])
                         iter->mp++;
 
                     regen = 40;
@@ -138,68 +117,48 @@ void doTick(int key) {
     }
 }
 
+int getExpCap(int level) {
+    return sqrt(level) * 100;
+}
+
 /* Returns the rounded count of frames being made during the given time-frame (ms) */
 int getFramesDuringTime(int miliseconds) {
     return round(fps * miliseconds / 1000);
 }
 
-int getExpCap(int level) {
-    return sqrt(level) * 100;
-}
-
-const char* getItemName(ItemType type) {
-    switch (type) {
-        case SMALL_SWORD:
-            return "Small Sword";
-        case BRONZE_SWORD:
-            return "Bronze Sword";
-        case STEEL_BLADE:
-            return "Steel Blade";
-        case HOOD_CAPE:
-            return "Hood Cape";
-        default:
-            return NULL;
-    }
-}
-
-static void initPlayer() {
+static void initGameCache() {
     AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
     bool map[9][9] = {false};
     Texture skin;
 
-    for (int i = 0; i < INVENTORY_CAP; i++) {
-        inv.items[i] = NULL;
+    for (int i = 0; i < IC_SIZE; i++) {
+        for (int n = 0; n < SLOT_CAP; n++) {
+            inv.items[i][n] = -1;
+        }
+
+        inv.equipment[i] = -1;
     }
+
     inv.skills = 0;
     inv.coin = 0;
-    inv.equipment[0] = NULL;
-    inv.equipment[1] = NULL;
-    inv.equipment[2] = NULL;
-    
-    p_attr.max_mp = 100;
-    p_attr.level = 1;
-    p_attr.exp = 0;
 
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
     memcpy(skin.map, map, sizeof(map));
 
-    player.name = p_attr.name;
-    player.type = PLAYER;
-    player.loc = getTopLocation(5);
-    player.target = NULL;
-    player.hitbox = hitbox;
-    player.health = player.max_health = p_attr.max_health;
-    player.mp = p_attr.max_mp;
-    player.absorb = 0;
-    player.damage = 1;
-    player.agility = p_attr.agility;
-    player.strength = p_attr.strength;
-    player.offset[0] = 0.0;
-    player.offset[1] = 0.0;
-    player.skin = skin;
-    player.deathEvent = onPlayerDeath;
-    spawnEntity(&player);
+    playerEntity.name = getPlayerName(playerType);
+    playerEntity.type[0] = PLAYER;
+    playerEntity.type[1] = playerType;
+    playerEntity.loc = getTopLocation(5);
+    playerEntity.target = NULL;
+    playerEntity.hitbox = hitbox;
+    playerEntity.health = playerAttr[playerType][P_MAX_HEALTH];
+    playerEntity.mp = playerAttr[playerType][P_MAX_MP];
+    playerEntity.damage = 1;
+    playerEntity.offset[0] = 0.0;
+    playerEntity.offset[1] = 0.0;
+    playerEntity.skin = skin;
+    playerEntity.deathEvent = onPlayerDeath;
 }
 
 static void onPlayerDeath(Entity* entity) {
@@ -207,6 +166,6 @@ static void onPlayerDeath(Entity* entity) {
     setPromptMode(DIALOGUE_PROMPT);
     mvwprintw(getPromptWindow(0), 3, 3, "You died! Respawning back to lobby...");
 
-    entity->health = entity->max_health;
+    entity->health = playerAttr[playerType][P_MAX_HEALTH];
     entity->loc = getTopLocation(5);
 }

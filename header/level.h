@@ -4,8 +4,10 @@
 
 #include <stdbool.h>
 #include "game-struct.h"
+#include "data.h"
 
 extern int level_width, level_height;
+extern DungeonType dungeon;
 
 extern void spawnEntity(Entity*);
 extern bool despawnEntity(const char*);
@@ -17,7 +19,8 @@ extern Portal* getPortal(Tile);
 extern void generateLevel(Stage);
 extern void destructLevel();
 extern Stage getStage();
-extern const char* getStageName(Stage);
+extern char* getStageName(Stage);
+extern char* getDungeonName(DungeonType type);
 extern Tile getTileAt(int, int);
 extern void setTileAt(int x, int y, Tile tile);
 

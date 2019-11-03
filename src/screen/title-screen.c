@@ -3,22 +3,23 @@
 #define _XOPEN_SOURCE_EXTENDED 1
 
 #include <stdlib.h>
+#include <string.h>
 #include <menu.h>
 #include <panel.h>
 #include <ncursesw/curses.h>
 #include "header/screen.h"
 #include "header/game.h"
+#include "header/data.h"
 
 extern int column, row;
 
+extern void initModPage();
 extern void suspend();
 static void printAttributes();
 static void onStart(ItemEventBus);
+static void onMod(ItemEventBus);
 static void onQuit(ItemEventBus);
-static void onKirito(ItemEventBus);
-static void onAsuna(ItemEventBus);
-static void onKlein(ItemEventBus);
-static void onAgil(ItemEventBus);
+static void onSelectCharacter(ItemEventBus);
 static void onReturn(ItemEventBus);
 
 void drawTitleScreen() {
@@ -30,138 +31,105 @@ void drawTitleScreen() {
 }
 
 Prompt getTitlePrompt() {
-    ITEM **myItems = calloc(3, sizeof(ITEM*));
-    myItems[0] = new_item("◎ Start Game", "Start Game");
-    myItems[1] = new_item("◎ Quit", "Quit");
-    myItems[2] = NULL; // 말단 원소는 NULL값으로 지정해야 함
-
-    // 버튼 동작 함수를 NCurse로 넘겨준다.
-    set_item_userptr(myItems[0], onStart);
-    set_item_userptr(myItems[1], onQuit);
-
     Prompt p;
+    ITEM **items;
+    
+    items = calloc(4, sizeof(ITEM*));
+    items[0] = new_item("◎ Start Game", "start");
+    items[1] = new_item("◎ Modification", "mod");
+    items[2] = new_item("◎ Quit", "quit");
+    items[3] = NULL; // ITEM* array has to be terminated with NULL element.
+
+    // Inject function pointers to their respective items.
+    // These functions define the functionality of menu item.
+    set_item_userptr(items[0], onStart);
+    set_item_userptr(items[1], onMod);
+    set_item_userptr(items[2], onQuit);
+
     p.width = 40;
     p.height = 15;
     p.x = column / 2 - 20;
     p.y = row / 2 - 5;
-    p.desc_lines = 1;
-    p.items = myItems;
-    p.gitems = NULL;
-    p.gitem_count = 0;
+    p.desc_lines = 2;
+    p.items = items;
     return p;
 }
 
 Prompt getCharPrompt() {
     Prompt p;
-    ITEM **myItems = (ITEM**) calloc(6, sizeof(ITEM*));
+    ITEM **items;
+    
+    items = (ITEM**) calloc(6, sizeof(ITEM*));
+    items[0] = new_item("▣ Kirito", intToString(KIRITO));
+    items[1] = new_item("▣ Asuna", intToString(ASUNA));
+    items[2] = new_item("▣ Klein", intToString(KLEIN));
+    items[3] = new_item("▣ Agil", intToString(AGIL));
+    items[4] = new_item("← Go back", "back");
+    items[5] = NULL;
 
-    myItems[0] = new_item("▣ Kirito", "Kirito");
-    myItems[1] = new_item("▣ Asuna", "Asuna");
-    myItems[2] = new_item("▣ Klein", "Klein");
-    myItems[3] = new_item("▣ Agil", "Agil");
-    myItems[4] = new_item("← Go back", "Go back");
-    myItems[5] = NULL;
-
-    set_item_userptr(myItems[0], onKirito);
-    set_item_userptr(myItems[1], onAsuna);
-    set_item_userptr(myItems[2], onKlein);
-    set_item_userptr(myItems[3], onAgil);
-    set_item_userptr(myItems[4], onReturn);
+    set_item_userptr(items[0], onSelectCharacter);
+    set_item_userptr(items[1], onSelectCharacter);
+    set_item_userptr(items[2], onSelectCharacter);
+    set_item_userptr(items[3], onSelectCharacter);
+    set_item_userptr(items[4], onReturn);
 
     p.width = 40;
     p.height = 20;
     p.x = column / 2 - 20;
     p.y = row / 2 - 10;
     p.desc_lines = 8;
-    p.items = myItems;
-    p.gitems = NULL;
-    p.gitem_count = 0;
+    p.items = items;
     return p;
 }
 
-/* 시작 버튼을 누른 이벤트 */
 static void onStart(ItemEventBus bus) {
     if (bus.event == CLICK) {
         setPromptMode(TITLE_CHARACTER_PROMPT);
         return;
     }
 
-    mvwprintw(menu_win(getPromptMenu()), 1, 3, "Hit <Enter> to select your character!");
+    mvwprintw(getPromptWindow(0), 2, 3, "Hit <Enter> to start the game!");
 }
 
-/* 종료 버튼을 누른 이벤트 */
+static void onMod(ItemEventBus bus) {
+    if (bus.event == CLICK) {
+        initModPage();
+        setPromptMode(MOD_CATEGORY_PROMPT);
+        return;
+    }
+
+    mvwprintw(getPromptWindow(0), 2, 3, "Hit <Enter> to modify game data.");
+}
+
 static void onQuit(ItemEventBus bus) {
     if (bus.event == CLICK) {
         suspend();
         return;
     }
     
-    mvwprintw(menu_win(getPromptMenu()), 1, 3, "Hit <Enter> to exit the game.");
+    mvwprintw(getPromptWindow(0), 2, 3, "Hit <Enter> to exit the game.");
 }
 
-static void onKirito(ItemEventBus bus) {
-    p_attr.max_health = 100;
-    p_attr.max_mp = 100;
-    p_attr.agility = 30;
-    p_attr.strength = 30;
-    p_attr.name = "Kirito";
-    inv.skills = 0;
-    assignSkill(MANA_RECOVERY);
-    assignSkill(DUAL_WIELD);
+static void onSelectCharacter(ItemEventBus bus) {
+    switch (atoi(item_description(bus.item))) {
+        case KIRITO:
+            playerType = KIRITO;
+            break;
+        case ASUNA:
+            playerType = ASUNA;
+            break;
+        case KLEIN:
+            playerType = KLEIN;
+            break;
+        case AGIL:
+            playerType = AGIL;
+            break;
+    }
 
     if (bus.event == CLICK) {
         startGame();
     } else {
         printAttributes();        
-    }
-}
-
-static void onAsuna(ItemEventBus bus) {
-    p_attr.max_health = 100;
-    p_attr.max_mp = 100;
-    p_attr.agility = 50;
-    p_attr.strength = 20;
-    p_attr.name = "Asuna";
-    inv.skills = 0;
-    assignSkill(HEALTH_RECOVERY);
-
-    if (bus.event == CLICK) {
-        startGame();
-    } else {
-        printAttributes();        
-    }
-}
-
-static void onKlein(ItemEventBus bus) {
-    p_attr.max_health = 100;
-    p_attr.max_mp = 100;
-    p_attr.agility = 30;
-    p_attr.strength = 30;
-    p_attr.name = "Klein";
-    inv.skills = 0;
-    assignSkill(MANA_RECOVERY);
-    assignSkill(EXP_BONUS);
-
-    if (bus.event == CLICK) {
-        startGame();
-    } else {
-        printAttributes();        
-    }
-}
-
-static void onAgil(ItemEventBus bus) {
-    p_attr.max_health = 100;
-    p_attr.max_mp = 100;
-    p_attr.agility = 20;
-    p_attr.strength = 50;
-    p_attr.name = "Agil";
-    inv.skills = 0;
-    assignSkill(AXE_BERSERK);
-
-    if (bus.event == CLICK) {
-        startGame();
-    } else {
-        printAttributes();
     }
 }
 
@@ -172,11 +140,13 @@ static void onReturn(ItemEventBus bus) {
 }
 
 static void printAttributes() {
-    WINDOW *w = menu_win(getPromptMenu());
+    WINDOW *w = getPromptWindow(0);
     int r = 4;
-    mvwprintw(w, 1, 3, "Name: %s", p_attr.name);
-    mvwprintw(w, 2, 3, "AGILITY: %d", p_attr.agility);
-    mvwprintw(w, 3, 3, "STRENGTH: %d", p_attr.strength);
+    mvwprintw(w, 1, 3, "Character - %s", getPlayerName(playerType));
+    mvwprintw(w, 3, 3, "HP: %d", playerAttr[playerType][P_MAX_HEALTH]);
+    mvwprintw(w, 4, 3, "MP: %d", playerAttr[playerType][P_MAX_MP]);
+    mvwprintw(w, 5, 3, "AGILITY: %d", playerAttr[playerType][P_AGI]);
+    mvwprintw(w, 6, 3, "STRENGTH: %d", playerAttr[playerType][P_STR]);
 
     if (hasSkill(DUAL_WIELD)) {
         mvwprintw(w, r++, 3, "UNIQUE SKILL: Dual Wield");

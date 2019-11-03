@@ -1,29 +1,24 @@
 #ifndef GAME_STRUCT_INCLUDED
 #define GAME_STRUCT_INCLUDED
-#define INVENTORY_CAP 10
+
+#define SLOT_CAP 10
 
 #include <stdbool.h>
+#include "data.h"
 
 typedef float Vector[2];
 
 typedef enum Tile { AIR, BLOCK, TRAIL, PORTAL_1, PORTAL_2, PORTAL_3, PORTAL_4, PORTAL_5 } Tile;
 typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, CYAN } Color;
-typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON_1, DUNGEON_2, DUNGEON_3 } Stage;
-typedef enum ItemCategory { WEAPON, ARMORY, POTION } ItemCategory;
-typedef enum ItemType { SMALL_SWORD, BRONZE_SWORD, STEEL_BLADE, HOOD_CAPE, ITEMTYPE_SIZE } ItemType;
+typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON } Stage;
 typedef enum EntityType { PLAYER, MONSTER } EntityType;
-typedef struct GItem {
-    ItemCategory category;
-    ItemType type;
-    bool equip;
-    int value;
-} GItem;
 
 typedef struct {
     bool valid;
     Tile tile;
-    Stage dest;
     Color color;
+    Stage dest;
+    char* alias; // (Optional) Alias
 } Portal;
 
 typedef struct {
@@ -55,16 +50,12 @@ typedef struct { // Present bias of entity movement
 
 typedef struct entity {
     const char* name;
-    EntityType type;
+    int type[2]; // EntityType-Type (i.e. PLAYER-ASUNA)
     Location loc;
     struct entity* target; // Monster's target
-    char agility; // Extra speed ratio (%)
-    char strength; // Extra damage ratio (%)
-    char absorb; // Damage absorbtion
     float health;
-    float max_health;
-    char mp; // Mana point
-    char damage; // Amount of damage dealt without a weapon
+    int mp; // Player's mana point
+    int damage; // Amount of damage dealt without a weapon
     Texture skin;
     AABB hitbox;
     Vector offset;
@@ -73,18 +64,8 @@ typedef struct entity {
 } Entity;
 
 typedef struct {
-    char max_health;
-    char max_mp;
-    char agility; // Extra speed ratio (%)
-    char strength; // Extra damage ratio (%)
-    unsigned int level;
-    unsigned long long exp; // Level-up cost: sqrt(level) * 100
-    const char* name; // Character name
-} PlayerProperty;
-
-typedef struct {
-    GItem *items[INVENTORY_CAP];
-    GItem *equipment[3]; // Indexed upon ItemCategory
+    int items[IC_SIZE][SLOT_CAP]; // ItemCategory-ItemType
+    int equipment[IC_SIZE]; // ItemCategory-ItemType
     long long skills; // Achieved skills are recorded as codes in bit-manner.
     int coin;
 } Inventory;

@@ -13,8 +13,8 @@
 ScreenMode screen_mode = TITLE_SCREEN;
 PromptMode prompt_mode = PROMPT_NONE;
 PromptMode hid_prompt_mode = PROMPT_NONE;
-int column = 230;
-int row = 70;
+int column = 224;
+int row = 66;
 Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
@@ -119,6 +119,10 @@ static Prompt getPrompt(PromptMode mode) {
             return getTitlePrompt();
         case TITLE_CHARACTER_PROMPT:
             return getCharPrompt();
+        case MOD_PROMPT:
+            return getModPrompt();
+        case MOD_CATEGORY_PROMPT:
+            return getModCategoryPrompt();
         case INV_CATEGORY_PROMPT:
             return getCategoryPrompt();
         case INVENTORY_PROMPT:
@@ -138,8 +142,6 @@ static Prompt getPrompt(PromptMode mode) {
             p.width = 80;
             p.y = 10;
             p.x = column / 2 - 40;
-            p.gitems = NULL;
-            p.gitem_count = 0;
             return p;
         }
     }
@@ -177,6 +179,19 @@ void setScreenMode(ScreenMode mode) {
     clearScreen();
     screen_mode = mode;
     drawScreen();
+}
+
+void setItemName(ITEM *item, const char* name) {
+    int len = strlen(name);
+    char* clone = malloc(len + 1);
+
+    if (item->name.str) {
+        free(item->name.str);
+    }
+
+    strcpy(clone, name);
+    item->name.length = len;
+    item->name.str = clone;
 }
 
 void setMenuOptions(Menu_Options options, bool on) {
@@ -234,13 +249,6 @@ static void updatePrompt(int key) {
                 bus.event = SELECT;
                 break;
         }
-    }
-    
-    if (prompt.gitems && prompt.gitem_count > id) {
-        bus.gitem = prompt.gitems[id];
-    }
-    else {
-        bus.gitem = NULL;
     }
 
     bus.item = item;

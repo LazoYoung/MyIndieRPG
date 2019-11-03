@@ -4,43 +4,21 @@
 #include "header/level.h"
 #include "header/screen.h"
 #include "header/game.h"
+#include "header/data.h"
 
 #define MAX_REWARD 3
 
+DungeonType dungeon;
 static Entity* monster;
 static int exp;
-static int reward[MAX_REWARD];
+static ItemType reward[MAX_REWARD];
 
+static void spawnMonster(MonsterType);
 static void onMonsterDeath(Entity*);
 
 void generateDungeon() {
-    if (getStage() == DUNGEON_1) {
-        monster = malloc(sizeof(Entity));
-        AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
-        Texture skin;
-        bool map[9][9] = {false};
-
-        skin.color = RED;
-        map[3][3] = map[3][4] = map[3][5] = true;
-        map[4][3] = map[4][4] = map[4][5] = true;
-        map[5][3] = map[5][4] = map[5][5] = true;
-        memcpy(skin.map, map, sizeof(map));
-
-        monster->type = MONSTER;
-        monster->loc = getTopLocation(50);
-        monster->target = getEntityByID(0);
-        monster->hitbox = hitbox;
-        monster->name = "Magika";
-        monster->health = monster->max_health = 50.0;
-        monster->damage = 5;
-        monster->absorb = 0;
-        monster->agility = -50;
-        monster->strength = 0;
-        monster->offset[0] = 0.0;
-        monster->offset[1] = 0.0;
-        monster->skin = skin;
-        monster->deathEvent = onMonsterDeath;
-        spawnEntity(monster);
+    if (dungeon == DUNGEON_1) {
+        spawnMonster(GOLEM);
 
         exp = 100;
         reward[0] = BRONZE_SWORD;
@@ -55,6 +33,34 @@ void destructDungeon() {
         free(monster);
         monster = NULL;
     }
+}
+
+static void spawnMonster(MonsterType type) {
+    monster = malloc(sizeof(Entity));
+    AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
+    Texture skin;
+    bool map[9][9] = {false};
+
+    skin.color = RED;
+    map[3][3] = map[3][4] = map[3][5] = true;
+    map[4][3] = map[4][4] = map[4][5] = true;
+    map[5][3] = map[5][4] = map[5][5] = true;
+    memcpy(skin.map, map, sizeof(map));
+
+    monster->type[0] = MONSTER;
+    monster->type[1] = type;
+    monster->loc = getTopLocation(50);
+    monster->target = getEntityByID(0);
+    monster->hitbox = hitbox;
+    monster->name = getMonsterName(type);
+    monster->mp = 0;
+    monster->health = monsterAttr[type][M_MAX_HEALTH];
+    monster->damage = monsterAttr[type][M_DAMAGE];
+    monster->offset[0] = 0.0;
+    monster->offset[1] = 0.0;
+    monster->skin = skin;
+    monster->deathEvent = onMonsterDeath;
+    spawnEntity(monster);
 }
 
 static void onMonsterDeath(Entity* entity) {

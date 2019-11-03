@@ -8,6 +8,7 @@
 #include <ncursesw/curses.h>
 #include "header/screen.h"
 #include "header/game.h"
+#include "header/data.h"
 
 static bool cont = true;
 
@@ -15,7 +16,7 @@ extern void doTick(int);
 void suspend();
 
 int main() {
-	// NCurses 터미널 스크린 초기화
+	// NCurses terminal initialization
 	setlocale(LC_ALL, "");
 	initscr();
 
@@ -32,7 +33,10 @@ int main() {
 	curs_set(0);
 	keypad(stdscr, true);
 	
-	// 타이틀 화면을 시작
+	// Initialize game data
+	initData();
+
+	// Start title screen
 	setPromptMode(TITLE_PROMPT);
 	drawScreen();
 	initGameResolution();

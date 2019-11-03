@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ncursesw/curses.h>
 #include "header/game-struct.h"
+#include "header/data.h"
 #include "header/level.h"
 #include "header/game.h"
 #include "header/screen.h"
@@ -31,8 +32,8 @@ bool overlaps(AABB a, AABB b) {
     return true;
 }
 
-void updateControl(int key, Entity* player) {
-    Bias *bias = &player->bias;
+void updateControl(int key, Entity* p) {
+    Bias *bias = &p->bias;
 
     switch (key) {
         case 'd': // Right
@@ -69,11 +70,11 @@ void updateControl(int key, Entity* player) {
                 norm[0] = -1.0;
             }
 
-            src[0] = player->loc.pos[0] + norm[0] * 3;
-            src[1] = player->loc.pos[1];
+            src[0] = p->loc.pos[0] + norm[0] * 3;
+            src[1] = p->loc.pos[1];
             
-            if (player->mp >= 40 && spawnSwordTrail(src, norm)) {
-                player->mp -= 40;
+            if (p->mp >= 40 && spawnSwordTrail(src, norm)) {
+                p->mp -= 40;
             }
             break;
         }
@@ -86,13 +87,13 @@ void updateControl(int key, Entity* player) {
                 while (i < MAX_ENTITY) {
                     victim = getEntityByID(i++);        
 
-                    if (!victim || strcmp(victim->name, player->name) == 0)
+                    if (!victim || strcmp(victim->name, p->name) == 0)
                         continue;
 
-                    dist = distance(victim->loc.pos, player->loc.pos);
+                    dist = distance(victim->loc.pos, p->loc.pos);
 
                     if (dist < 3.0) {
-                        attack(player, victim, dist);
+                        attack(p, victim, dist);
                         bias->attackCooldown = getFramesDuringTime(700);
                     }
                     break;
@@ -111,6 +112,16 @@ void updatePhysic(Entity* e) {
     Vector* last_pos = &l->last_pos;
     AABB* hitbox = &e->hitbox;
     Bias* bias = &e->bias;
+    int agility, max_hp;
+
+    if (e->type[0] == PLAYER) {
+        agility = playerAttr[e->type[1]][P_AGI];
+        max_hp = playerAttr[e->type[1]][P_MAX_HEALTH];
+    }
+    else if (e->type[0] == MONSTER) {
+        agility = monsterAttr[e->type[1]][M_AGI];
+        max_hp = monsterAttr[e->type[1]][M_MAX_HEALTH];
+    }
 
     // Update movement records
     l->last_pos[0] = l->pos[0];
@@ -136,10 +147,10 @@ void updatePhysic(Entity* e) {
 
     // Handle controls and gravity
     if (bias->leftSpan > 0) {
-        l->spd[0] = -10.0 * (1 + e->agility / 100.0);
+        l->spd[0] = -10.0 * (1 + agility / 100.0);
     }
     else if (bias->rightSpan > 0) {
-        l->spd[0] = 10.0 * (1 + e->agility / 100.0);
+        l->spd[0] = 10.0 * (1 + agility / 100.0);
     }
     else {
         l->spd[0] = 0.0;
@@ -147,7 +158,7 @@ void updatePhysic(Entity* e) {
 
     if (bias->up) {
         bias->up = false;
-        l->spd[1] = 10.0 * (1 + e->agility / 100.0);
+        l->spd[1] = 10.0 * (1 + agility / 100.0);
     }
 
     if (!l->onGround) {
@@ -170,7 +181,7 @@ void updatePhysic(Entity* e) {
         e->health -= 100 * 1 / getFramesDuringTime(1000);
     }
 
-    if (e->type == PLAYER) {
+    if (e->type[0] == PLAYER) {
         if (--sleep == 0) {
             Tile tile = getTileAt((int) l->pos[0], (int) l->pos[1]);
             sleep = 30;
@@ -185,8 +196,8 @@ void updatePhysic(Entity* e) {
                     Portal *portal = getPortal(tile);
 
                     if (portal != NULL) {
-                        e->health = e->max_health;
-                        e->mp = p_attr.max_mp;
+                        e->health = max_hp;
+                        e->mp = playerAttr[e->type[1]][P_MAX_MP];
                         generateLevel(portal->dest);
                     }
                     break;
@@ -194,7 +205,7 @@ void updatePhysic(Entity* e) {
             }
         }
     }
-    else if (e->type == MONSTER) {
+    else if (e->type[0] == MONSTER) {
         Vector e_pos, t_pos;
         float dist;
 
@@ -326,26 +337,31 @@ static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float 
 static void attack(Entity* entity, Entity* victim, float distance) {
     const float crit_dist = 2.0;
     const float crit_mul = 2.0;
-    GItem *weapon = inv.equipment[WEAPON];
-    GItem *armory = inv.equipment[ARMORY];
-    float damage;
+    ItemType weapon = inv.equipment[WEAPON];
+    ItemType armory = inv.equipment[ARMORY];
+    float damage = 0.0;
+    int strength = 0, absorb = 0;
 
-    if (entity->type == PLAYER && weapon) {
-        damage = weapon->value;
+    if (entity->type[0] == PLAYER) {
+        if (weapon)
+            damage = itemAttr[weapon][I_VALUE];
+
+        strength = playerAttr[entity->type[1]][P_STR];
     } else {
-        damage = entity->damage;        
+        damage = entity->damage;
+        absorb = monsterAttr[victim->type[1]][M_ABSORB];
     }
 
-    if (entity->type == PLAYER && crit_dist > distance) {
+    if (entity->type[0] == PLAYER && crit_dist > distance) {
         damage *= (1 - crit_mul) / crit_dist * distance + crit_mul;
     }
 
-    if (victim->type == PLAYER && armory) {
-        damage -= armory->value;
+    if (victim->type[0] == PLAYER && armory) {
+        damage -= itemAttr[armory][I_VALUE];
     }
 
-    damage += damage * (entity->strength / 100);
-    damage -= victim->absorb;
+    damage += damage * (strength / 100);
+    damage -= absorb;
 
     victim->health -= (damage > 0 ? floorf(damage) : 0);
 }
