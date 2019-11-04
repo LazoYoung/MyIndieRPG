@@ -181,19 +181,6 @@ void setScreenMode(ScreenMode mode) {
     drawScreen();
 }
 
-void setItemName(ITEM *item, const char* name) {
-    int len = strlen(name);
-    char* clone = malloc(len + 1);
-
-    if (item->name.str) {
-        free(item->name.str);
-    }
-
-    strcpy(clone, name);
-    item->name.length = len;
-    item->name.str = clone;
-}
-
 void setMenuOptions(Menu_Options options, bool on) {
     if (menu == NULL)
         return;

@@ -52,7 +52,6 @@ extern void setScreenMode(ScreenMode mode);
 extern void setPromptMode(PromptMode mode);
 extern MENU* getPromptMenu();
 extern WINDOW* getPromptWindow(int index);
-extern void setItemName(ITEM *item, const char* name);
 extern void setMenuOptions(Menu_Options, bool);
 
 /* title-screen.c */
