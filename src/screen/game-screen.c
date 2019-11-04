@@ -177,7 +177,7 @@ static void drawGuage(WINDOW* win, Color color_fg, Color color_bg, int length, f
 static void drawEquipment(WINDOW* win, ItemCategory category) {
     const char *name = NULL;
     const char *title = NULL;
-    ItemType gItem = inv.equipment[category];
+    int gItem = inv.equipment[category];
 
     if (gItem > -1) {
         name = getItemName(gItem);
@@ -196,7 +196,7 @@ static void drawEquipment(WINDOW* win, ItemCategory category) {
     }
 
     mvwprintw(win, 1, 2, title);
-    mvwprintw(win, 3, 2, "%s", name != NULL ? name : "Not equipped.");
+    mvwprintw(win, 3, 2, "%s", name ? name : "Not equipped.");
 }
 
 static void drawControlAid(WINDOW* win) {
@@ -308,11 +308,11 @@ static void drawEntities() {
 
                 if (iter->type[0] == PLAYER) {
                     mvwaddch(win, ctr_y + map_y - 4, ctr_x + map_x - 4, ' ');
-                    return;
+                    continue;
                 }
 
                 if ( !(iter->type[0] == MONSTER && getScreenCoordByTile(X, loc.pos[0], &scr_x)))
-                    return;
+                    continue;
 
                 scr_x += map_x - 4;
 

@@ -51,7 +51,7 @@ bool addItem(ItemType type) {
     ItemCategory category = itemAttr[type][I_CATEGORY];
 
     for (int i = 0; i < SLOT_CAP; i++) {
-        if (inv.items[category][i] > -1) {
+        if (inv.items[category][i] < 0) {
             inv.items[category][i] = type;
             return true;
         }

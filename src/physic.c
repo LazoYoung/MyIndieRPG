@@ -337,17 +337,21 @@ static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float 
 static void attack(Entity* entity, Entity* victim, float distance) {
     const float crit_dist = 2.0;
     const float crit_mul = 2.0;
-    ItemType weapon = inv.equipment[WEAPON];
-    ItemType armory = inv.equipment[ARMORY];
+    int weapon = inv.equipment[WEAPON];
+    int armory = inv.equipment[ARMORY];
     float damage = 0.0;
     int strength = 0, absorb = 0;
 
     if (entity->type[0] == PLAYER) {
-        if (weapon)
+        if (weapon > -1) {
             damage = itemAttr[weapon][I_VALUE];
+        } else {
+            damage = entity->damage;
+        }
 
         strength = playerAttr[entity->type[1]][P_STR];
-    } else {
+    }
+    else if (entity->type[0] == MONSTER) {
         damage = entity->damage;
         absorb = monsterAttr[victim->type[1]][M_ABSORB];
     }
@@ -356,7 +360,7 @@ static void attack(Entity* entity, Entity* victim, float distance) {
         damage *= (1 - crit_mul) / crit_dist * distance + crit_mul;
     }
 
-    if (victim->type[0] == PLAYER && armory) {
+    if (victim->type[0] == PLAYER && armory > -1) {
         damage -= itemAttr[armory][I_VALUE];
     }
 

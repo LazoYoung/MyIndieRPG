@@ -69,6 +69,7 @@ static void onMonsterDeath(Entity* entity) {
     char name[30];
     char rewards[100];
     int cnt = 0;
+    bool full = false;
     
     exit.color = GREEN;
     exit.tile = PORTAL_1;
@@ -81,12 +82,13 @@ static void onMonsterDeath(Entity* entity) {
 
         if (type > -1) {
             const char* str = getItemName(type);
-
-            if (str != NULL)
-                strcat(rewards, str);
             
-            strcat(rewards, ", ");
-            addItem(type);
+            if (addItem(type)) {
+                strcat(rewards, str);
+                strcat(rewards, ", ");
+            } else {
+                full = true;
+            }
         }
     }
 
@@ -109,5 +111,9 @@ static void onMonsterDeath(Entity* entity) {
     mvwprintw(win, 1, 3, "Dungeon Clear! You've defeated %s.", name);
     mvwprintw(win, 3, 3, "EXP Gained: %d", exp);
     mvwprintw(win, 4, 3, "Reward: %s", rewards);
+
+    if (full)
+        mvwprintw(win, 5, 3, "> Some reward is lost because your inventory is full!");
+
     wrefresh(win);
 }

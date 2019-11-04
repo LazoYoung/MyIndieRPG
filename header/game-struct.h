@@ -64,7 +64,7 @@ typedef struct entity {
 } Entity;
 
 typedef struct {
-    int items[IC_SIZE][SLOT_CAP]; // ItemCategory-ItemType
+    int items[IC_SIZE][SLOT_CAP]; // ItemType storage. ItemCategory-Slot
     int equipment[IC_SIZE]; // ItemCategory-ItemType
     long long skills; // Achieved skills are recorded as codes in bit-manner.
     int coin;

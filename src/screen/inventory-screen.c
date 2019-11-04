@@ -51,16 +51,14 @@ Prompt getInventoryPrompt() {
     Prompt prompt;
     int n = 0;
 
-    for (int c = 0; c < IC_SIZE; c++) {
-        for (int i = 0; i < SLOT_CAP; i++) {
-            int itemType = inv.items[c][i];
+    for (int i = 0; i < SLOT_CAP; i++) {
+        int itemType = inv.items[category][i];
 
-            if (itemType < 0) continue;
+        if (itemType < 0) continue;
 
-            items[n] = new_item(getItemName(itemType), intToString(itemType));
-            set_item_userptr(items[n], onSelectItem);
-            n++;
-        }
+        items[n] = new_item(getItemName(itemType), intToString(itemType));
+        set_item_userptr(items[n], onSelectItem);
+        n++;
     }
 
     items = realloc(items, (n + 2) * sizeof(ITEM*));
@@ -126,12 +124,13 @@ static void onSelectItem(ItemEventBus bus) {
     
     switch (bus.event) {
         case CLICK: {
-
-            if (*equip > -1 && *equip == gItem) {
+            if (*equip == gItem) {
                 *equip = -1;
             }
-
-            *equip = gItem;
+            else {
+                *equip = gItem;
+            }
+            
             setPromptMode(INVENTORY_PROMPT);
             break;
         }
