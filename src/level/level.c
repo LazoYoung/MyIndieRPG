@@ -9,10 +9,10 @@
 #include "header/physic.h"
 
 int level_width = 0, level_height = 0, portal_i = -1;
+Entity *entity[MAX_ENTITY];
 static Stage stage = VOID;
 static Portal portal_arr[30];
 static Tile **tiles = NULL;
-static Entity *entity[MAX_ENTITY] = {NULL};
 
 /**
  * Spawn an entity.
@@ -26,25 +26,23 @@ void spawnEntity(Entity* e) {
 
         if (s) continue;
         
+        e->id = i;
         e->bias = bias;
         entity[i] = e;
         break;
     }
 }
 
-bool despawnEntity(const char* name) {
-    for (int i=0; i<MAX_ENTITY; i++) {
-        Entity *s = entity[i];
-
-        if (s && strcmp(name, s->name) == 0) {
-            entity[i] = NULL;
-            return true;
-        }
+bool despawnEntity(int id) {
+    if (entity[id]) {
+        entity[id] = NULL;
+        return true;
     }
     return false;
 }
 
 /**
+ * DEPRECATED
  * Finds an entity matching the NAME
  * Returns NULL if the function has failed to query
  **/
@@ -60,14 +58,13 @@ Entity* getEntity(const char* name) {
 }
 
 /**
- * Returns the pointer of entity matching the index ID
- * The pointer is NULL if the entity is invalid.
+ * Returns the pointer of entity matching the ID.
+ * The NULL pointer as result is possible.
+ * Player always occupy the first entry (id 0)
  **/
 Entity* getEntityByID(int id) {
     if (id >= 0 && id < MAX_ENTITY) {
-        Entity *e = entity[id];
-
-        if (e) return e;
+        return entity[id];
     }
     return NULL;
 }
@@ -195,6 +192,10 @@ char* getDungeonName(DungeonType type) {
             return "Dungeon 2";
         case DUNGEON_3:
             return "Dungeon 3";
+        case DUNGEON_4:
+            return "Dungeon 4";
+        case DUNGEON_5:
+            return "Dungeon 5";
     }
 
     return NULL;

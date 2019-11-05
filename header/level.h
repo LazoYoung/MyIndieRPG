@@ -1,6 +1,6 @@
 #ifndef FILE_LEVEL_INCLUDED
 #define FILE_LEVEL_INCLUDED
-#define MAX_ENTITY 3
+#define MAX_ENTITY 4
 
 #include <stdbool.h>
 #include "game-struct.h"
@@ -10,7 +10,7 @@ extern int level_width, level_height;
 extern DungeonType dungeon;
 
 extern void spawnEntity(Entity*);
-extern bool despawnEntity(const char*);
+extern bool despawnEntity(int id);
 extern Entity* getEntity(const char*);
 extern Entity* getEntityByID(int);
 extern Location getTopLocation(int);

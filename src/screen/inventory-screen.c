@@ -146,8 +146,13 @@ static void onSelectItem(ItemEventBus bus) {
                 case ARMORY:
                     sprintf(desc, "Damage absorbtion: %d", value);
                     break;
-                case POTION: // TODO Potion item value determines whether HP or MP.
-                    sprintf(desc, "%s recovery", value ? "HP" : "MP");
+                case POTION:
+                    if (gItem == HEAL_CRYSTAL) {
+                        sprintf(desc, "HP recovery: %d", value);
+                    }
+                    else if (gItem == MANA_CRYSTAL) {
+                        sprintf(desc, "MP recovery: %d", value);                        
+                    }
                     break;
             }
 

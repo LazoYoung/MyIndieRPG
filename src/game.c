@@ -17,6 +17,7 @@
 Inventory inv;
 bool inGame = false;
 static Entity playerEntity;
+extern Entity *entity[MAX_ENTITY];
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
@@ -80,6 +81,26 @@ bool addExp(int exp) {
     return false;
 }
 
+bool removeItem(ItemType type) {
+    ItemCategory category = itemAttr[type][I_CATEGORY];
+
+    for (int i = 0; i < SLOT_CAP; i++) {
+        int* sub = &inv.items[category][i];
+        int* equip = &inv.equipment[category];
+
+        if (type != *sub)
+            continue;
+
+        *sub = -1;
+
+        if (type == *equip) {
+            *equip = -1;
+        }
+        return true;
+    }
+    return false;
+}
+
 void doTick(int key) {
     if (!inGame)
         return;
@@ -88,7 +109,11 @@ void doTick(int key) {
         int id = 0;
         Entity* iter;
 
-        while (iter = getEntityByID(id++)) {
+        while (id < MAX_ENTITY) {
+            iter = getEntityByID(id++);
+
+            if (!iter) continue;
+
             if (iter->loc.pos[1] < 0) {
                 iter->health--;
             }
@@ -145,6 +170,9 @@ static void initGameCache() {
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
     memcpy(skin.map, map, sizeof(map));
+
+    for (int i = 0; i < MAX_ENTITY; i++)
+        entity[i] = NULL;
 
     playerEntity.name = getPlayerName(playerType);
     playerEntity.type[0] = PLAYER;

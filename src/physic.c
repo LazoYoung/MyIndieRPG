@@ -34,6 +34,7 @@ bool overlaps(AABB a, AABB b) {
 
 void updateControl(int key, Entity* p) {
     Bias *bias = &p->bias;
+    int potion = inv.equipment[POTION];
 
     switch (key) {
         case 'd': // Right
@@ -59,6 +60,26 @@ void updateControl(int key, Entity* p) {
         case 'w': // Jump
             bias->up = true;
             break;
+        case 'h': // Use Heal/Mana potion
+            if (potion == HEAL_CRYSTAL) {
+                p->health += itemAttr[potion][I_VALUE];
+                removeItem(HEAL_CRYSTAL);
+            }
+            else {
+                setPromptMode(DIALOGUE_PROMPT);
+                mvwprintw(getPromptWindow(0), 2, 2, "You don't have a potion equipped.");
+            }
+            break;
+        case 'm':
+            if (potion == MANA_CRYSTAL) {
+                p->mp += itemAttr[potion][I_VALUE];
+                removeItem(MANA_CRYSTAL);
+            }
+            else {
+                setPromptMode(DIALOGUE_PROMPT);
+                mvwprintw(getPromptWindow(0), 2, 2, "You don't have a potion equipped.");
+            }
+            break;
         case 'i': // Inventory
             setPromptMode(INV_CATEGORY_PROMPT);
             break;
@@ -73,7 +94,11 @@ void updateControl(int key, Entity* p) {
             src[0] = p->loc.pos[0] + norm[0] * 3;
             src[1] = p->loc.pos[1];
             
-            if (p->mp >= 40 && spawnSwordTrail(src, norm)) {
+            if (inv.equipment[WEAPON] < 0) {
+                setPromptMode(DIALOGUE_PROMPT);
+                mvwprintw(getPromptWindow(0), 3, 3, "You must be equipped with a sword to activate the skill.");
+            }
+            else if (p->mp >= 40 && spawnSwordTrail(src, norm)) {
                 p->mp -= 40;
             }
             break;
@@ -198,6 +223,11 @@ void updatePhysic(Entity* e) {
                     if (portal != NULL) {
                         e->health = max_hp;
                         e->mp = playerAttr[e->type[1]][P_MAX_MP];
+
+                        if (portal->dest == DUNGEON) {
+                            dungeon = portal->dungeon;
+                        }
+
                         generateLevel(portal->dest);
                     }
                     break;

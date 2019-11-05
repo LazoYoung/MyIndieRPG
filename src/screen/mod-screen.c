@@ -168,16 +168,30 @@ static void onModInteger(ItemEventBus bus) {
         return;
     }
 
-    mvwprintw(win, 3, 2, "Wrong value will be converted to 0.");
-    mvwprintw(win, 4, 2, "Write value (in numeric): _____");
+    mvwprintw(win, 3, 2, "Wrong value is converted into the minimum.");
+    mvwprintw(win, 4, 2, "Type the numeric value: _____");
     getyx(win, y, x);
     wmove(win, y, x - 5);
     curs_set(1);
+    wattron(win, WA_BLINK);
     echo();
+    wrefresh(win);
     wgetnstr(win, input, sizeof(char) * 5);
     noecho();
+    attroff(WA_BLINK);
     curs_set(0);
     value = atoi(input);
+
+    switch (attr) {
+        case P_MAX_HEALTH:
+        case P_MAX_MP:
+            value = value > 0 ? value : 1;
+            break;
+        case P_AGI:
+        case P_STR:
+            value = value >= 0 ? value : 0;
+            break;
+    }
 
     switch (page) {
         case PLAYER_MOD:

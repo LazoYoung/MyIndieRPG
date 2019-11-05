@@ -7,93 +7,119 @@
 #include "header/data.h"
 
 #define MAX_REWARD 3
+#define MAX_MONSTER 3
 
 DungeonType dungeon;
-static Entity* monster;
-static int exp;
-static ItemType reward[MAX_REWARD];
+Entity monster[MAX_MONSTER];
+int alive;
 
-static void spawnMonster(MonsterType);
+static void spawnMonsters();
 static void onMonsterDeath(Entity*);
 
 void generateDungeon() {
-    if (dungeon == DUNGEON_1) {
-        spawnMonster(GOLEM);
-
-        exp = 100;
-        reward[0] = BRONZE_SWORD;
-        reward[1] = STEEL_BLADE;
-        reward[2] = -1;
-    }
+    spawnMonsters();
 }
 
 void destructDungeon() {
-    if (monster != NULL) {
-        despawnEntity(monster->name);
-        free(monster);
-        monster = NULL;
+    for (int i = 0; i < MAX_MONSTER; i++) {
+        despawnEntity(monster[i].id);
+        alive--;
     }
 }
 
-static void spawnMonster(MonsterType type) {
-    monster = malloc(sizeof(Entity));
-    AABB hitbox = {{0.0, 0.0}, {1.0, 1.0}};
-    Texture skin;
-    bool map[9][9] = {false};
+static void spawnMonsters() {
+    int id, vol, xPos = 60;
 
-    skin.color = RED;
-    map[3][3] = map[3][4] = map[3][5] = true;
-    map[4][3] = map[4][4] = map[4][5] = true;
-    map[5][3] = map[5][4] = map[5][5] = true;
-    memcpy(skin.map, map, sizeof(map));
+    alive = 0;
 
-    monster->type[0] = MONSTER;
-    monster->type[1] = type;
-    monster->loc = getTopLocation(50);
-    monster->target = getEntityByID(0);
-    monster->hitbox = hitbox;
-    monster->name = getMonsterName(type);
-    monster->mp = 0;
-    monster->health = monsterAttr[type][M_MAX_HEALTH];
-    monster->damage = monsterAttr[type][M_DAMAGE];
-    monster->offset[0] = 0.0;
-    monster->offset[1] = 0.0;
-    monster->skin = skin;
-    monster->deathEvent = onMonsterDeath;
-    spawnEntity(monster);
+    for (id = 0; id < MAX_MONSTER; id++) {
+        AABB hitbox;
+        Texture skin;
+        bool map[9][9] = {false};
+        int type = dungeonAttr[dungeon][D_MONSTER_1 + id];
+
+        if (type < 0) continue;
+        
+        skin.color = monsterAttr[type][M_COLOR];
+        vol = monsterAttr[type][M_VOLUME];
+        hitbox.centre[0] = 0.0;
+        hitbox.centre[1] = 0.0;
+        hitbox.radius[0] = monsterAttr[type][M_VOLUME] - 1.0;
+        hitbox.radius[1] = monsterAttr[type][M_VOLUME] - 1.0;
+
+        if (vol <= 1) {
+            map[4][4] = true;
+        }
+        else if (vol == 2) {
+            for (int i = 3; i <= 5; i++)
+                for (int j = 3; j <= 5; j++) {
+                    map[i][j] = true;
+                }
+        }
+        else {
+            for (int i = 2; i <= 6; i++)
+                for (int j = 2; j <= 6; j++) {
+                    map[i][j] = true;
+                }
+        }
+        memcpy(skin.map, map, sizeof(map));
+
+        monster[id].type[0] = MONSTER;
+        monster[id].type[1] = type;
+        monster[id].loc = getTopLocation(xPos);
+        monster[id].target = getEntityByID(0);
+        monster[id].hitbox = hitbox;
+        monster[id].name = getMonsterName(type);
+        monster[id].mp = 0;
+        monster[id].health = monsterAttr[type][M_MAX_HEALTH];
+        monster[id].damage = monsterAttr[type][M_DAMAGE];
+        monster[id].offset[0] = 0.0;
+        monster[id].offset[1] = 0.0;
+        monster[id].skin = skin;
+        monster[id].deathEvent = onMonsterDeath;
+        spawnEntity(&monster[id]);
+
+        xPos += 10;
+        alive++;
+    }
 }
 
 static void onMonsterDeath(Entity* entity) {
     Portal exit;
     WINDOW* win;
-    char name[30];
-    char rewards[100];
+    char reward_msg[100];
     int cnt = 0;
     bool full = false;
-    
+    int exp;
+
+    despawnEntity(entity->id);
+
+    if (--alive > 0) return;
+
+    exp = dungeonAttr[dungeon][D_EXP];
     exit.color = GREEN;
     exit.tile = PORTAL_1;
     exit.dest = LOBBY;
-    strcpy(name, entity->name);
-    memset(rewards, '\0', strlen(rewards));
+    memset(reward_msg, '\0', strlen(reward_msg));
 
     for (int i = 0; i < MAX_REWARD; i++) {
-        int type = reward[i];
+        int type = dungeonAttr[dungeon][D_REWARD_1 + i];
+        const char* str;
 
-        if (type > -1) {
-            const char* str = getItemName(type);
-            
-            if (addItem(type)) {
-                strcat(rewards, str);
-                strcat(rewards, ", ");
-            } else {
-                full = true;
-            }
+        if (type < 0) continue;
+
+        str = getItemName(type);
+        
+        if (addItem(type)) {
+            strcat(reward_msg, str);
+            strcat(reward_msg, ", ");
+        } else {
+            full = true;
         }
     }
 
-    if (rewards[0] != '\0') {
-        rewards[strlen(rewards) - 2] = '\0';
+    if (reward_msg[0] != '\0') {
+        reward_msg[strlen(reward_msg) - 2] = '\0';
     }
 
     addExp(exp);
@@ -102,15 +128,12 @@ static void onMonsterDeath(Entity* entity) {
     setTileAt(10, 6, PORTAL_1);
     setTileAt(11, 6, PORTAL_1);
     setTileAt(12, 6, PORTAL_1);
-    despawnEntity(name);
-    free(monster);
-    monster = NULL;
 
     setPromptMode(DIALOGUE_PROMPT);
     win = menu_win(getPromptMenu());
-    mvwprintw(win, 1, 3, "Dungeon Clear! You've defeated %s.", name);
-    mvwprintw(win, 3, 3, "EXP Gained: %d", exp);
-    mvwprintw(win, 4, 3, "Reward: %s", rewards);
+    mvwprintw(win, 1, 3, "%s Clear! You defeated every monsters.", getDungeonName(dungeon));
+    mvwprintw(win, 3, 3, "* EXP Gained: %d", exp);
+    mvwprintw(win, 4, 3, "* Reward: %s", reward_msg);
 
     if (full)
         mvwprintw(win, 5, 3, "> Some reward is lost because your inventory is full!");

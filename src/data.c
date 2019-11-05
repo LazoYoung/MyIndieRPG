@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "header/data.h"
+#include "header/game-struct.h"
 
 PlayerType playerType;
 int playerAttr[PT_SIZE][PA_SIZE];
 int monsterAttr[MT_SIZE][MA_SIZE];
 int itemAttr[IT_SIZE][IA_SIZE];
+int dungeonAttr[DT_SIZE][DA_SIZE];
 
 void initData() {
     playerAttr[KIRITO][P_MAX_HEALTH] = 100;
@@ -36,14 +38,86 @@ void initData() {
     monsterAttr[GOLEM][M_AGI] = -50;
     monsterAttr[GOLEM][M_ABSORB] = 0;
     monsterAttr[GOLEM][M_DAMAGE] = 5;
+    monsterAttr[GOLEM][M_COLOR] = GREEN;
+    monsterAttr[GOLEM][M_VOLUME] = 3;
+    monsterAttr[DWARF][M_MAX_HEALTH] = 10;
+    monsterAttr[DWARF][M_AGI] = 0;
+    monsterAttr[DWARF][M_ABSORB] = 2;
+    monsterAttr[DWARF][M_DAMAGE] = 2;
+    monsterAttr[DWARF][M_COLOR] = GREEN;
+    monsterAttr[DWARF][M_VOLUME] = 1;
+    monsterAttr[GOBLIN][M_MAX_HEALTH] = 100;
+    monsterAttr[GOBLIN][M_AGI] = -20;
+    monsterAttr[GOBLIN][M_ABSORB] = 0;
+    monsterAttr[GOBLIN][M_DAMAGE] = 5;
+    monsterAttr[GOBLIN][M_COLOR] = WHITE;
+    monsterAttr[GOBLIN][M_VOLUME] = 2;
+    // TODO Define all the monsters
     itemAttr[SMALL_SWORD][I_CATEGORY] = WEAPON;
     itemAttr[SMALL_SWORD][I_VALUE] = 5;
+    itemAttr[SMALL_SWORD][I_ASSET] = 1;
     itemAttr[BRONZE_SWORD][I_CATEGORY] = WEAPON;
     itemAttr[BRONZE_SWORD][I_VALUE] = 10;
+    itemAttr[BRONZE_SWORD][I_ASSET] = 0;
     itemAttr[STEEL_BLADE][I_CATEGORY] = WEAPON;
     itemAttr[STEEL_BLADE][I_VALUE] = 15;
+    itemAttr[STEEL_BLADE][I_ASSET] = 0;
+    itemAttr[ANNEAL_BLADE][I_CATEGORY] = WEAPON;
+    itemAttr[ANNEAL_BLADE][I_VALUE] = 20;
+    itemAttr[ANNEAL_BLADE][I_ASSET] = 0;
+    itemAttr[TYRANT_DRAGON][I_CATEGORY] = WEAPON;
+    itemAttr[TYRANT_DRAGON][I_VALUE] = 30;
+    itemAttr[TYRANT_DRAGON][I_ASSET] = 0;
+    itemAttr[ELUCIDATOR][I_CATEGORY] = WEAPON;
+    itemAttr[ELUCIDATOR][I_VALUE] = 50;
+    itemAttr[ELUCIDATOR][I_ASSET] = 0;
     itemAttr[HOOD_CAPE][I_CATEGORY] = ARMORY;
     itemAttr[HOOD_CAPE][I_VALUE] = 1;
+    itemAttr[HOOD_CAPE][I_ASSET] = 1;
+    itemAttr[COAT_OF_MIDNIGHT][I_CATEGORY] = ARMORY;
+    itemAttr[COAT_OF_MIDNIGHT][I_VALUE] = 5;
+    itemAttr[COAT_OF_MIDNIGHT][I_ASSET] = 0;
+    itemAttr[HEAL_CRYSTAL][I_CATEGORY] = POTION;
+    itemAttr[HEAL_CRYSTAL][I_VALUE] = 50;
+    itemAttr[HEAL_CRYSTAL][I_ASSET] = 0;
+    itemAttr[MANA_CRYSTAL][I_CATEGORY] = POTION;
+    itemAttr[MANA_CRYSTAL][I_VALUE] = 50;
+    itemAttr[MANA_CRYSTAL][I_ASSET] = 0;
+    dungeonAttr[DUNGEON_1][D_MONSTER_1] = GOLEM;
+    dungeonAttr[DUNGEON_1][D_MONSTER_2] = DWARF;
+    dungeonAttr[DUNGEON_1][D_MONSTER_3] = DWARF;
+    dungeonAttr[DUNGEON_1][D_REWARD_1] = BRONZE_SWORD;
+    dungeonAttr[DUNGEON_1][D_REWARD_2] = COAT_OF_MIDNIGHT;
+    dungeonAttr[DUNGEON_1][D_REWARD_3] = -1;
+    dungeonAttr[DUNGEON_1][D_EXP] = 200;
+    dungeonAttr[DUNGEON_2][D_MONSTER_1] = GOBLIN;
+    dungeonAttr[DUNGEON_2][D_MONSTER_2] = GOLEM;
+    dungeonAttr[DUNGEON_2][D_MONSTER_3] = -1;
+    dungeonAttr[DUNGEON_2][D_REWARD_1] = STEEL_BLADE;
+    dungeonAttr[DUNGEON_2][D_REWARD_2] = HEAL_CRYSTAL;
+    dungeonAttr[DUNGEON_2][D_REWARD_3] = MANA_CRYSTAL;
+    dungeonAttr[DUNGEON_2][D_EXP] = 250;
+    dungeonAttr[DUNGEON_3][D_MONSTER_1] = GARGOYLE;
+    dungeonAttr[DUNGEON_3][D_MONSTER_2] = GHOST;
+    dungeonAttr[DUNGEON_3][D_MONSTER_3] = GOBLIN;
+    dungeonAttr[DUNGEON_3][D_REWARD_1] = ANNEAL_BLADE;
+    dungeonAttr[DUNGEON_3][D_REWARD_2] = HEAL_CRYSTAL;
+    dungeonAttr[DUNGEON_3][D_REWARD_3] = MANA_CRYSTAL;
+    dungeonAttr[DUNGEON_3][D_EXP] = 300;
+    dungeonAttr[DUNGEON_4][D_MONSTER_1] = LUCIFER;
+    dungeonAttr[DUNGEON_4][D_MONSTER_2] = SUCCUBUS;
+    dungeonAttr[DUNGEON_4][D_MONSTER_3] = DULLAHAN;
+    dungeonAttr[DUNGEON_4][D_REWARD_1] = TYRANT_DRAGON;
+    dungeonAttr[DUNGEON_4][D_REWARD_2] = HEAL_CRYSTAL;
+    dungeonAttr[DUNGEON_4][D_REWARD_3] = MANA_CRYSTAL;
+    dungeonAttr[DUNGEON_4][D_EXP] = 350;
+    dungeonAttr[DUNGEON_5][D_MONSTER_1] = SKELETON;
+    dungeonAttr[DUNGEON_5][D_MONSTER_2] = SKELETON;
+    dungeonAttr[DUNGEON_5][D_MONSTER_3] = TITAN;
+    dungeonAttr[DUNGEON_5][D_REWARD_1] = ELUCIDATOR;
+    dungeonAttr[DUNGEON_5][D_REWARD_2] = HEAL_CRYSTAL;
+    dungeonAttr[DUNGEON_5][D_REWARD_3] = MANA_CRYSTAL;
+    dungeonAttr[DUNGEON_5][D_EXP] = 400;
 }
 
 char* getPlayerName(PlayerType type) {
@@ -65,6 +139,24 @@ char* getMonsterName(MonsterType type) {
     switch (type) {
         case GOLEM:
             return "Golem";
+        case DWARF:
+            return "Dwarf";
+        case GOBLIN:
+            return "Goblin";
+        case GARGOYLE:
+            return "Gargoyle";
+        case GHOST:
+            return "Ghost";
+        case LUCIFER:
+            return "Lucifer";
+        case SUCCUBUS:
+            return "Succubus";
+        case DULLAHAN:
+            return "Dullahan";
+        case SKELETON:
+            return "Skeleton";
+        case TITAN:
+            return "Titan";
         default:
             return NULL;
     }
@@ -78,8 +170,20 @@ char* getItemName(ItemType type) {
             return "Bronze Sword";
         case STEEL_BLADE:
             return "Steel Blade";
+        case ANNEAL_BLADE:
+            return "Anneal Blade";
+        case TYRANT_DRAGON:
+            return "Tyrant Dragon";
+        case ELUCIDATOR:
+            return "Elucidator";
         case HOOD_CAPE:
             return "Hood Cape";
+        case COAT_OF_MIDNIGHT:
+            return "Coat of Midnight";
+        case HEAL_CRYSTAL:
+            return "Heal Crystal";
+        case MANA_CRYSTAL:
+            return "Mana Crystal";
         default:
             return NULL;
     }

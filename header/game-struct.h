@@ -18,7 +18,7 @@ typedef struct {
     Tile tile;
     Color color;
     Stage dest;
-    char* alias; // (Optional) Alias
+    DungeonType dungeon;
 } Portal;
 
 typedef struct {
@@ -51,6 +51,7 @@ typedef struct { // Present bias of entity movement
 typedef struct entity {
     const char* name;
     int type[2]; // EntityType-Type (i.e. PLAYER-ASUNA)
+    int id; // Unique ID that is automatically assigned
     Location loc;
     struct entity* target; // Monster's target
     float health;

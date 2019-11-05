@@ -35,6 +35,7 @@ extern void startGame();
 extern void assignSkill(char);
 extern bool hasSkill(char);
 extern bool addItem(ItemType);
+extern bool removeItem(ItemType);
 extern bool addExp(int);
 extern int getExpCap(int);
 extern int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)

@@ -40,11 +40,11 @@ void initGameScreen() {
     WINDOW *hp_win_1 = derwin(hp_win_0, 1, 38, 1, 1);
     WINDOW *mp_win_0 = newwin(3, 40, 3, 0);
     WINDOW *mp_win_1 = derwin(mp_win_0, 1, 38, 1, 1);
-    WINDOW *stat_win = newwin(5, 25, init_y + row_, init_x + 1);
-    WINDOW *weapon_win = newwin(5, 20, init_y + row_, init_x + 27);
-    WINDOW *armory_win = newwin(5, 20, init_y + row_, init_x + 48);
-    WINDOW *potion_win = newwin(5, 20, init_y + row_, init_x + 69);
-    WINDOW *ctrl_win = newwin(5, 30, init_y + row_, column_ - 30);
+    WINDOW *stat_win = newwin(6, 25, init_y + row_, init_x + 1);
+    WINDOW *weapon_win = newwin(6, 20, init_y + row_, init_x + 27);
+    WINDOW *armory_win = newwin(6, 20, init_y + row_, init_x + 48);
+    WINDOW *potion_win = newwin(6, 20, init_y + row_, init_x + 69);
+    WINDOW *ctrl_win = newwin(6, 35, init_y + row_, column_ - 35);
     panels[WORLD_WIN] = new_panel(world_win);
     panels[HEALTH_WIN] = new_panel(hp_win_0);
     panels[MANA_WIN] = new_panel(mp_win_0);
@@ -57,14 +57,14 @@ void initGameScreen() {
     panels[CONTROL_WIN] = new_panel(ctrl_win);
     
     // Initialize basic screen colors
-    init_pair(1, COLOR_RED, COLOR_RED);
-    init_pair(2, COLOR_GREEN, COLOR_GREEN);
-    init_pair(3, COLOR_BLUE, COLOR_BLUE);
-    init_pair(4, COLOR_WHITE, COLOR_WHITE);
-    init_pair(5, COLOR_YELLOW, COLOR_YELLOW);
-    init_pair(6, COLOR_MAGENTA, COLOR_MAGENTA);
-    init_pair(7, COLOR_BLACK, COLOR_BLACK);
-    init_pair(8, COLOR_CYAN, COLOR_CYAN);
+    init_pair(RED, COLOR_RED, COLOR_RED);
+    init_pair(GREEN, COLOR_GREEN, COLOR_GREEN);
+    init_pair(BLUE, COLOR_BLUE, COLOR_BLUE);
+    init_pair(WHITE, COLOR_WHITE, COLOR_WHITE);
+    init_pair(YELLOW, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(MAGENTA, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(BLACK, COLOR_BLACK, COLOR_BLACK);
+    init_pair(CYAN, COLOR_CYAN, COLOR_CYAN);
 
     timeout(deltaTime * 1000);
 	keypad(world_win, true);
@@ -100,7 +100,7 @@ void drawGameScreen() {
     box(potion_w, ACS_VLINE, ACS_HLINE);
     box(ctrl_w, ACS_VLINE, ACS_HLINE);
 
-    if (inGame && player != NULL) {
+    if (inGame && player) {
         waddch(health_w, ' ');
         wattron(health_w, A_BOLD);
         waddstr(health_w, "Health");
@@ -150,9 +150,9 @@ WINDOW* getGameWindow(WindowType type) {
 static void drawStatus(WINDOW* win) {
     int lvl = playerAttr[playerType][P_LEVEL];
 
-    mvwprintw(win, 1, 2, "Character: %s", getPlayerName(playerType));
-    mvwprintw(win, 2, 2, "Level: %d (Exp. %d/%d)", lvl, playerAttr[playerType][P_EXP], getExpCap(lvl));
-    mvwprintw(win, 3, 2, "Coin: %d", inv.coin);
+    mvwprintw(win, 1, 2, "%s", getPlayerName(playerType));
+    mvwprintw(win, 3, 2, "Level: %d (Exp. %d/%d)", lvl, playerAttr[playerType][P_EXP], getExpCap(lvl));
+    mvwprintw(win, 4, 2, "Coin: %d", inv.coin);
 }
 
 static void drawGuage(WINDOW* win, Color color_fg, Color color_bg, int length, float ratio) {
@@ -196,19 +196,20 @@ static void drawEquipment(WINDOW* win, ItemCategory category) {
     }
 
     mvwprintw(win, 1, 2, title);
-    mvwprintw(win, 3, 2, "%s", name ? name : "Not equipped.");
+    mvwprintw(win, 4, 2, "%s", name ? name : "Not equipped.");
 }
 
 static void drawControlAid(WINDOW* win) {
     mvwprintw(win, 1, 9, "Control Keys");
     mvwprintw(win, 2, 2, "Move: WASD");
-    mvwprintw(win, 2, 15, "Attack: K");
-    mvwprintw(win, 3, 2, "Potion: H/M");
-    mvwprintw(win, 3, 15, "Inventory: I");
+    mvwprintw(win, 2, 20, "Attack: K");
+    mvwprintw(win, 3, 2, "Skill: [SPACE]");
+    mvwprintw(win, 3, 20, "Inventory: I");
+    mvwprintw(win, 4, 2, "Potion: H (for HP) / M (for MP)");
 }
 
 static void drawTiles() {
-    Entity *entity = getEntity(getPlayerName(playerType));
+    Entity *entity = getEntityByID(0);
     WINDOW *win = getGameWindow(WORLD_WIN);
     Location loc;
 
@@ -261,8 +262,8 @@ static void drawTiles() {
                             char label[20];
                             const char* name;
                             
-                            if (portal->alias != NULL) {
-                                name = portal->alias;
+                            if (portal->dest == DUNGEON) {
+                                name = getDungeonName(portal->dungeon);
                             }
                             else {
                                 name = getStageName(portal->dest);
@@ -282,17 +283,24 @@ static void drawTiles() {
 
 static void drawEntities() {
     int id = 0, row = 0;
-    Entity* iter = getEntityByID(id);
+    Entity* iter;
     
-    while (iter != NULL) {
-        Location loc = iter->loc;
-        Texture skin = iter->skin;
-        WINDOW* win = getGameWindow(WORLD_WIN);
-        int color = COLOR_PAIR(skin.color);
+    while (id < MAX_ENTITY) {
+        Location loc;
+        Texture skin;
+        WINDOW* win;
+        int color;
         int map_x, map_y, scr_x, scr_y;
         bool label = false;
+        
+        iter = getEntityByID(id++);
 
-        wattron(win, color);
+        if (!iter) continue;
+
+        loc = iter->loc;
+        skin = iter->skin;
+        win = getGameWindow(WORLD_WIN);
+        color = COLOR_PAIR(skin.color);
 
         for (map_y = 0; map_y < 9; map_y++) {
             if (iter->type[0] != PLAYER) {
@@ -307,7 +315,9 @@ static void drawEntities() {
                     continue;
 
                 if (iter->type[0] == PLAYER) {
+                    wattron(win, color);
                     mvwaddch(win, ctr_y + map_y - 4, ctr_x + map_x - 4, ' ');
+                    wattroff(win, color);
                     continue;
                 }
 
@@ -316,20 +326,23 @@ static void drawEntities() {
 
                 scr_x += map_x - 4;
 
-                if (scr_x < column_ && scr_y < row_)
+                if (scr_x < column_ && scr_y < row_) {
+                    wattron(win, color);
                     mvwaddch(win, scr_y, scr_x, ' ');
+                    wattroff(win, color);
+                }
 
                 if (!label) {
                     label = true;
                     wmove(win, scr_y - 3, scr_x);
 
                     if (scr_y - 3 > init_y) {
-                        if (skin.color == RED)
+                        if (skin.color == RED || skin.color == GREEN)
                             wattroff(win, color);
 
                         drawGuage(win, GREEN, RED, 10, (float) iter->health / monsterAttr[iter->type[1]][M_MAX_HEALTH]);
                         
-                        if (skin.color == RED)
+                        if (skin.color == RED || skin.color == GREEN)
                             wattron(win, color);
                     }
                 }
@@ -339,11 +352,9 @@ static void drawEntities() {
         wattroff(win, color);
 
         // TODO Debug
-        mvwprintw(win, 10 + row++, 2, "%s's position: %.2f %.2f", iter->name, loc.pos[0], loc.pos[1]);
+        mvwprintw(win, 10 + row++, 2, "%s's id: %d", iter->name, iter->id);
         mvwprintw(win, 10 + row++, 2, "%s's velocity: %.2f %.2f", iter->name, loc.spd[0], loc.spd[1]);
         mvwprintw(win, 10 + row++, 2, "%s's health: %.1f", iter->name, iter->health);
-
-        iter = getEntityByID(++id);
     }
 }
 
@@ -356,7 +367,7 @@ static bool getTileCoordByScreen(enum Axis a, int input, int *result) {
     Entity *player = getEntityByID(0);
     int x, y;
 
-    if (player == NULL)
+    if (!player)
         return false;
 
     if (a == X) {
@@ -388,7 +399,7 @@ static bool getScreenCoordByTile(enum Axis a, int input, int *result) {
     Entity *player = getEntityByID(0);
     int x, y;
 
-    if (player == NULL)
+    if (!player)
         return false;
 
     if (a == X) {
