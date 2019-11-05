@@ -16,12 +16,13 @@ struct {
     int length;
     int span;
     int dtg;
+    int damage;
     Vector pos;
     Vector norm;
 } trail;
 
 static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y);
-static bool spawnSwordTrail(Vector pos, Vector norm);
+static bool spawnSwordTrail(Vector pos, Vector norm, int damage);
 static void attack(Entity* entity, Entity* victim, float distance);
 
 bool overlaps(AABB a, AABB b) {
@@ -84,6 +85,7 @@ void updateControl(int key, Entity* p) {
             setPromptMode(INV_CATEGORY_PROMPT);
             break;
         case ' ': { // Skill (costs MP)
+            int weapon = inv.equipment[WEAPON];
             Vector norm = {1.0, 0.0};
             Vector src;
 
@@ -94,11 +96,11 @@ void updateControl(int key, Entity* p) {
             src[0] = p->loc.pos[0] + norm[0] * 3;
             src[1] = p->loc.pos[1];
             
-            if (inv.equipment[WEAPON] < 0) {
+            if (weapon < 0) {
                 setPromptMode(DIALOGUE_PROMPT);
                 mvwprintw(getPromptWindow(0), 3, 3, "You must be equipped with a sword to activate the skill.");
             }
-            else if (p->mp >= 40 && spawnSwordTrail(src, norm)) {
+            else if (p->mp >= 40 && spawnSwordTrail(src, norm, 10 * itemAttr[weapon][I_VALUE])) {
                 p->mp -= 40;
             }
             break;
@@ -108,6 +110,7 @@ void updateControl(int key, Entity* p) {
                 int i = 0;
                 Entity *victim;
                 float dist;
+                bool succeed;
 
                 while (i < MAX_ENTITY) {
                     victim = getEntityByID(i++);        
@@ -119,10 +122,12 @@ void updateControl(int key, Entity* p) {
 
                     if (dist < 3.0) {
                         attack(p, victim, dist);
-                        bias->attackCooldown = getFramesDuringTime(700);
+                        succeed = true;
                     }
-                    break;
                 }
+
+                if (succeed)
+                    bias->attackCooldown = getFramesDuringTime(700);
             }
             break;
     }
@@ -203,7 +208,7 @@ void updatePhysic(Entity* e) {
         bias->attackCooldown--;
     
     if (getTileAt(l->pos[0], l->pos[1]) == TRAIL) {
-        e->health -= 100 * 1 / getFramesDuringTime(1000);
+        e->health -= trail.damage / getFramesDuringTime(1000);
     }
 
     if (e->type[0] == PLAYER) {
@@ -321,11 +326,12 @@ void updateSwordTrail() {
     }
 }
 
-static bool spawnSwordTrail(Vector pos, Vector norm) {
+static bool spawnSwordTrail(Vector pos, Vector norm, int damage) {
     if (trail.active)
         return false;
 
     trail.active = true;
+    trail.damage = damage;
     trail.pos[0] = pos[0];
     trail.pos[1] = pos[1];
     trail.norm[0] = norm[0];

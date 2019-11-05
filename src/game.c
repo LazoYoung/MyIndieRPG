@@ -67,18 +67,21 @@ bool addItem(ItemType type) {
  **/
 bool addExp(int exp) {
     int rem, *playerExp, *playerLevel;
+    bool result = false;
 
     playerExp = &playerAttr[playerType][P_EXP];
     playerLevel = &playerAttr[playerType][P_LEVEL];
     *playerExp += exp;
     rem = *playerExp - getExpCap(*playerLevel);
 
-    if (rem >= 0) {
-        *playerLevel++;
-        *playerExp = rem;
-        return true;
+    while (rem >= 0) {
+        *playerLevel += 1;
+        *playerExp = rem;        
+        rem = *playerExp - getExpCap(*playerLevel);
+        result = true;
     }
-    return false;
+
+    return result;
 }
 
 bool removeItem(ItemType type) {
@@ -143,7 +146,7 @@ void doTick(int key) {
 }
 
 int getExpCap(int level) {
-    return sqrt(level) * 100;
+    return floor(sqrt(level) * 100);
 }
 
 /* Returns the rounded count of frames being made during the given time-frame (ms) */

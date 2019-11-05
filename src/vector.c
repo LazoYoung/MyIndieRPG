@@ -31,6 +31,6 @@ void scale(Vector a, float scalar, Vector *result) {
 
 /* Measure the distance between two location: p1 and p2*/
 float distance(Vector p1, Vector p2) {
-    double a = pow(p1[0] - p2[0], 2) + pow(p1[1] - p2[1], 2);
+    double a = pow(p1[0] - p2[0], 2.0) + pow(p1[1] - p2[1], 2.0);
     return sqrt(a);
 }

@@ -49,6 +49,7 @@ static void spawnMonsters() {
 
         if (vol <= 1) {
             map[4][4] = true;
+            monster[id].offset[1] = 1.0;
         }
         else if (vol == 2) {
             for (int i = 3; i <= 5; i++)
