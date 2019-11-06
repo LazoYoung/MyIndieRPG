@@ -74,52 +74,45 @@ void initGameScreen() {
 }
 
 void drawGameScreen() {
-    WINDOW* health_bg = getGameWindow(HEALTH_WIN);
-    WINDOW* health_w = getGameWindow(HEALTH_G_WIN);
-    WINDOW* mana_bg = getGameWindow(MANA_WIN);
-    WINDOW* mana_w = getGameWindow(MANA_G_WIN);
-    WINDOW* stat_w = getGameWindow(STAT_WIN);
-    WINDOW* weapon_w = getGameWindow(WEAPON_WIN);
-    WINDOW* armory_w = getGameWindow(ARMORY_WIN);
-    WINDOW* potion_w = getGameWindow(POTION_WIN);
-    WINDOW* ctrl_w = getGameWindow(CONTROL_WIN);
+    WINDOW* w[WT_SIZE];
     Entity* player = getEntityByID(0);
 
-    for (int i = 0; i <= WORLD_WIN; i++) {
-        WINDOW *w = getGameWindow(i);
+    for (int i = 0; i < WT_SIZE; i++) {
+        w[i] = getGameWindow(i);
 
-        if (w != NULL)
-            werase(w);
+        if (w[i] != NULL) {
+            werase(w[i]);
+        }
     }
 
-    box(health_bg, ACS_VLINE, ACS_HLINE);
-    box(mana_bg, ACS_VLINE, ACS_HLINE);
-    box(stat_w, ACS_VLINE, ACS_HLINE);
-    box(weapon_w, ACS_VLINE, ACS_HLINE);
-    box(armory_w, ACS_VLINE, ACS_HLINE);
-    box(potion_w, ACS_VLINE, ACS_HLINE);
-    box(ctrl_w, ACS_VLINE, ACS_HLINE);
+    box(w[HEALTH_WIN], ACS_VLINE, ACS_HLINE);
+    box(w[MANA_WIN], ACS_VLINE, ACS_HLINE);
+    box(w[STAT_WIN], ACS_VLINE, ACS_HLINE);
+    box(w[WEAPON_WIN], ACS_VLINE, ACS_HLINE);
+    box(w[ARMORY_WIN], ACS_VLINE, ACS_HLINE);
+    box(w[POTION_WIN], ACS_VLINE, ACS_HLINE);
+    box(w[CONTROL_WIN], ACS_VLINE, ACS_HLINE);
 
     if (inGame && player) {
-        waddch(health_w, ' ');
-        wattron(health_w, A_BOLD);
-        waddstr(health_w, "Health");
-        wattroff(health_w, A_BOLD);
-        waddch(health_w, ' ');
-        wmove(health_w, 0, 13);
-        drawGuage(health_w, GREEN, RED, 25, (float) player->health / playerAttr[playerType][P_MAX_HEALTH]);
-        waddch(mana_w, ' ');
-        wattron(mana_w, A_BOLD);
-        waddstr(mana_w, "Mana");
-        wattroff(mana_w, A_BOLD);
-        waddch(mana_w, ' ');
-        wmove(mana_w, 0, 13);
-        drawGuage(mana_w, CYAN, BLACK, 25, (float) player->mp / playerAttr[playerType][P_MAX_MP]);
-        drawStatus(stat_w);
-        drawEquipment(weapon_w, WEAPON);
-        drawEquipment(armory_w, ARMORY);
-        drawEquipment(potion_w, POTION);
-        drawControlAid(ctrl_w);
+        waddch(w[HEALTH_G_WIN], ' ');
+        wattron(w[HEALTH_G_WIN], A_BOLD);
+        waddstr(w[HEALTH_G_WIN], "Health");
+        wattroff(w[HEALTH_G_WIN], A_BOLD);
+        waddch(w[HEALTH_G_WIN], ' ');
+        wmove(w[HEALTH_G_WIN], 0, 13);
+        drawGuage(w[HEALTH_G_WIN], GREEN, RED, 25, (float) player->health / playerAttr[playerType][P_MAX_HEALTH]);
+        waddch(w[MANA_G_WIN], ' ');
+        wattron(w[MANA_G_WIN], A_BOLD);
+        waddstr(w[MANA_G_WIN], "Mana");
+        wattroff(w[MANA_G_WIN], A_BOLD);
+        waddch(w[MANA_G_WIN], ' ');
+        wmove(w[MANA_G_WIN], 0, 13);
+        drawGuage(w[MANA_G_WIN], CYAN, BLACK, 25, (float) player->mp / playerAttr[playerType][P_MAX_MP]);
+        drawStatus(w[STAT_WIN]);
+        drawEquipment(w[WEAPON_WIN], WEAPON);
+        drawEquipment(w[ARMORY_WIN], ARMORY);
+        drawEquipment(w[POTION_WIN], POTION);
+        drawControlAid(w[CONTROL_WIN]);
         drawTiles();
         drawEntities();
     }

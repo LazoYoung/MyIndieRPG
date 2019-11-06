@@ -26,7 +26,7 @@ int main() {
 		exit(EXIT_SUCCESS);
 	}
 	
-    start_color();
+	start_color();
 	cbreak();
 	noecho();
 	timeout(deltaTime * 1000);
@@ -50,7 +50,7 @@ int main() {
 		}
 		else {
 			updateScreen(key);
-    		curs_set(0);
+			curs_set(0);
 			doTick(key);
 		}
 	}

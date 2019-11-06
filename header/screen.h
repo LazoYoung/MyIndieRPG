@@ -6,7 +6,8 @@
 
 typedef enum WindowType { // WORLD_WIN is the last element
     HEALTH_WIN, HEALTH_G_WIN, MANA_WIN, MANA_G_WIN, STAT_WIN,
-    WEAPON_WIN, ARMORY_WIN, POTION_WIN, CONTROL_WIN, WORLD_WIN
+    WEAPON_WIN, ARMORY_WIN, POTION_WIN, CONTROL_WIN, WORLD_WIN,
+    WT_SIZE
 } WindowType;
 
 typedef enum ItemEvent {
