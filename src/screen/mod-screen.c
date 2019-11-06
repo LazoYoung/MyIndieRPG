@@ -326,7 +326,7 @@ static void onModInteger(ItemEventBus bus) {
         }
     }
     else if (page == RESOLUTION_MOD) {
-        value = value > 1 ? value : 1;
+        value = value > 50 ? value : 50;
     }
 
     switch (page) {
@@ -418,6 +418,7 @@ static ITEM* newIntegerItem(char *alias, int attr) {
                     value = row;
                     break;
             }
+            initGameResolution();
             break;
     }
 
