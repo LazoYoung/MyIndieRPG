@@ -350,11 +350,6 @@ static void drawEntities() {
         }
         
         wattroff(win, color);
-
-        // TODO Debug
-        mvwprintw(win, 10 + row++, 2, "%s's id: %d", iter->name, iter->id);
-        mvwprintw(win, 10 + row++, 2, "%s's position: %.2f %.2f", iter->name, loc.pos[0], loc.pos[1]);
-        mvwprintw(win, 10 + row++, 2, "%s's health: %.1f", iter->name, iter->health);
     }
 }
 
