@@ -36,16 +36,16 @@ static void spawnMonsters() {
         AABB hitbox;
         Texture skin;
         bool map[9][9] = {false};
-        int type = dungeonAttr[dungeon][D_MONSTER_1 + id];
+        int type = dungeonData[dungeon][D_MONSTER_1 + id];
 
         if (type < 0) continue;
         
-        skin.color = monsterAttr[type][M_COLOR];
-        vol = monsterAttr[type][M_VOLUME];
+        skin.color = monsterData[type][M_COLOR];
+        vol = monsterData[type][M_VOLUME];
         hitbox.centre[0] = 0.0;
         hitbox.centre[1] = 0.0;
-        hitbox.radius[0] = monsterAttr[type][M_VOLUME] - 1.0;
-        hitbox.radius[1] = monsterAttr[type][M_VOLUME] - 1.0;
+        hitbox.radius[0] = monsterData[type][M_VOLUME] - 1.0;
+        hitbox.radius[1] = monsterData[type][M_VOLUME] - 1.0;
 
         if (vol <= 1) {
             map[4][4] = true;
@@ -72,8 +72,8 @@ static void spawnMonsters() {
         monster[id].hitbox = hitbox;
         monster[id].name = getMonsterName(type);
         monster[id].mp = 0;
-        monster[id].health = monsterAttr[type][M_MAX_HEALTH];
-        monster[id].damage = monsterAttr[type][M_DAMAGE];
+        monster[id].health = monsterData[type][M_MAX_HEALTH];
+        monster[id].damage = monsterData[type][M_DAMAGE];
         monster[id].offset[0] = 0.0;
         monster[id].offset[1] = 0.0;
         monster[id].skin = skin;
@@ -97,14 +97,14 @@ static void onMonsterDeath(Entity* entity) {
 
     if (--alive > 0) return;
 
-    exp = dungeonAttr[dungeon][D_EXP];
+    exp = dungeonData[dungeon][D_EXP];
     exit.color = GREEN;
     exit.tile = PORTAL_1;
     exit.dest = LOBBY;
     memset(reward_msg, '\0', strlen(reward_msg));
 
     for (int i = 0; i < MAX_REWARD; i++) {
-        int type = dungeonAttr[dungeon][D_REWARD_1 + i];
+        int type = dungeonData[dungeon][D_REWARD_1 + i];
         const char* str;
 
         if (type < 0) continue;

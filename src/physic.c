@@ -63,7 +63,7 @@ void updateControl(int key, Entity* p) {
             break;
         case 'h': // Use Heal/Mana potion
             if (potion == HEAL_CRYSTAL) {
-                p->health += itemAttr[potion][I_VALUE];
+                p->health += itemData[potion][I_VALUE];
                 removeItem(HEAL_CRYSTAL);
             }
             else {
@@ -73,7 +73,7 @@ void updateControl(int key, Entity* p) {
             break;
         case 'm':
             if (potion == MANA_CRYSTAL) {
-                p->mp += itemAttr[potion][I_VALUE];
+                p->mp += itemData[potion][I_VALUE];
                 removeItem(MANA_CRYSTAL);
             }
             else {
@@ -100,7 +100,7 @@ void updateControl(int key, Entity* p) {
                 setPromptMode(DIALOGUE_PROMPT);
                 mvwprintw(getPromptWindow(0), 3, 3, "You must be equipped with a sword to activate the skill.");
             }
-            else if (p->mp >= 40 && spawnSwordTrail(src, norm, 10 * itemAttr[weapon][I_VALUE])) {
+            else if (p->mp >= 40 && spawnSwordTrail(src, norm, 10 * itemData[weapon][I_VALUE])) {
                 p->mp -= 40;
             }
             break;
@@ -145,12 +145,12 @@ void updatePhysic(Entity* e) {
     int agility, max_hp;
 
     if (e->type[0] == PLAYER) {
-        agility = playerAttr[e->type[1]][P_AGI];
-        max_hp = playerAttr[e->type[1]][P_MAX_HEALTH];
+        agility = playerData[e->type[1]][P_AGI];
+        max_hp = playerData[e->type[1]][P_MAX_HEALTH];
     }
     else if (e->type[0] == MONSTER) {
-        agility = monsterAttr[e->type[1]][M_AGI];
-        max_hp = monsterAttr[e->type[1]][M_MAX_HEALTH];
+        agility = monsterData[e->type[1]][M_AGI];
+        max_hp = monsterData[e->type[1]][M_MAX_HEALTH];
     }
 
     // Update movement records
@@ -227,7 +227,7 @@ void updatePhysic(Entity* e) {
 
                     if (portal != NULL) {
                         e->health = max_hp;
-                        e->mp = playerAttr[e->type[1]][P_MAX_MP];
+                        e->mp = playerData[e->type[1]][P_MAX_MP];
 
                         if (portal->dest == DUNGEON) {
                             dungeon = portal->dungeon;
@@ -380,16 +380,16 @@ static void attack(Entity* entity, Entity* victim, float distance) {
 
     if (entity->type[0] == PLAYER) {
         if (weapon > -1) {
-            damage = itemAttr[weapon][I_VALUE];
+            damage = itemData[weapon][I_VALUE];
         } else {
             damage = entity->damage;
         }
 
-        strength = playerAttr[entity->type[1]][P_STR];
+        strength = playerData[entity->type[1]][P_STR];
     }
     else if (entity->type[0] == MONSTER) {
         damage = entity->damage;
-        absorb = monsterAttr[victim->type[1]][M_ABSORB];
+        absorb = monsterData[victim->type[1]][M_ABSORB];
     }
 
     if (entity->type[0] == PLAYER && crit_dist > distance) {
@@ -397,7 +397,7 @@ static void attack(Entity* entity, Entity* victim, float distance) {
     }
 
     if (victim->type[0] == PLAYER && armory > -1) {
-        damage -= itemAttr[armory][I_VALUE];
+        damage -= itemData[armory][I_VALUE];
     }
 
     damage += damage * (strength / 100);

@@ -15,6 +15,9 @@ enum ModPage {
     GAME_CATEGORY, PLAYER_CATEGORY, MONSTER_CATEGORY, ITEM_CATEGORY, DUNGEON_CATEGORY,
     PLAYER_MOD, MONSTER_MOD, ITEM_MOD, DUNGEON_MOD, RESOLUTION_MOD
 } page;
+enum DataCategory {
+    MONSTER_DATA, ITEM_DATA, ITEM_CATEGORY_DATA, DUNGEON_DATA
+};
 static MonsterType monsterType;
 static ItemType itemType;
 static DungeonType dungeonType;
@@ -24,7 +27,7 @@ static void onModCategory(ItemEventBus);
 static void onModInteger(ItemEventBus);
 static void onReturn(ItemEventBus);
 static ITEM* newIntegerItem(char *alias, int attr);
-static ITEM* newCategoryItem(char *alias);
+static ITEM* newCategoryItem(char *alias, int attr, enum DataCategory category);
 
 Prompt getModCategoryPrompt() {
     Prompt p;
@@ -131,7 +134,7 @@ Prompt getModPrompt() {
     }
     else if (page == ITEM_MOD) {
         items = calloc(5, sizeof(ITEM*));
-        items[0] = newCategoryItem("Category");
+        items[0] = newCategoryItem("Category", I_CATEGORY, ITEM_CATEGORY_DATA);
         items[1] = newIntegerItem("Value", I_VALUE);
         items[2] = newIntegerItem("Obtained asset", I_ASSET);
         items[3] = new_item("← Go back", "back");
@@ -143,13 +146,13 @@ Prompt getModPrompt() {
     }
     else if (page == DUNGEON_MOD) {
         items = calloc(9, sizeof(ITEM*));
-        items[0] = newCategoryItem("Monster 1");
-        items[1] = newCategoryItem("Monster 2");
-        items[2] = newCategoryItem("Monster 3");
-        items[3] = newCategoryItem("RewardItem 1");
-        items[4] = newCategoryItem("RewardItem 2");
-        items[5] = newCategoryItem("RewardItem 3");
-        items[6] = newIntegerItem("RewardExp", D_EXP);
+        items[0] = newCategoryItem("Monster 1", D_MONSTER_1, MONSTER_DATA);
+        items[1] = newCategoryItem("Monster 2", D_MONSTER_2, MONSTER_DATA);
+        items[2] = newCategoryItem("Monster 3", D_MONSTER_3, MONSTER_DATA);
+        items[3] = newCategoryItem("Reward 1", D_REWARD_1, ITEM_DATA);
+        items[4] = newCategoryItem("Reward 2", D_REWARD_2, ITEM_DATA);
+        items[5] = newCategoryItem("Reward 3", D_REWARD_3, ITEM_DATA);
+        items[6] = newIntegerItem("Experience", D_EXP);
         items[7] = new_item("← Go back", "back");
         items[8] = NULL;
         set_item_userptr(items[0], onModInteger);
@@ -331,16 +334,16 @@ static void onModInteger(ItemEventBus bus) {
 
     switch (page) {
         case PLAYER_MOD:
-            playerAttr[playerType][attr] = value;
+            playerData[playerType][attr] = value;
             break;
         case MONSTER_MOD:
-            monsterAttr[monsterType][attr] = value;
+            monsterData[monsterType][attr] = value;
             break;
         case ITEM_MOD:
-            itemAttr[itemType][attr] = value;
+            itemData[itemType][attr] = value;
             break;
         case DUNGEON_MOD:
-            dungeonAttr[dungeonType][attr] = value;
+            dungeonData[dungeonType][attr] = value;
             break;
         case RESOLUTION_MOD:
             switch (attr) {
@@ -398,16 +401,16 @@ static ITEM* newIntegerItem(char *alias, int attr) {
 
     switch (page) {
         case PLAYER_MOD:
-            value = playerAttr[playerType][attr];
+            value = playerData[playerType][attr];
             break;
         case MONSTER_MOD:
-            value = monsterAttr[monsterType][attr];
+            value = monsterData[monsterType][attr];
             break;
         case ITEM_MOD:
-            value = itemAttr[itemType][attr];
+            value = itemData[itemType][attr];
             break;
         case DUNGEON_MOD:
-            value = dungeonAttr[dungeonType][attr];
+            value = dungeonData[dungeonType][attr];
             break;
         case RESOLUTION_MOD:
             switch (attr) {
@@ -427,31 +430,41 @@ static ITEM* newIntegerItem(char *alias, int attr) {
     return new_item(name, intToString(attr));
 }
 
-static ITEM* newCategoryItem(char *alias) {
-    char* name;
-    char* value;
-    int type;
+static ITEM* newCategoryItem(char *alias, int attr, enum DataCategory category) {
+    char* name = calloc(40, sizeof(char));
+    const char* attr_name;
+    int attr_val;
 
     switch (page) {
         case PLAYER_MOD:
-            type = playerType;
-            value = getPlayerName(type);
+            attr_val = playerData[playerType][attr];
             break;
         case MONSTER_MOD:
-            type = monsterType;
-            value = getMonsterName(type);            
-            break;
+            attr_val = monsterData[monsterType][attr];
+            break; 
         case ITEM_MOD:
-            type = itemType;
-            value = getItemCategoryName(type);
+            attr_val = itemData[itemType][attr];
             break;
         case DUNGEON_MOD:
-            type = dungeonType;
-            value = getDungeonName(type);
+            attr_val = dungeonData[dungeonType][attr];
             break;
     }
 
-    name = calloc(40, sizeof(char));
-    sprintf(name, "%s: %s", alias, value);
-    return new_item(name, intToString(type));
+    switch (category) {
+        case MONSTER_DATA:
+            attr_name = getMonsterName(attr_val);
+            break;
+        case ITEM_DATA:
+            attr_name = getItemName(attr_val);
+            break;
+        case ITEM_CATEGORY_DATA:
+            attr_name = getItemCategoryName(attr_val);
+            break;
+        case DUNGEON_DATA:
+            attr_name = getDungeonName(attr_val);
+            break;
+    }
+
+    sprintf(name, "%s: %s", alias, attr_name);
+    return new_item(name, intToString(attr));
 }

@@ -49,7 +49,7 @@ bool hasSkill(char skill_code) {
 }
 
 bool addItem(ItemType type) {
-    ItemCategory category = itemAttr[type][I_CATEGORY];
+    ItemCategory category = itemData[type][I_CATEGORY];
 
     for (int i = 0; i < SLOT_CAP; i++) {
         if (inv.items[category][i] < 0) {
@@ -69,8 +69,8 @@ bool addExp(int exp) {
     int rem, *playerExp, *playerLevel;
     bool result = false;
 
-    playerExp = &playerAttr[playerType][P_EXP];
-    playerLevel = &playerAttr[playerType][P_LEVEL];
+    playerExp = &playerData[playerType][P_EXP];
+    playerLevel = &playerData[playerType][P_LEVEL];
     *playerExp += exp;
     rem = *playerExp - getExpCap(*playerLevel);
 
@@ -85,7 +85,7 @@ bool addExp(int exp) {
 }
 
 bool removeItem(ItemType type) {
-    ItemCategory category = itemAttr[type][I_CATEGORY];
+    ItemCategory category = itemData[type][I_CATEGORY];
 
     for (int i = 0; i < SLOT_CAP; i++) {
         int* sub = &inv.items[category][i];
@@ -130,7 +130,7 @@ void doTick(int key) {
                 static int regen = 40;
 
                 if (regen-- == 0) {
-                    if (iter->mp < playerAttr[playerType][P_MAX_MP])
+                    if (iter->mp < playerData[playerType][P_MAX_MP])
                         iter->mp++;
 
                     regen = 40;
@@ -183,8 +183,8 @@ static void initGameCache() {
     playerEntity.loc = getTopLocation(5);
     playerEntity.target = NULL;
     playerEntity.hitbox = hitbox;
-    playerEntity.health = playerAttr[playerType][P_MAX_HEALTH];
-    playerEntity.mp = playerAttr[playerType][P_MAX_MP];
+    playerEntity.health = playerData[playerType][P_MAX_HEALTH];
+    playerEntity.mp = playerData[playerType][P_MAX_MP];
     playerEntity.damage = 1;
     playerEntity.offset[0] = 0.0;
     playerEntity.offset[1] = 0.0;
@@ -197,6 +197,6 @@ static void onPlayerDeath(Entity* entity) {
     setPromptMode(DIALOGUE_PROMPT);
     mvwprintw(getPromptWindow(0), 3, 3, "You died! Respawning back to lobby...");
 
-    entity->health = playerAttr[playerType][P_MAX_HEALTH];
+    entity->health = playerData[playerType][P_MAX_HEALTH];
     entity->loc = getTopLocation(5);
 }

@@ -50,10 +50,10 @@ typedef enum DungeonAttribute {
 
 
 extern PlayerType playerType;
-extern int playerAttr[PT_SIZE][PA_SIZE]; // PlayerType-PlayerAttribute
-extern int monsterAttr[MT_SIZE][MA_SIZE]; // MonsterType-MonsterAttribute
-extern int itemAttr[IT_SIZE][IA_SIZE]; // ItemType-ItemAttribute
-extern int dungeonAttr[DT_SIZE][DA_SIZE]; // DungeonType-DungeonAttribute
+extern int playerData[PT_SIZE][PA_SIZE]; // PlayerType-PlayerAttribute
+extern int monsterData[MT_SIZE][MA_SIZE]; // MonsterType-MonsterAttribute
+extern int itemData[IT_SIZE][IA_SIZE]; // ItemType-ItemAttribute
+extern int dungeonData[DT_SIZE][DA_SIZE]; // DungeonType-DungeonAttribute
 
 extern void initData();
 extern char* getPlayerName(int type);

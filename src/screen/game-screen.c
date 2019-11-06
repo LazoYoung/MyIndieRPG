@@ -100,14 +100,14 @@ void drawGameScreen() {
         wattroff(w[HEALTH_G_WIN], A_BOLD);
         waddch(w[HEALTH_G_WIN], ' ');
         wmove(w[HEALTH_G_WIN], 0, 13);
-        drawGuage(w[HEALTH_G_WIN], GREEN, RED, 25, (float) player->health / playerAttr[playerType][P_MAX_HEALTH]);
+        drawGuage(w[HEALTH_G_WIN], GREEN, RED, 25, (float) player->health / playerData[playerType][P_MAX_HEALTH]);
         waddch(w[MANA_G_WIN], ' ');
         wattron(w[MANA_G_WIN], A_BOLD);
         waddstr(w[MANA_G_WIN], "Mana");
         wattroff(w[MANA_G_WIN], A_BOLD);
         waddch(w[MANA_G_WIN], ' ');
         wmove(w[MANA_G_WIN], 0, 13);
-        drawGuage(w[MANA_G_WIN], CYAN, BLACK, 25, (float) player->mp / playerAttr[playerType][P_MAX_MP]);
+        drawGuage(w[MANA_G_WIN], CYAN, BLACK, 25, (float) player->mp / playerData[playerType][P_MAX_MP]);
         drawStatus(w[STAT_WIN]);
         drawEquipment(w[WEAPON_WIN], WEAPON);
         drawEquipment(w[ARMORY_WIN], ARMORY);
@@ -141,10 +141,10 @@ WINDOW* getGameWindow(WindowType type) {
 }
 
 static void drawStatus(WINDOW* win) {
-    int lvl = playerAttr[playerType][P_LEVEL];
+    int lvl = playerData[playerType][P_LEVEL];
 
     mvwprintw(win, 1, 2, "%s", getPlayerName(playerType));
-    mvwprintw(win, 3, 2, "Level: %d (Exp. %d/%d)", lvl, playerAttr[playerType][P_EXP], getExpCap(lvl));
+    mvwprintw(win, 3, 2, "Level: %d (Exp. %d/%d)", lvl, playerData[playerType][P_EXP], getExpCap(lvl));
     mvwprintw(win, 4, 2, "Coin: %d", inv.coin);
 }
 
@@ -333,7 +333,7 @@ static void drawEntities() {
                         if (skin.color == RED || skin.color == GREEN)
                             wattroff(win, color);
 
-                        drawGuage(win, GREEN, RED, 10, (float) iter->health / monsterAttr[iter->type[1]][M_MAX_HEALTH]);
+                        drawGuage(win, GREEN, RED, 10, (float) iter->health / monsterData[iter->type[1]][M_MAX_HEALTH]);
                         
                         if (skin.color == RED || skin.color == GREEN)
                             wattron(win, color);

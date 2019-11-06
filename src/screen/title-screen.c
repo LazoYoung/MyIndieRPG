@@ -145,10 +145,10 @@ static void printAttributes() {
     WINDOW *w = getPromptWindow(0);
     int r = 4;
     mvwprintw(w, 1, 3, "Character - %s", getPlayerName(playerType));
-    mvwprintw(w, 3, 3, "HP: %d", playerAttr[playerType][P_MAX_HEALTH]);
-    mvwprintw(w, 4, 3, "MP: %d", playerAttr[playerType][P_MAX_MP]);
-    mvwprintw(w, 5, 3, "AGILITY: %d", playerAttr[playerType][P_AGI]);
-    mvwprintw(w, 6, 3, "STRENGTH: %d", playerAttr[playerType][P_STR]);
+    mvwprintw(w, 3, 3, "HP: %d", playerData[playerType][P_MAX_HEALTH]);
+    mvwprintw(w, 4, 3, "MP: %d", playerData[playerType][P_MAX_MP]);
+    mvwprintw(w, 5, 3, "AGILITY: %d", playerData[playerType][P_AGI]);
+    mvwprintw(w, 6, 3, "STRENGTH: %d", playerData[playerType][P_STR]);
 
     if (hasSkill(DUAL_WIELD)) {
         mvwprintw(w, r++, 3, "UNIQUE SKILL: Dual Wield");

@@ -139,9 +139,9 @@ static void onSelectItem(ItemEventBus bus) {
 
         case HOVER: {
             char desc[30];
-            int value = itemAttr[gItem][I_VALUE];
+            int value = itemData[gItem][I_VALUE];
 
-            switch (itemAttr[gItem][I_CATEGORY]) {
+            switch (itemData[gItem][I_CATEGORY]) {
                 case WEAPON:
                     sprintf(desc, "Attack power: %d", value);
                     break;
