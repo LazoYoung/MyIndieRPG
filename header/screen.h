@@ -28,6 +28,7 @@ typedef struct {
     int x; // box coord-x
     int y; // box coord-y
     int desc_lines; // Number of rows reserved in description window
+    int btn_length;
     ITEM** items;
 } Prompt;
 

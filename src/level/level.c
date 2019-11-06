@@ -184,23 +184,6 @@ char* getStageName(Stage _stage) {
     return NULL;
 }
 
-char* getDungeonName(DungeonType type) {
-    switch (type) {
-        case DUNGEON_1:
-            return "Dungeon 1";
-        case DUNGEON_2:
-            return "Dungeon 2";
-        case DUNGEON_3:
-            return "Dungeon 3";
-        case DUNGEON_4:
-            return "Dungeon 4";
-        case DUNGEON_5:
-            return "Dungeon 5";
-    }
-
-    return NULL;
-}
-
 Tile getTileAt(int x, int y) {
     if (tiles == NULL || x >= level_width || x < 0 || y >= level_height || y < 0)
         return AIR;

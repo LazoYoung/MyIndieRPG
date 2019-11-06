@@ -15,7 +15,7 @@ PromptMode prompt_mode = PROMPT_NONE;
 PromptMode hid_prompt_mode = PROMPT_NONE;
 int column = 224;
 int row = 66;
-Prompt prompt = {0, 0, 0, 0, 0, NULL};
+Prompt prompt = {0, 0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
 
@@ -63,7 +63,7 @@ void drawPrompt(int cursor) {
     item = prompt.items[cursor];
     menu = new_menu(prompt.items);
     win0 = newwin(prompt.height, prompt.width, prompt.y, prompt.x);
-    win1 = derwin(win0, item_count(menu), 20, prompt.desc_lines + 3, 3);
+    win1 = derwin(win0, item_count(menu), 20, prompt.desc_lines + 3, 10);
     prompt_pan[0] = new_panel(win0);
     prompt_pan[1] = new_panel(win1);
 
@@ -137,6 +137,7 @@ static Prompt getPrompt(PromptMode mode) {
             set_item_userptr(items[0], onDialogueConfirm);
 
             p.desc_lines = 5;
+            p.btn_length = 10;
             p.items = items;
             p.height = 15;
             p.width = 80;

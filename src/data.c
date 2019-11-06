@@ -161,7 +161,7 @@ void initData() {
     dungeonAttr[DUNGEON_5][D_EXP] = 400;
 }
 
-char* getPlayerName(PlayerType type) {
+char* getPlayerName(int type) {
     switch (type) {
         case KIRITO:
             return "Kirito";
@@ -176,7 +176,7 @@ char* getPlayerName(PlayerType type) {
     }
 }
 
-char* getMonsterName(MonsterType type) {
+char* getMonsterName(int type) {
     switch (type) {
         case GOLEM:
             return "Golem";
@@ -203,7 +203,7 @@ char* getMonsterName(MonsterType type) {
     }
 }
 
-char* getItemName(ItemType type) {
+char* getItemName(int type) {
     switch (type) {
         case SMALL_SWORD:
             return "Small Sword";
@@ -228,6 +228,23 @@ char* getItemName(ItemType type) {
         default:
             return NULL;
     }
+}
+
+char* getDungeonName(int type) {
+    switch (type) {
+        case DUNGEON_1:
+            return "Dungeon 1";
+        case DUNGEON_2:
+            return "Dungeon 2";
+        case DUNGEON_3:
+            return "Dungeon 3";
+        case DUNGEON_4:
+            return "Dungeon 4";
+        case DUNGEON_5:
+            return "Dungeon 5";
+    }
+
+    return NULL;
 }
 
 char* intToString(int i) {

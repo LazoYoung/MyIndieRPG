@@ -13,7 +13,7 @@
 
 enum ModPage {
     GAME_CATEGORY, PLAYER_CATEGORY, MONSTER_CATEGORY, ITEM_CATEGORY, DUNGEON_CATEGORY,
-    PLAYER_MOD, ITEM_MOD, MONSTER_MOD, DUNGEON_MOD, RESOLUTION_MOD
+    PLAYER_MOD, MONSTER_MOD, ITEM_MOD, DUNGEON_MOD, RESOLUTION_MOD
 } page;
 static MonsterType monsterType;
 static ItemType itemType;
@@ -23,7 +23,8 @@ extern int column, row;
 static void onModCategory(ItemEventBus);
 static void onModInteger(ItemEventBus);
 static void onReturn(ItemEventBus);
-static ITEM* newAttributeItem(char *alias, int attr);
+static ITEM* newIntegerItem(char *alias, int attr);
+static ITEM* newTypeItem(char *alias);
 
 Prompt getModCategoryPrompt() {
     Prompt p;
@@ -45,19 +46,39 @@ Prompt getModCategoryPrompt() {
         set_item_userptr(items[4], onModCategory);
         set_item_userptr(items[5], onReturn);
     }
-    else if (page == PLAYER_CATEGORY) {
-        items = calloc(PT_SIZE + 2, sizeof(ITEM*));
-        items[KIRITO] = new_item("Kirito", intToString(KIRITO));
-        items[ASUNA] = new_item("Asuna", intToString(ASUNA));
-        items[KLEIN] = new_item("Klein", intToString(KLEIN));
-        items[AGIL] = new_item("Agil", intToString(AGIL));
-        items[PT_SIZE] = new_item("← Go back", "back");
-        items[PT_SIZE + 1] = NULL;
-        set_item_userptr(items[KIRITO], onModCategory);
-        set_item_userptr(items[ASUNA], onModCategory);
-        set_item_userptr(items[KLEIN], onModCategory);
-        set_item_userptr(items[AGIL], onModCategory);
-        set_item_userptr(items[PT_SIZE], onReturn);
+    else {
+        int size, i;
+        char* (*getLabel)(int);
+
+        switch (page) {
+            case PLAYER_CATEGORY:
+                size = PT_SIZE;
+                getLabel = getPlayerName;
+                break;
+            case MONSTER_CATEGORY:
+                size = MT_SIZE;
+                getLabel = getMonsterName;
+                break;
+            case ITEM_CATEGORY:
+                size = IT_SIZE;
+                getLabel = getItemName;
+                break;
+            case DUNGEON_CATEGORY:
+                size = DT_SIZE;
+                getLabel = getDungeonName;
+                break;
+        }
+
+        items = calloc(size + 2, sizeof(ITEM*));
+
+        for (i = 0; i < size; i++) {
+            items[i] = new_item((*getLabel)(i), intToString(i));
+            set_item_userptr(items[i], onModCategory);
+        }
+        
+        items[i] = new_item("← Go back", "back");
+        items[i + 1] = NULL;
+        set_item_userptr(items[i], onReturn);
     }
 
     p.width = 50;
@@ -65,6 +86,7 @@ Prompt getModCategoryPrompt() {
     p.x = column / 2 - 25;
     p.y = row / 2 - 15;
     p.desc_lines = 3;
+    p.btn_length = 15;
     p.items = items;
     return p;
 }
@@ -74,18 +96,80 @@ Prompt getModPrompt() {
     ITEM **items;
 
     if (page == PLAYER_MOD) {
-        items = calloc(6, sizeof(ITEM*));
-        items[0] = newAttributeItem("Max health", P_MAX_HEALTH);
-        items[1] = newAttributeItem("Max mana", P_MAX_MP);
-        items[2] = newAttributeItem("Agility", P_AGI);
-        items[3] = newAttributeItem("Strength", P_STR);
-        items[4] = new_item("← Go back", "back");
-        items[5] = NULL;
+        items = calloc(8, sizeof(ITEM*));
+        items[0] = newIntegerItem("Max health", P_MAX_HEALTH);
+        items[1] = newIntegerItem("Max mana", P_MAX_MP);
+        items[2] = newIntegerItem("Agility", P_AGI);
+        items[3] = newIntegerItem("Strength", P_STR);
+        items[4] = newIntegerItem("Level", P_LEVEL);
+        items[5] = newIntegerItem("Experience", P_EXP);
+        items[6] = new_item("← Go back", "back");
+        items[7] = NULL;
         set_item_userptr(items[0], onModInteger);
         set_item_userptr(items[1], onModInteger);
         set_item_userptr(items[2], onModInteger);
         set_item_userptr(items[3], onModInteger);
-        set_item_userptr(items[4], onReturn);
+        set_item_userptr(items[4], onModInteger);
+        set_item_userptr(items[5], onModInteger);
+        set_item_userptr(items[6], onReturn);
+    }
+    else if (page == MONSTER_MOD) {
+        items = calloc(7, sizeof(ITEM*));
+        items[0] = newIntegerItem("Max health", M_MAX_HEALTH);
+        items[1] = newIntegerItem("Agility", M_AGI);
+        items[2] = newIntegerItem("Defense", M_ABSORB);
+        items[3] = newIntegerItem("Skin color", M_COLOR);
+        items[4] = newIntegerItem("Volume size", M_VOLUME);
+        items[5] = new_item("← Go back", "back");
+        items[6] = NULL;
+        set_item_userptr(items[0], onModInteger);
+        set_item_userptr(items[1], onModInteger);
+        set_item_userptr(items[2], onModInteger);
+        set_item_userptr(items[3], onModInteger);
+        set_item_userptr(items[4], onModInteger);
+        set_item_userptr(items[5], onReturn);
+    }
+    else if (page == ITEM_MOD) {
+        items = calloc(5, sizeof(ITEM*));
+        items[0] = newTypeItem("Category");
+        items[1] = newIntegerItem("Value", I_VALUE);
+        items[2] = newIntegerItem("Obtained asset", I_ASSET);
+        items[3] = new_item("← Go back", "back");
+        items[4] = NULL;
+        set_item_userptr(items[0], onModInteger);
+        set_item_userptr(items[1], onModInteger);
+        set_item_userptr(items[2], onModInteger);
+        set_item_userptr(items[3], onReturn);
+    }
+    else if (page == DUNGEON_MOD) {
+        items = calloc(9, sizeof(ITEM*));
+        items[0] = newTypeItem("Monster 1");
+        items[1] = newTypeItem("Monster 2");
+        items[2] = newTypeItem("Monster 3");
+        items[3] = newTypeItem("RewardItem 1");
+        items[4] = newTypeItem("RewardItem 2");
+        items[5] = newTypeItem("RewardItem 3");
+        items[6] = newIntegerItem("RewardExp", D_EXP);
+        items[7] = new_item("← Go back", "back");
+        items[8] = NULL;
+        set_item_userptr(items[0], onModInteger);
+        set_item_userptr(items[1], onModInteger);
+        set_item_userptr(items[2], onModInteger);
+        set_item_userptr(items[3], onModInteger);
+        set_item_userptr(items[4], onModInteger);
+        set_item_userptr(items[5], onModInteger);
+        set_item_userptr(items[6], onModInteger);
+        set_item_userptr(items[7], onReturn);
+    }
+    else if (page == RESOLUTION_MOD) {
+        items = calloc(4, sizeof(ITEM*));
+        items[0] = newIntegerItem("Width", 0);
+        items[1] = newIntegerItem("Height", 1);
+        items[2] = new_item("← Go back", "back");
+        items[3] = NULL;
+        set_item_userptr(items[0], onModInteger);
+        set_item_userptr(items[1], onModInteger);
+        set_item_userptr(items[2], onReturn);
     }
 
     p.width = 50;
@@ -93,6 +177,7 @@ Prompt getModPrompt() {
     p.x = column / 2 - 25;
     p.y = row / 2 - 15;
     p.desc_lines = 3;
+    p.btn_length = 30;
     p.items = items;
     return p;
 }
@@ -129,7 +214,8 @@ static void onModCategory(ItemEventBus bus) {
                     break;
                 case 4:
                     page = RESOLUTION_MOD;
-                    break;
+                    setPromptMode(MOD_PROMPT);
+                    return;
             }
 
             setPromptMode(MOD_CATEGORY_PROMPT);
@@ -182,20 +268,89 @@ static void onModInteger(ItemEventBus bus) {
     curs_set(0);
     value = atoi(input);
 
-    switch (attr) {
-        case P_MAX_HEALTH:
-        case P_MAX_MP:
-            value = value > 0 ? value : 1;
-            break;
-        case P_AGI:
-        case P_STR:
-            value = value >= 0 ? value : 0;
-            break;
+    if (page == PLAYER_MOD) {
+        switch (attr) {
+            case P_MAX_HEALTH:
+            case P_MAX_MP:
+            case P_LEVEL:
+                value = value > 0 ? value : 1;
+                break;
+            case P_AGI:
+            case P_STR:
+            case P_EXP:
+                value = value >= 0 ? value : 0;
+                break;
+        }
+    }
+    else if (page == MONSTER_MOD) {
+        switch (attr) {
+            case M_VOLUME:
+                value = value > 0 && value < 4 ? value : 1;
+                break;
+            case M_MAX_HEALTH:
+            case M_DAMAGE:
+                value = value > 0 ? value : 1;
+                break;
+            case M_ABSORB:
+            case M_COLOR:
+                value = value > 0 ? value : 0;
+                break;
+            case M_AGI:
+                value = value >= -100 && value <= 100 ? value : -100;                
+                break;
+        }
+    }
+    else if (page == ITEM_MOD) {
+        switch (attr) {
+            case I_VALUE:
+            case I_ASSET:
+                value = value > 0 ? value : 0;
+                break;
+        }
+    }
+    else if (page == DUNGEON_MOD) {
+        switch (attr) {
+            case D_MONSTER_1:
+            case D_MONSTER_2:
+            case D_MONSTER_3:
+                value = value >= -1 && value < MT_SIZE ? value : -1;
+                break;
+            case D_REWARD_1:
+            case D_REWARD_2:
+            case D_REWARD_3:
+                value = value >= -1 && value < IT_SIZE ? value : -1;
+                break;
+            case D_EXP:
+                value = value > 0 ? value : 0;
+                break;
+        }
+    }
+    else if (page == RESOLUTION_MOD) {
+        value = value > 1 ? value : 1;
     }
 
     switch (page) {
         case PLAYER_MOD:
             playerAttr[playerType][attr] = value;
+            break;
+        case MONSTER_MOD:
+            monsterAttr[monsterType][attr] = value;
+            break;
+        case ITEM_MOD:
+            itemAttr[itemType][attr] = value;
+            break;
+        case DUNGEON_MOD:
+            dungeonAttr[dungeonType][attr] = value;
+            break;
+        case RESOLUTION_MOD:
+            switch (attr) {
+                case 0: // Width
+                    column = value;
+                    break;
+                case 1:
+                    row = value;
+                    break;
+            }
             break;
     }
 
@@ -229,12 +384,15 @@ static void onReturn(ItemEventBus bus) {
         case DUNGEON_MOD:
             page = DUNGEON_CATEGORY;
             break;
+        case RESOLUTION_MOD:
+            page = GAME_CATEGORY;
+            break;
     }
 
     setPromptMode(MOD_CATEGORY_PROMPT);
 }
 
-static ITEM* newAttributeItem(char *alias, int attr) {
+static ITEM* newIntegerItem(char *alias, int attr) {
     char* name;
     int value;
 
@@ -242,9 +400,57 @@ static ITEM* newAttributeItem(char *alias, int attr) {
         case PLAYER_MOD:
             value = playerAttr[playerType][attr];
             break;
+        case MONSTER_MOD:
+            value = monsterAttr[monsterType][attr];
+            break;
+        case ITEM_MOD:
+            value = itemAttr[itemType][attr];
+            break;
+        case DUNGEON_MOD:
+            value = dungeonAttr[dungeonType][attr];
+            break;
+        case RESOLUTION_MOD:
+            switch (attr) {
+                case 0: // Width
+                    value = column;
+                    break;
+                case 1:
+                    value = row;
+                    break;
+            }
+            break;
     }
 
     name = calloc(40, sizeof(char));
     sprintf(name, "%s: %d", alias, value);
     return new_item(name, intToString(attr));
+}
+
+static ITEM* newTypeItem(char *alias) {
+    char* name;
+    char* value;
+    int type;
+
+    switch (page) {
+        case PLAYER_MOD:
+            type = playerType;
+            value = getPlayerName(type);
+            break;
+        case MONSTER_MOD:
+            type = monsterType;
+            value = getMonsterName(type);            
+            break;
+        case ITEM_MOD:
+            type = itemType;
+            value = getItemName(type);
+            break;
+        case DUNGEON_MOD:
+            type = dungeonType;
+            value = getDungeonName(type);
+            break;
+    }
+
+    name = calloc(40, sizeof(char));
+    sprintf(name, "%s: %s", alias, value);
+    return new_item(name, intToString(type));
 }

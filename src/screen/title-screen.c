@@ -51,6 +51,7 @@ Prompt getTitlePrompt() {
     p.x = column / 2 - 20;
     p.y = row / 2 - 5;
     p.desc_lines = 2;
+    prompt.btn_length = 20;
     p.items = items;
     return p;
 }
@@ -78,6 +79,7 @@ Prompt getCharPrompt() {
     p.x = column / 2 - 20;
     p.y = row / 2 - 10;
     p.desc_lines = 8;
+    prompt.btn_length = 15;
     p.items = items;
     return p;
 }

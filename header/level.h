@@ -20,7 +20,6 @@ extern void generateLevel(Stage);
 extern void destructLevel();
 extern Stage getStage();
 extern char* getStageName(Stage);
-extern char* getDungeonName(DungeonType type);
 extern Tile getTileAt(int, int);
 extern void setTileAt(int x, int y, Tile tile);
 

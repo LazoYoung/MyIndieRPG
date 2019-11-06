@@ -56,9 +56,10 @@ extern int itemAttr[IT_SIZE][IA_SIZE]; // ItemType-ItemAttribute
 extern int dungeonAttr[DT_SIZE][DA_SIZE]; // DungeonType-DungeonAttribute
 
 extern void initData();
-extern char* getPlayerName(PlayerType type);
-extern char* getMonsterName(MonsterType type);
-extern char* getItemName(ItemType type);
+extern char* getPlayerName(int type);
+extern char* getMonsterName(int type);
+extern char* getItemName(int type);
+extern char* getDungeonName(int type);
 extern char* intToString(int i);
 
 #endif
