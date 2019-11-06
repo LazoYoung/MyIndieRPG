@@ -13,8 +13,8 @@
 ScreenMode screen_mode = TITLE_SCREEN;
 PromptMode prompt_mode = PROMPT_NONE;
 PromptMode hid_prompt_mode = PROMPT_NONE;
-int column = 224;
-int row = 66;
+int column = 180;
+int row = 60;
 Prompt prompt = {0, 0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
