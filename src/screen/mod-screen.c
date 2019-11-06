@@ -24,7 +24,7 @@ static void onModCategory(ItemEventBus);
 static void onModInteger(ItemEventBus);
 static void onReturn(ItemEventBus);
 static ITEM* newIntegerItem(char *alias, int attr);
-static ITEM* newTypeItem(char *alias);
+static ITEM* newCategoryItem(char *alias);
 
 Prompt getModCategoryPrompt() {
     Prompt p;
@@ -131,7 +131,7 @@ Prompt getModPrompt() {
     }
     else if (page == ITEM_MOD) {
         items = calloc(5, sizeof(ITEM*));
-        items[0] = newTypeItem("Category");
+        items[0] = newCategoryItem("Category");
         items[1] = newIntegerItem("Value", I_VALUE);
         items[2] = newIntegerItem("Obtained asset", I_ASSET);
         items[3] = new_item("← Go back", "back");
@@ -143,12 +143,12 @@ Prompt getModPrompt() {
     }
     else if (page == DUNGEON_MOD) {
         items = calloc(9, sizeof(ITEM*));
-        items[0] = newTypeItem("Monster 1");
-        items[1] = newTypeItem("Monster 2");
-        items[2] = newTypeItem("Monster 3");
-        items[3] = newTypeItem("RewardItem 1");
-        items[4] = newTypeItem("RewardItem 2");
-        items[5] = newTypeItem("RewardItem 3");
+        items[0] = newCategoryItem("Monster 1");
+        items[1] = newCategoryItem("Monster 2");
+        items[2] = newCategoryItem("Monster 3");
+        items[3] = newCategoryItem("RewardItem 1");
+        items[4] = newCategoryItem("RewardItem 2");
+        items[5] = newCategoryItem("RewardItem 3");
         items[6] = newIntegerItem("RewardExp", D_EXP);
         items[7] = new_item("← Go back", "back");
         items[8] = NULL;
@@ -426,7 +426,7 @@ static ITEM* newIntegerItem(char *alias, int attr) {
     return new_item(name, intToString(attr));
 }
 
-static ITEM* newTypeItem(char *alias) {
+static ITEM* newCategoryItem(char *alias) {
     char* name;
     char* value;
     int type;
@@ -442,7 +442,7 @@ static ITEM* newTypeItem(char *alias) {
             break;
         case ITEM_MOD:
             type = itemType;
-            value = getItemName(type);
+            value = getItemCategoryName(type);
             break;
         case DUNGEON_MOD:
             type = dungeonType;

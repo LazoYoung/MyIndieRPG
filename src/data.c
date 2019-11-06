@@ -247,6 +247,19 @@ char* getDungeonName(int type) {
     return NULL;
 }
 
+char* getItemCategoryName(int type) {
+    switch (type) {
+        case WEAPON:
+            return "Weapon";
+        case ARMORY:
+            return "Armory";
+        case POTION:
+            return "Potion";
+    }
+
+    return NULL;
+}
+
 char* intToString(int i) {
     char* str;
     str = malloc(sizeof(int));

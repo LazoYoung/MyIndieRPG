@@ -60,6 +60,7 @@ extern char* getPlayerName(int type);
 extern char* getMonsterName(int type);
 extern char* getItemName(int type);
 extern char* getDungeonName(int type);
+extern char* getItemCategoryName(int type);
 extern char* intToString(int i);
 
 #endif
