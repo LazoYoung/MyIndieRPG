@@ -6,9 +6,9 @@
 #include "game.h"
 #include "game-struct.h"
 
-extern bool overlaps(AABB, AABB);
-extern void updateControl(int, Entity*);
-extern void updateEntities();
-extern void updateSwordTrail();
+bool overlaps(AABB, AABB);
+void updateControl(int, Entity*);
+void updateEntities();
+void updateSwordTrail();
 
 #endif

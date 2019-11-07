@@ -20,7 +20,7 @@ typedef enum ScreenMode {
 
 typedef enum PromptMode {
     PROMPT_NONE, TITLE_PROMPT, TITLE_CHARACTER_PROMPT, MOD_PROMPT, MOD_CATEGORY_PROMPT,
-    INV_CATEGORY_PROMPT, INVENTORY_PROMPT, DIALOGUE_PROMPT
+    INV_CATEGORY_PROMPT, INVENTORY_PROMPT, DIALOGUE_PROMPT, PAUSE_PROMPT
 } PromptMode;
 
 typedef struct {
@@ -29,7 +29,6 @@ typedef struct {
     int x; // box coord-x
     int y; // box coord-y
     int desc_lines; // Number of rows reserved in description window
-    int btn_length;
     ITEM** items;
 } Prompt;
 
@@ -44,34 +43,41 @@ extern int column, row;
 extern Prompt prompt;
 
 /* screen.c */
-extern void drawScreen();
-extern void clearScreen();
-extern void deletePrompt();
-extern void drawPrompt(int cursor);
-extern void refreshPrompt(int cursor);
-extern void updateScreen(int key);
-extern void setScreenMode(ScreenMode mode);
-extern void setPromptMode(PromptMode mode);
-extern MENU* getPromptMenu();
-extern WINDOW* getPromptWindow(int index);
-extern void setMenuOptions(Menu_Options, bool);
+void drawScreen();
+void clearScreen();
+void deletePrompt();
+void drawPrompt(int cursor);
+void refreshPrompt(int cursor);
+void updateScreen(int key);
+void setScreenMode(ScreenMode mode);
+void setPromptMode(PromptMode mode);
+MENU* getPromptMenu();
+WINDOW* getPromptWindow(int index);
+void setMenuOptions(Menu_Options, bool);
 
 /* title-screen.c */
-extern void drawTitleScreen();
-extern Prompt getTitlePrompt();
-extern Prompt getCharPrompt();
-extern Prompt getModPrompt();
-extern Prompt getModCategoryPrompt();
+void drawTitleScreen();
+Prompt getTitlePrompt();
+Prompt getCharPrompt();
+Prompt getModPrompt();
+Prompt getModCategoryPrompt();
 
 /* game-screen.c */
-extern void initGameScreen();
-extern void initGameResolution();
-extern void drawGameScreen();
-extern void clearGameScreen();
-extern WINDOW* getGameWindow(enum WindowType type);
+void initGameScreen();
+void initGameResolution();
+void drawGameScreen();
+void clearGameScreen();
+WINDOW* getGameWindow(enum WindowType type);
 
-/* inventory-screen.c */
-extern Prompt getCategoryPrompt();
-extern Prompt getInventoryPrompt();
+/* inventory.c */
+Prompt getCategoryPrompt();
+Prompt getInventoryPrompt();
+
+/* mod.c */
+Prompt getModPrompt();
+Prompt getModCategoryPrompt();
+
+/* pause.c */
+Prompt getPausePrompt();
 
 #endif

@@ -42,7 +42,6 @@ Prompt getCategoryPrompt() {
     prompt.x = column / 2 - 25;
     prompt.y = row / 2 - 10;
     prompt.desc_lines = 1;
-    prompt.btn_length = 15;
     prompt.items = items;
     return prompt;
 }
@@ -72,7 +71,6 @@ Prompt getInventoryPrompt() {
     prompt.x = column / 2 - 25;
     prompt.y = row / 2 - 10;
     prompt.desc_lines = 8;
-    prompt.btn_length = 30;
     prompt.items = items;
     return prompt;
 }

@@ -9,8 +9,7 @@
 #include "header/screen.h"
 #include "header/game.h"
 #include "header/data.h"
-
-static bool cont = true;
+#include "header/pause.h"
 
 extern void doTick(int);
 void suspend();
@@ -41,7 +40,7 @@ int main() {
 	drawScreen();
 	initGameResolution();
 
-	while (cont) {
+	for (;;) {
 		int key = getch();
 
 		if (is_term_resized(row, column)) {
@@ -51,7 +50,10 @@ int main() {
 		else {
 			updateScreen(key);
 			curs_set(0);
-			doTick(key);
+
+			if (!pause) {
+				doTick(key);
+			}
 		}
 	}
 	
@@ -60,5 +62,6 @@ int main() {
 }
 
 void suspend() {
-	cont = false;
+	endwin();
+	exit(EXIT_SUCCESS);
 }

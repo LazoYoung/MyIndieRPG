@@ -9,13 +9,14 @@
 #include <ncursesw/menu.h>
 #include <ncursesw/panel.h>
 #include "header/screen.h"
+#include "header/pause.h"
 
 ScreenMode screen_mode = TITLE_SCREEN;
 PromptMode prompt_mode = PROMPT_NONE;
 PromptMode hid_prompt_mode = PROMPT_NONE;
 int column = 180;
 int row = 60;
-Prompt prompt = {0, 0, 0, 0, 0, 0, NULL};
+Prompt prompt = {0, 0, 0, 0, 0, NULL};
 static MENU *menu = NULL;
 static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
 
@@ -125,6 +126,9 @@ static Prompt getPrompt(PromptMode mode) {
             return getModCategoryPrompt();
         case INV_CATEGORY_PROMPT:
             return getCategoryPrompt();
+        case PAUSE_PROMPT:
+            pauseGame(true);
+            return getPausePrompt();
         case INVENTORY_PROMPT:
             return getInventoryPrompt();
         case DIALOGUE_PROMPT: {
@@ -137,7 +141,6 @@ static Prompt getPrompt(PromptMode mode) {
             set_item_userptr(items[0], onDialogueConfirm);
 
             p.desc_lines = 5;
-            p.btn_length = 10;
             p.items = items;
             p.height = 15;
             p.width = 80;
