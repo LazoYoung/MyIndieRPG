@@ -9,8 +9,7 @@
 #include "header/screen.h"
 #include "header/game.h"
 #include "header/data.h"
-
-static bool cont = true;
+#include "header/pause.h"
 
 extern void doTick(int);
 void suspend();
@@ -33,15 +32,19 @@ int main() {
 	curs_set(0);
 	keypad(stdscr, true);
 	
-	// Initialize game data
-	initData();
+	// Load game data from storage
+	if (loadData() != 0) {
+		endwin();
+		printf("Failed to load data. %s might be corrupted.", dataFileName);
+		exit(EXIT_FAILURE);
+	}
 
 	// Start title screen
 	setPromptMode(TITLE_PROMPT);
 	drawScreen();
 	initGameResolution();
 
-	while (cont) {
+	for (;;) {
 		int key = getch();
 
 		if (is_term_resized(row, column)) {
@@ -51,7 +54,10 @@ int main() {
 		else {
 			updateScreen(key);
 			curs_set(0);
-			doTick(key);
+
+			if (!pause) {
+				doTick(key);
+			}
 		}
 	}
 	
@@ -60,5 +66,6 @@ int main() {
 }
 
 void suspend() {
-	cont = false;
+	endwin();
+	exit(EXIT_SUCCESS);
 }

@@ -130,6 +130,9 @@ void updateControl(int key, Entity* p) {
                     bias->attackCooldown = getFramesDuringTime(700);
             }
             break;
+        case 27:
+            setPromptMode(PAUSE_PROMPT);
+            break;
     }
 }
 

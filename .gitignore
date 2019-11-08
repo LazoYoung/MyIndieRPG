@@ -1,5 +1,8 @@
 .vscode/
 
+# File storage
+data.txt
+
 # Prerequisites
 *.d
 

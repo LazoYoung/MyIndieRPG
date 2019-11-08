@@ -3,10 +3,10 @@
 
 #include "game-struct.h"
 
-extern void add(Vector, Vector, Vector*);
-extern void add_m(Vector, float, float, Vector*);
-extern void sub(Vector, Vector, Vector*);
-extern void scale(Vector, float, Vector*);
-extern float distance(Vector, Vector);
+void add(Vector, Vector, Vector*);
+void add_m(Vector, float, float, Vector*);
+void sub(Vector, Vector, Vector*);
+void scale(Vector, float, Vector*);
+float distance(Vector, Vector);
 
 #endif

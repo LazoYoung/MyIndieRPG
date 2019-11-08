@@ -31,13 +31,13 @@ extern bool inGame;
 extern const float deltaTime; // How much time does 1 frame take in seconds
 extern const int fps; // How many frames and operations are made in 1 sec
 
-extern void startGame();
-extern void assignSkill(char);
-extern bool hasSkill(char);
-extern bool addItem(ItemType);
-extern bool removeItem(ItemType);
-extern bool addExp(int);
-extern int getExpCap(int);
-extern int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)
+void startGame();
+void assignSkill(char);
+bool hasSkill(char);
+bool addItem(ItemType);
+bool removeItem(ItemType);
+bool addExp(int);
+int getExpCap(int);
+int getFramesDuringTime(int); // fps : 1(s) = result : input(ms)
 
 #endif

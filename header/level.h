@@ -9,25 +9,25 @@
 extern int level_width, level_height;
 extern DungeonType dungeon;
 
-extern void spawnEntity(Entity*);
-extern bool despawnEntity(int id);
-extern Entity* getEntity(const char*);
-extern Entity* getEntityByID(int);
-extern Location getTopLocation(int);
-extern void assignPortal(Portal);
-extern Portal* getPortal(Tile);
-extern void generateLevel(Stage);
-extern void destructLevel();
-extern Stage getStage();
-extern char* getStageName(Stage);
-extern Tile getTileAt(int, int);
-extern void setTileAt(int x, int y, Tile tile);
+void spawnEntity(Entity*);
+bool despawnEntity(int id);
+Entity* getEntity(const char*);
+Entity* getEntityByID(int);
+Location getTopLocation(int);
+void assignPortal(Portal);
+Portal* getPortal(Tile);
+void generateLevel(Stage);
+void destructLevel();
+Stage getStage();
+char* getStageName(Stage);
+Tile getTileAt(int, int);
+void setTileAt(int x, int y, Tile tile);
 
 // lobby.c
-extern void generateLobby();
+void generateLobby();
 
 // dungeon.c
-extern void generateDungeon();
-extern void destructDungeon();
+void generateDungeon();
+void destructDungeon();
 
 #endif

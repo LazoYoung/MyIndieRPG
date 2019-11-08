@@ -28,7 +28,7 @@ typedef enum ItemType {
     IT_SIZE
 } ItemType;
 typedef enum ItemAttribute {
-    I_CATEGORY, I_VALUE, I_ASSET,
+    I_CATEGORY, I_VALUE, I_ASSET, I_EQUIP,
     IA_SIZE
 } ItemAttribute;
 
@@ -47,20 +47,22 @@ typedef enum DungeonAttribute {
     DA_SIZE
 } DungeonAttribute;
 
+PlayerType playerType;
+int playerData[PT_SIZE][PA_SIZE]; // PlayerType-PlayerAttribute
+int monsterData[MT_SIZE][MA_SIZE]; // MonsterType-MonsterAttribute
+int itemData[IT_SIZE][IA_SIZE]; // ItemType-ItemAttribute
+int dungeonData[DT_SIZE][DA_SIZE]; // DungeonType-DungeonAttribute
+const char* dataFileName;
 
-
-extern PlayerType playerType;
-extern int playerData[PT_SIZE][PA_SIZE]; // PlayerType-PlayerAttribute
-extern int monsterData[MT_SIZE][MA_SIZE]; // MonsterType-MonsterAttribute
-extern int itemData[IT_SIZE][IA_SIZE]; // ItemType-ItemAttribute
-extern int dungeonData[DT_SIZE][DA_SIZE]; // DungeonType-DungeonAttribute
-
-extern void initData();
-extern char* getPlayerName(int type);
-extern char* getMonsterName(int type);
-extern char* getItemName(int type);
-extern char* getDungeonName(int type);
-extern char* getItemCategoryName(int type);
-extern char* intToString(int i);
+void initData();
+int loadData();
+int saveData();
+char* getPlayerName(int type);
+char* getMonsterName(int type);
+char* getItemName(int type);
+char* getDungeonName(int type);
+char* getItemCategoryName(int type);
+char* intToString(int i);
+void loadInventory();
 
 #endif

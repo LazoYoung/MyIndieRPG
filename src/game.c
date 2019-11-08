@@ -31,8 +31,6 @@ void startGame() {
     generateLevel(LOBBY);
     initGameCache();
     spawnEntity(&playerEntity);
-    addItem(SMALL_SWORD);
-    addItem(HOOD_CAPE);
 
     inGame = true;
 }
@@ -49,7 +47,7 @@ bool hasSkill(char skill_code) {
 }
 
 bool addItem(ItemType type) {
-    ItemCategory category = itemData[type][I_CATEGORY];
+    int category = itemData[type][I_CATEGORY];
 
     for (int i = 0; i < SLOT_CAP; i++) {
         if (inv.items[category][i] < 0) {
@@ -159,13 +157,7 @@ static void initGameCache() {
     bool map[9][9] = {false};
     Texture skin;
 
-    for (int i = 0; i < IC_SIZE; i++) {
-        for (int n = 0; n < SLOT_CAP; n++) {
-            inv.items[i][n] = -1;
-        }
-
-        inv.equipment[i] = -1;
-    }
+    loadInventory();
 
     inv.skills = 0;
     inv.coin = 0;

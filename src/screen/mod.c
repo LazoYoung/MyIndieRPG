@@ -89,7 +89,6 @@ Prompt getModCategoryPrompt() {
     p.x = column / 2 - 25;
     p.y = row / 2 - 15;
     p.desc_lines = 3;
-    p.btn_length = 15;
     p.items = items;
     return p;
 }
@@ -180,7 +179,6 @@ Prompt getModPrompt() {
     p.x = column / 2 - 25;
     p.y = row / 2 - 15;
     p.desc_lines = 3;
-    p.btn_length = 30;
     p.items = items;
     return p;
 }
