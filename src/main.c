@@ -32,8 +32,12 @@ int main() {
 	curs_set(0);
 	keypad(stdscr, true);
 	
-	// Initialize game data
-	initData();
+	// Load game data from storage
+	if (loadData() != 0) {
+		endwin();
+		printf("Failed to load data. %s might be corrupted.", dataFileName);
+		exit(EXIT_FAILURE);
+	}
 
 	// Start title screen
 	setPromptMode(TITLE_PROMPT);

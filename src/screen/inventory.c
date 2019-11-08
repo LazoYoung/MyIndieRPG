@@ -11,7 +11,7 @@
 #include "header/game.h"
 #include "header/data.h"
 
-static ItemCategory category;
+static int category;
 
 static void onSelectCategory(ItemEventBus);
 static void onSelectItem(ItemEventBus);

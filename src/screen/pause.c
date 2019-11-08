@@ -52,7 +52,14 @@ static void onPauseEvent(ItemEventBus bus) {
             mvwprintw(win, 1, 3, "Save the current progress.");
         }
         else if (bus.event == CLICK) {
-            // TODO Start saving
+            bool result = saveData();
+            setPromptMode(DIALOGUE_PROMPT);
+
+            if (result == 0) {
+                mvwprintw(getPromptWindow(0), 1, 3, "Data has been saved into storage.");
+            } else {
+                mvwprintw(getPromptWindow(0), 1, 3, "Error! Failed to save data into storage.");
+            }
         }
     }
     else if (strcmp(item, "quit") == 0) {
@@ -60,6 +67,7 @@ static void onPauseEvent(ItemEventBus bus) {
             mvwprintw(win, 1, 3, "Exit the game.");
         }
         else if (bus.event == CLICK) {
+            saveData();
             suspend();
         }
     }

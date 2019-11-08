@@ -1,13 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "header/data.h"
-#include "header/game-struct.h"
+#include "header/game.h"
+#include "header/screen.h"
 
 PlayerType playerType;
 int playerData[PT_SIZE][PA_SIZE];
 int monsterData[MT_SIZE][MA_SIZE];
 int itemData[IT_SIZE][IA_SIZE];
 int dungeonData[DT_SIZE][DA_SIZE];
+const char* dataFileName = "data.txt";
+
+static void saveInventory();
 
 void initData() {
     playerData[KIRITO][P_MAX_HEALTH] = 100;
@@ -161,6 +165,114 @@ void initData() {
     dungeonData[DUNGEON_5][D_EXP] = 400;
 }
 
+int loadData() {
+    FILE* file = fopen(dataFileName, "rb");
+    int* arr;
+    int row_size[5], column_size[5];
+
+    if (!file) {        
+        initData();
+        return saveData();
+    }
+
+    row_size[0] = PT_SIZE;
+    row_size[1] = MT_SIZE;
+    row_size[2] = IT_SIZE;
+    row_size[3] = DT_SIZE;
+    row_size[4] = 1;
+    column_size[0] = PA_SIZE;
+    column_size[1] = MA_SIZE;
+    column_size[2] = IA_SIZE;
+    column_size[3] = DA_SIZE;
+    column_size[4] = 2;
+
+    for (int i = 0; i < 5; i++) {
+        for (int r = 0; r < row_size[i]; r++) {
+            if (feof(file)) {
+                return EOF;
+            }
+
+            arr = malloc(column_size[i] * sizeof(int));
+            fread(arr, sizeof(int), column_size[i], file);
+
+            switch (i) {
+                case 0:
+                    for (int c = 0; c < column_size[i]; c++) {
+                        playerData[r][c] = *(arr + c);
+                    }
+                    break;
+                case 1:
+                    for (int c = 0; c < column_size[i]; c++) {
+                        monsterData[r][c] = *(arr + c);
+                    }
+                    break;
+                case 2:
+                    for (int c = 0; c < column_size[i]; c++) {
+                        itemData[r][c] = *(arr + c);
+                    }
+                    break;
+                case 3:
+                    for (int c = 0; c < column_size[i]; c++) {
+                        dungeonData[r][c] = *(arr + c);
+                    }
+                    break;
+                case 4:
+                    row = *arr;
+                    column = *(arr + 1);
+                    break;
+            }
+
+            free(arr);
+        }
+    }
+
+    loadInventory();
+    return fclose(file);
+}
+
+int saveData() {
+    FILE* file;
+    int* data[5];
+    int row_size[5], column_size[5];
+    int resolutionData[1][2] = {{row, column}};
+    size_t count_r;
+
+    if (!(file = fopen(dataFileName, "w"))) return EOF;
+    if (!(file = freopen(dataFileName, "ab", file))) return EOF;
+
+    saveInventory();
+    data[0] = playerData[0];
+    data[1] = monsterData[0];
+    data[2] = itemData[0];
+    data[3] = dungeonData[0];
+    data[4] = resolutionData[0];
+    row_size[0] = PT_SIZE;
+    row_size[1] = MT_SIZE;
+    row_size[2] = IT_SIZE;
+    row_size[3] = DT_SIZE;
+    row_size[4] = 1;
+    column_size[0] = PA_SIZE;
+    column_size[1] = MA_SIZE;
+    column_size[2] = IA_SIZE;
+    column_size[3] = DA_SIZE;
+    column_size[4] = 2;
+
+    for (int i = 0; i < 5; i++) {
+        for (int r = 0; r < row_size[i]; r++) {
+            count_r = fwrite(data[i] + r*column_size[i], sizeof(int), column_size[i], file);
+
+            if (column_size[i] > count_r) {
+                if (feof(file))
+                    return EOF;
+                
+                return ferror(file);
+            }
+        }
+    }
+
+    return fclose(file);
+}
+
 char* getPlayerName(int type) {
     switch (type) {
         case KIRITO:
@@ -266,4 +378,45 @@ char* intToString(int i) {
     sprintf(str, "%d", i);
 
     return str;
+}
+
+void loadInventory() {
+    int slot[IC_SIZE] = {0};
+
+    for (int i = 0; i < IC_SIZE; i++) {
+        for (int n = 0; n < SLOT_CAP; n++) {
+            inv.items[i][n] = -1;
+        }
+
+        inv.equipment[i] = -1;
+    }
+
+    for (int item = 0; item < IT_SIZE; item++) {
+        if (itemData[item][I_ASSET]) {
+            int category = itemData[item][I_CATEGORY];
+            inv.items[category][slot[category]++] = item;
+
+            if (itemData[item][I_EQUIP]) {
+                inv.equipment[category] = item;
+            }
+        }
+    }
+}
+
+static void saveInventory() {
+    for (int c = 0; c < IC_SIZE; c++) {
+        int equip = inv.equipment[c];
+
+        for (int i = 0; i < SLOT_CAP; i++) {
+            int item = inv.items[c][i];
+
+            if (item > -1) {
+                itemData[item][I_ASSET] = 1;
+            }
+        }
+
+        if (equip > -1) {
+            itemData[equip][I_EQUIP] = 1;
+        }
+    }
 }

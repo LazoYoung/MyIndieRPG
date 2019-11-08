@@ -103,6 +103,7 @@ static void onMod(ItemEventBus bus) {
 
 static void onQuit(ItemEventBus bus) {
     if (bus.event == CLICK) {
+        saveData();
         suspend();
         return;
     }
