@@ -16,8 +16,6 @@
 
 Inventory inv;
 bool inGame = false;
-static Entity entity;
-//extern Entity *entity[MAX_ENTITY];
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
@@ -30,7 +28,6 @@ void startGame() {
     setScreenMode(GAME_SCREEN);
     generateLevel(LOBBY);
     initGameCache();
-    spawnEntity(&playerEntity);
 
     inGame = true;
 }
@@ -152,25 +149,21 @@ int getFramesDuringTime(int miliseconds) {
     return round(fps * miliseconds / 1000);
 }
 
+/* Init cache, and spawn the player */
 static void initGameCache() {
     AABB hitbox = {{0.0, 0.0}, {0.0, 0.0}};
     bool map[9][9] = {false};
     Texture skin;
+    Entity playerEntity;
 
     loadInventory();
 
     inv.skills = 0;
     inv.coin = 0;
 
-    // TODO first entries of data structures
-    portal.valid = false;
-
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;
     memcpy(skin.map, map, sizeof(map));
-
-    for (int i = 0; i < MAX_ENTITY; i++)
-        entity[i] = NULL;
 
     playerEntity.name = getPlayerName(playerType);
     playerEntity.type[0] = PLAYER;
@@ -185,6 +178,7 @@ static void initGameCache() {
     playerEntity.offset[1] = 0.0;
     playerEntity.skin = skin;
     playerEntity.deathEvent = onPlayerDeath;
+    spawnEntity(playerEntity);
 }
 
 static void onPlayerDeath(Entity* entity) {

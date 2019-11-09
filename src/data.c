@@ -5,10 +5,14 @@
 #include "header/screen.h"
 
 PlayerType playerType;
+
+// These arrays below store progress data in Integer. (Not structure)
+
 int playerData[PT_SIZE][PA_SIZE];
 int monsterData[MT_SIZE][MA_SIZE];
 int itemData[IT_SIZE][IA_SIZE];
 int dungeonData[DT_SIZE][DA_SIZE];
+
 const char* dataFileName = "data.txt";
 
 static void saveInventory();

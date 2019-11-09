@@ -8,53 +8,65 @@
 #include "header/screen.h"
 #include "header/physic.h"
 
-int level_width = 0, level_height = 0, portal_i = -1;
-Entity *entity[MAX_ENTITY];
-Portal portal;
+int level_width = 0, level_height = 0;
+static Entity* entityList = NULL; // Entity Linked-array (Game data)
+static Portal* portalList = NULL; // Portal Linked-array (Game data)
 static Stage stage = VOID;
-static Tile **tiles = NULL;
+static Tile **tiles = NULL; // Map tiles 2D array (Not a structure)
 
 /**
  * Spawn an entity.
  * Player must be assigned before any other entities.
+ * Returns: entity ID
  **/
-void spawnEntity(Entity* e) {
+int spawnEntity(Entity e) {
     Bias bias = {false, true, 0, 0, 0};
-    Portal *iter = &portal;
-    
+    Entity *iter = entityList;
+    Entity *prev = NULL;
     static int id = 0;
 
-    while (iter != NULL) {
+    while (iter) {
+        prev = iter;
         iter = iter->next;
     }
 
-    e->id = id++;
-    e->bias = bias;
-     = e;
+    iter = malloc(sizeof(Entity));
+
+    if (!entityList) {
+        entityList = iter;
+    }
+
+    e.id = id;
+    e.bias = bias;
+    e.next = NULL;
+    e.prev = prev;
+    *iter = e;
+
+    if (prev) {
+        prev->next = iter;
+    }
+
+    return id++;
 }
 
 bool despawnEntity(int id) {
-    if (entity[id]) {
-        entity[id] = NULL;
+    Entity *e = getEntityByID(id);
+
+    if (e) {
+        Entity *prev = e->prev;
+        Entity *next = e->next;
+
+        e->id = -1;
+
+        if (prev)
+            prev->next = next;
+
+        if (next)
+            next->prev = prev;
+
         return true;
     }
     return false;
-}
-
-/**
- * DEPRECATED
- * Finds an entity matching the NAME
- * Returns NULL if the function has failed to query
- **/
-Entity* getEntity(const char* name) {
-    for (int i = 0; i < MAX_ENTITY; i++) {
-        Entity *s = entity[i];
-
-        if (s && strcmp(name, s->name) == 0) {
-            return s;
-        }
-    }
-    return NULL;
 }
 
 /**
@@ -63,9 +75,16 @@ Entity* getEntity(const char* name) {
  * Player always occupy the first entry (id 0)
  **/
 Entity* getEntityByID(int id) {
-    if (id >= 0 && id < MAX_ENTITY) {
-        return entity[id];
+    Entity *iter = entityList;
+
+    while (iter) {
+        if (iter->id == id) {
+            return iter;
+        }
+
+        iter = iter->next;
     }
+
     return NULL;
 }
 
@@ -76,7 +95,7 @@ Location getTopLocation(int pos_x) {
     loc.spd[0] = 0.0;
     loc.spd[1] = 0.0;
     
-    if (tiles != NULL) {
+    if (tiles) {
         for (int y = level_height - 1; y > 0; y--) {
             if (tiles[y][pos_x] == BLOCK) {
                 loc.pos[1] = y + 3;
@@ -89,8 +108,27 @@ Location getTopLocation(int pos_x) {
 }
 
 void assignPortal(Portal instance) {
-    instance.valid = true;
-    portal_arr[++portal_i] = instance;
+    Portal *iter = portalList;
+    Portal *prev = NULL;
+
+    while (iter) {
+        prev = iter;
+        iter = iter->next;
+    }
+
+    iter = malloc(sizeof(Portal));
+
+    if (!portalList) {
+        portalList = iter;
+    }
+
+    instance.next = NULL;
+    instance.prev = prev;
+    *iter = instance;
+    
+    if (prev) {
+        prev->next = iter;
+    }
 }
 
 /**
@@ -98,33 +136,38 @@ void assignPortal(Portal instance) {
  * (NULL if not found)
  **/
 Portal *getPortal(Tile tile) {
-    for (int i=0; i<=portal_i; i++) {
-        Portal iter = portal_arr[i];
+    Portal *iter = portalList;
 
-        if (iter.valid && tile == iter.tile) {
-            return &portal_arr[i];
+    while (iter) {
+        if (iter->tile == tile) {
+            return iter;
         }
+
+        iter = iter->next;
     }
 
     return NULL;
 }
 
 void destructLevel() {
+    Portal *p = portalList;
+
     if (stage == DUNGEON)
         destructDungeon();
 
-    if (tiles != NULL) {
+    if (tiles) {
         free(tiles);
         tiles = NULL;
     }
 
-    if (portal_i > -1) {
-        for (int i=0; i<10; i++) {
-            Portal instance = {false};
-            portal_arr[i] = instance;
-        }
-        portal_i = -1;
+    while (p) {
+        Portal *prev = p;
+        p = p->next;
+
+        free(prev);
     }
+
+    portalList = NULL;
 }
 
 /**

@@ -3,11 +3,11 @@
 #include "header/data.h"
 
 void generateLobby() {
-    Portal d1 = {true, PORTAL_1, GREEN, DUNGEON, DUNGEON_1};
-    Portal d2 = {true, PORTAL_2, BLUE, DUNGEON, DUNGEON_2};
-    Portal d3 = {true, PORTAL_3, MAGENTA, DUNGEON, DUNGEON_3};
-    Portal d4 = {true, PORTAL_4, YELLOW, DUNGEON, DUNGEON_4};
-    Portal d5 = {true, PORTAL_5, RED, DUNGEON, DUNGEON_5};
+    Portal d1 = {PORTAL_1, GREEN, DUNGEON, DUNGEON_1};
+    Portal d2 = {PORTAL_2, BLUE, DUNGEON, DUNGEON_2};
+    Portal d3 = {PORTAL_3, MAGENTA, DUNGEON, DUNGEON_3};
+    Portal d4 = {PORTAL_4, YELLOW, DUNGEON, DUNGEON_4};
+    Portal d5 = {PORTAL_5, RED, DUNGEON, DUNGEON_5};
 
     assignPortal(d1);
     assignPortal(d2);

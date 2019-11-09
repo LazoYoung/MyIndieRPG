@@ -13,7 +13,7 @@
 
 enum Axis { X, Y };
 
-static PANEL* panels[WORLD_WIN + 1];
+static PANEL* panels[WORLD_WIN + 1]; // Screen panel cache (Not a game-data)
 static int row_, column_, init_y, init_x, ctr_y, ctr_x;
 
 static void drawStatus(WINDOW*);
@@ -246,7 +246,7 @@ static void drawTiles() {
                 case PORTAL_5: {
                     Portal *portal = getPortal(tile);
 
-                    if (portal != NULL) {
+                    if (portal) {
                         wattron(win, COLOR_PAIR(portal->color));
                         mvwaddch(win, y_, x_, 'P');
                         wattroff(win, COLOR_PAIR(portal->color));

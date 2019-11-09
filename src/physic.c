@@ -11,18 +11,21 @@
 #include "header/physic.h"
 #include "header/vector.h"
 
-struct {
-    bool active;
+// Structure of trails (Game data)
+typedef struct trail_str {
     int length;
     int span;
     int dtg;
-    int damage;
     Vector pos;
     Vector norm;
-} trail;
+    struct trail_str *prev, *next;
+} Trail;
+
+static Trail *trailList = NULL;
+static int trailDmg;
 
 static bool hasVerticalObstacle(Location loc, AABB hitbox, Vector offset, float *ground_y);
-static bool spawnSwordTrail(Vector pos, Vector norm, int damage);
+static void spawnSwordTrail(Vector pos, Vector norm, int damage);
 static void attack(Entity* entity, Entity* victim, float distance);
 
 bool overlaps(AABB a, AABB b) {
@@ -100,7 +103,8 @@ void updateControl(int key, Entity* p) {
                 setPromptMode(DIALOGUE_PROMPT);
                 mvwprintw(getPromptWindow(0), 3, 3, "You must be equipped with a sword to activate the skill.");
             }
-            else if (p->mp >= 40 && spawnSwordTrail(src, norm, 10 * itemData[weapon][I_VALUE])) {
+            else if (p->mp >= 40) {
+                spawnSwordTrail(src, norm, 10 * itemData[weapon][I_VALUE]);
                 p->mp -= 40;
             }
             break;
@@ -211,7 +215,7 @@ void updatePhysic(Entity* e) {
         bias->attackCooldown--;
     
     if (getTileAt(l->pos[0], l->pos[1]) == TRAIL) {
-        e->health -= trail.damage / getFramesDuringTime(1000);
+        e->health -= trailDmg / getFramesDuringTime(1000);
     }
 
     if (e->type[0] == PLAYER) {
@@ -293,55 +297,90 @@ void updatePhysic(Entity* e) {
 }
 
 void updateSwordTrail() {
-    if (!trail.active)
-        return;
+    Trail *iter = trailList;
 
-    trail.pos[0] += trail.norm[0];
-    trail.pos[1] += trail.norm[1];
-    trail.dtg--;
+    while (iter) {
+        Trail trail = *iter;
 
-    if ((trail.span - trail.dtg) > trail.length) {
-        Vector del;
+        trail.pos[0] += trail.norm[0];
+        trail.pos[1] += trail.norm[1];
+        trail.dtg--;
 
-        if (trail.dtg < -trail.length) {
-            trail.active = false;
-            return;
+        if ((trail.span - trail.dtg) > trail.length) {
+            Vector del;
+
+            if (trail.dtg < -trail.length) {
+                Trail *prev = trail.prev;
+                Trail *next = trail.next;
+                free(iter);
+
+                if (prev) {
+                    prev->next = next;
+                }
+
+                if (next) {
+                    next->prev = prev;
+                }
+
+                if (!prev && !next) {
+                    trailList = NULL;
+                }
+                return;
+            }
+
+            del[0] = trail.pos[0] - trail.norm[0] * trail.length;
+            del[1] = trail.pos[1] - trail.norm[1] * trail.length;
+
+            if (getTileAt(del[0], del[1]) == TRAIL) {
+                setTileAt(del[0], del[1], AIR);
+            }
+
+            if (getTileAt(del[0], del[1] + 1) == TRAIL) {
+                setTileAt(del[0], del[1] + 1, AIR);
+            }
         }
 
-        del[0] = trail.pos[0] - trail.norm[0] * trail.length;
-        del[1] = trail.pos[1] - trail.norm[1] * trail.length;
+        if (trail.dtg > 0) {
+            if (getTileAt(trail.pos[0], trail.pos[1]) == AIR)
+                setTileAt(trail.pos[0], trail.pos[1], TRAIL);
 
-        if (getTileAt(del[0], del[1]) == TRAIL) {
-            setTileAt(del[0], del[1], AIR);
+            if (getTileAt(trail.pos[0], trail.pos[1] + 1) == AIR)
+                setTileAt(trail.pos[0], trail.pos[1] + 1, TRAIL);
         }
 
-        if (getTileAt(del[0], del[1] + 1) == TRAIL) {
-            setTileAt(del[0], del[1] + 1, AIR);
-        }
-    }
-
-    if (trail.dtg > 0) {
-        if (getTileAt(trail.pos[0], trail.pos[1]) == AIR)
-            setTileAt(trail.pos[0], trail.pos[1], TRAIL);
-
-        if (getTileAt(trail.pos[0], trail.pos[1] + 1) == AIR)
-            setTileAt(trail.pos[0], trail.pos[1] + 1, TRAIL);
+        *iter = trail;
+        iter = iter->next;
     }
 }
 
-static bool spawnSwordTrail(Vector pos, Vector norm, int damage) {
-    if (trail.active)
-        return false;
+static void spawnSwordTrail(Vector pos, Vector norm, int damage) {
+    Trail *iter = trailList;
+    Trail *prev = NULL;
 
-    trail.active = true;
-    trail.damage = damage;
-    trail.pos[0] = pos[0];
-    trail.pos[1] = pos[1];
-    trail.norm[0] = norm[0];
-    trail.norm[1] = norm[1];
-    trail.dtg = trail.span = 30;
-    trail.length = 5 + rand() % 5;
-    return true;
+    while (iter) {
+        prev = iter;
+        iter = iter->next;
+    }
+
+    iter = malloc(sizeof(Trail));
+
+    if (!trailList) {
+        trailList = iter;
+    }
+
+    iter->prev = prev;
+    iter->next = NULL;
+    iter->pos[0] = pos[0];
+    iter->pos[1] = pos[1];
+    iter->norm[0] = norm[0];
+    iter->norm[1] = norm[1];
+    iter->dtg = iter->span = 30;
+    iter->length = 5 + rand() % 5;
+    trailDmg = damage;
+
+    if (prev) {
+        prev->next = iter;
+    }
 }
 
 /**

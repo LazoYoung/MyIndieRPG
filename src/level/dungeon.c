@@ -10,8 +10,8 @@
 #define MAX_MONSTER 3
 
 DungeonType dungeon;
-Entity monster[MAX_MONSTER];
-int alive;
+static int monster_id[MAX_MONSTER]; // Monster ID cache (Not a structure)
+static int alive;
 
 static void spawnMonsters();
 static void onMonsterDeath(Entity*);
@@ -22,24 +22,27 @@ void generateDungeon() {
 
 void destructDungeon() {
     for (int i = 0; i < MAX_MONSTER; i++) {
-        if (despawnEntity(monster[i].id)) {
+        int id = monster_id[i];
+
+        if (id > -1 && despawnEntity(id)) {
             alive--;
         }
     }
 }
 
 static void spawnMonsters() {
-    int id, vol, xPos = 60;
+    int vol, xPos = 60;
 
     alive = 0;
 
-    for (id = 0; id < MAX_MONSTER; id++) {
+    for (int i = 0; i < MAX_MONSTER; i++) {
         AABB hitbox;
         Texture skin;
+        Entity monster;
         bool map[9][9] = {false};
-        int type = dungeonData[dungeon][D_MONSTER_1 + id];
-        
-        monster[id].id = -1;
+        int type = dungeonData[dungeon][D_MONSTER_1 + i];
+
+        monster_id[i] = -1;
 
         if (type < 0) continue;
         
@@ -52,7 +55,7 @@ static void spawnMonsters() {
 
         if (vol <= 1) {
             map[4][4] = true;
-            monster[id].offset[1] = 1.0;
+            monster.offset[1] = 1.0;
         }
         else if (vol == 2) {
             for (int i = 3; i <= 5; i++)
@@ -68,20 +71,20 @@ static void spawnMonsters() {
         }
         memcpy(skin.map, map, sizeof(map));
 
-        monster[id].type[0] = MONSTER;
-        monster[id].type[1] = type;
-        monster[id].loc = getTopLocation(xPos);
-        monster[id].target = getEntityByID(0);
-        monster[id].hitbox = hitbox;
-        monster[id].name = getMonsterName(type);
-        monster[id].mp = 0;
-        monster[id].health = monsterData[type][M_MAX_HEALTH];
-        monster[id].damage = monsterData[type][M_DAMAGE];
-        monster[id].offset[0] = 0.0;
-        monster[id].offset[1] = 0.0;
-        monster[id].skin = skin;
-        monster[id].deathEvent = onMonsterDeath;
-        spawnEntity(&monster[id]);
+        monster.type[0] = MONSTER;
+        monster.type[1] = type;
+        monster.loc = getTopLocation(xPos);
+        monster.target = getEntityByID(0);
+        monster.hitbox = hitbox;
+        monster.name = getMonsterName(type);
+        monster.mp = 0;
+        monster.health = monsterData[type][M_MAX_HEALTH];
+        monster.damage = monsterData[type][M_DAMAGE];
+        monster.offset[0] = 0.0;
+        monster.offset[1] = 0.0;
+        monster.skin = skin;
+        monster.deathEvent = onMonsterDeath;
+        monster_id[i] = spawnEntity(monster);
 
         xPos += 10;
         alive++;

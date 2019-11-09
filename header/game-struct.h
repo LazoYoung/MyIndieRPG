@@ -14,7 +14,6 @@ typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON } Stage;
 typedef enum EntityType { PLAYER, MONSTER } EntityType;
 
 typedef struct portal_str {
-    bool valid;
     Tile tile;
     Color color;
     Stage dest;
@@ -54,7 +53,7 @@ typedef struct entity_str {
     int type[2]; // EntityType-Type (i.e. PLAYER-ASUNA)
     int id; // Unique ID that is automatically assigned
     Location loc;
-    struct entity* target; // Monster's target
+    struct entity_str* target; // Monster's target
     float health;
     int mp; // Player's mana point
     int damage; // Amount of damage dealt without a weapon

@@ -16,7 +16,7 @@ PromptMode prompt_mode = PROMPT_NONE;
 PromptMode hid_prompt_mode = PROMPT_NONE;
 int column = 180;
 int row = 60;
-Prompt prompt = {0, 0, 0, 0, 0, NULL};
+Prompt prompt = {0, 0, 0, 0, 0, NULL}; // Screen prompt cache (Not a game-data)
 static MENU *menu = NULL;
 static PANEL *prompt_pan[2] = { NULL }; // 0: Background, 1: Buttons
 

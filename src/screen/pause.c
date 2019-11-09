@@ -4,7 +4,7 @@
 #include "header/screen.h"
 #include "header/pause.h"
 
-bool pause;
+static bool pause;
 
 extern void suspend();
 static void onPauseEvent(ItemEventBus);
@@ -35,6 +35,10 @@ Prompt getPausePrompt() {
 /* @pause_ - True pauses the game, while False resumes it. */
 void pauseGame(bool pause_) {
     pause = pause_;
+}
+
+bool isPaused() {
+    return pause;
 }
 
 static void onPauseEvent(ItemEventBus bus) {

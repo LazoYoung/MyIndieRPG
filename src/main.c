@@ -55,7 +55,7 @@ int main() {
 			updateScreen(key);
 			curs_set(0);
 
-			if (!pause) {
+			if (!isPaused()) {
 				doTick(key);
 			}
 		}
