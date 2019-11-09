@@ -22,8 +22,9 @@ void generateDungeon() {
 
 void destructDungeon() {
     for (int i = 0; i < MAX_MONSTER; i++) {
-        despawnEntity(monster[i].id);
-        alive--;
+        if (despawnEntity(monster[i].id)) {
+            alive--;
+        }
     }
 }
 
@@ -37,6 +38,8 @@ static void spawnMonsters() {
         Texture skin;
         bool map[9][9] = {false};
         int type = dungeonData[dungeon][D_MONSTER_1 + id];
+        
+        monster[id].id = -1;
 
         if (type < 0) continue;
         
