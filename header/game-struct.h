@@ -13,12 +13,13 @@ typedef enum Color { DEFAULT, RED, GREEN, BLUE, WHITE, YELLOW, MAGENTA, BLACK, C
 typedef enum Stage { VOID, LOBBY, SHOP, DUNGEON } Stage;
 typedef enum EntityType { PLAYER, MONSTER } EntityType;
 
-typedef struct {
+typedef struct portal_str {
     bool valid;
     Tile tile;
     Color color;
     Stage dest;
     DungeonType dungeon;
+    struct portal_str *prev, *next;
 } Portal;
 
 typedef struct {
@@ -48,7 +49,7 @@ typedef struct { // Present bias of entity movement
     int attackCooldown;
 } Bias;
 
-typedef struct entity {
+typedef struct entity_str {
     const char* name;
     int type[2]; // EntityType-Type (i.e. PLAYER-ASUNA)
     int id; // Unique ID that is automatically assigned
@@ -61,7 +62,8 @@ typedef struct entity {
     AABB hitbox;
     Vector offset;
     Bias bias; // Movement bias
-    void (* deathEvent)(struct entity*);
+    void (* deathEvent)(struct entity_str*);
+    struct entity_str *prev, *next;
 } Entity;
 
 typedef struct {

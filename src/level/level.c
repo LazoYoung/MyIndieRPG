@@ -10,8 +10,8 @@
 
 int level_width = 0, level_height = 0, portal_i = -1;
 Entity *entity[MAX_ENTITY];
+Portal portal;
 static Stage stage = VOID;
-static Portal portal_arr[30];
 static Tile **tiles = NULL;
 
 /**
@@ -20,17 +20,17 @@ static Tile **tiles = NULL;
  **/
 void spawnEntity(Entity* e) {
     Bias bias = {false, true, 0, 0, 0};
+    Portal *iter = &portal;
+    
+    static int id = 0;
 
-    for (int i = 0; i < MAX_ENTITY; i++) {
-        Entity *s = entity[i];
-
-        if (s) continue;
-        
-        e->id = i;
-        e->bias = bias;
-        entity[i] = e;
-        break;
+    while (iter != NULL) {
+        iter = iter->next;
     }
+
+    e->id = id++;
+    e->bias = bias;
+     = e;
 }
 
 bool despawnEntity(int id) {

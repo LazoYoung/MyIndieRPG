@@ -16,8 +16,8 @@
 
 Inventory inv;
 bool inGame = false;
-static Entity playerEntity;
-extern Entity *entity[MAX_ENTITY];
+static Entity entity;
+//extern Entity *entity[MAX_ENTITY];
 const float deltaTime = 50 / 1000.0;
 const int fps = 1000 / 50;
 
@@ -161,6 +161,9 @@ static void initGameCache() {
 
     inv.skills = 0;
     inv.coin = 0;
+
+    // TODO first entries of data structures
+    portal.valid = false;
 
     map[3][4] = map[4][4] = true;
     skin.color = COLOR_CYAN;

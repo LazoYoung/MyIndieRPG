@@ -8,6 +8,7 @@
 
 extern int level_width, level_height;
 extern DungeonType dungeon;
+extern Portal portal;
 
 void spawnEntity(Entity*);
 bool despawnEntity(int id);
