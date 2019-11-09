@@ -170,6 +170,7 @@ void setPromptMode(PromptMode mode) {
     }
 
     deletePrompt();
+    setScreenMode(screen_mode);
 
     if (mode != PROMPT_NONE) {
         prompt_mode = mode;
@@ -199,7 +200,7 @@ void setMenuOptions(Menu_Options options, bool on) {
 void refreshPrompt(int cursor) {
     PromptMode mode = prompt_mode;
 
-    setScreenMode(screen_mode);  
+    deletePrompt();
     prompt_mode = mode;
     prompt = getPrompt(mode);
     drawPrompt(cursor);
